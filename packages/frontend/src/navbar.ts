@@ -89,12 +89,6 @@ export const navbarItemDef = reactive<{
 		show: computed(() => $i != null),
 		to: '/my/lists',
 	},
-	antennas: {
-		title: i18n.ts.antennas,
-		icon: 'ti ti-antenna',
-		show: computed(() => $i != null),
-		to: '/my/antennas',
-	},
 	favorites: {
 		title: i18n.ts.favorites,
 		icon: 'ti ti-star',
@@ -140,11 +134,11 @@ export const navbarItemDef = reactive<{
 		show: computed(() => $i != null),
 		to: '/my/achievements',
 	},
-	noq: {
-		title: i18n.ts._noq?.questionBox ?? '質問箱',
+	yoruq: {
+		title: i18n.ts._yoruq?.questionBox ?? '質問箱',
 		icon: 'ti ti-message-question',
 		show: computed(() => $i != null),
-		to: '/my/noq',
+		to: '/my/yoruq',
 	},
 	games: {
 		title: 'Misskey Games',
@@ -160,13 +154,6 @@ export const navbarItemDef = reactive<{
 				active: ui === 'default' || ui === null,
 				action: () => {
 					miLocalStorage.setItem('ui', 'default');
-					unisonReload();
-				},
-			}, {
-				text: i18n.ts.deck,
-				active: ui === 'deck',
-				action: () => {
-					miLocalStorage.setItem('ui', 'deck');
 					unisonReload();
 				},
 			}], ev.currentTarget ?? ev.target);

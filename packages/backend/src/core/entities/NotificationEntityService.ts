@@ -194,7 +194,7 @@ export class NotificationEntityService implements OnModuleInit {
 				header: notification.customHeader,
 				icon: notification.customIcon,
 			} : {}),
-			...(notification.type === 'noqQuestion' ? {
+			...(notification.type === 'yoruqQuestion' ? {
 				questionId: notification.questionId,
 			} : {}),
 		});

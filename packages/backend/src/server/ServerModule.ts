@@ -33,7 +33,6 @@ import { OAuth2ProviderService } from './oauth/OAuth2ProviderService.js';
 import MainStreamConnection from '@/server/api/stream/Connection.js';
 import { MainChannel } from './api/stream/channels/main.js';
 import { AdminChannel } from './api/stream/channels/admin.js';
-import { AntennaChannel } from './api/stream/channels/antenna.js';
 import { ChannelChannel } from './api/stream/channels/channel.js';
 import { DriveChannel } from './api/stream/channels/drive.js';
 import { GlobalTimelineChannel } from './api/stream/channels/global-timeline.js';
@@ -47,9 +46,6 @@ import { UserListChannel } from './api/stream/channels/user-list.js';
 import { RoleTimelineChannel } from './api/stream/channels/role-timeline.js';
 import { ChatUserChannel } from './api/stream/channels/chat-user.js';
 import { ChatRoomChannel } from './api/stream/channels/chat-room.js';
-import { ReversiChannel } from './api/stream/channels/reversi.js';
-import { ReversiGameChannel } from './api/stream/channels/reversi-game.js';
-import { NoctownChannel } from './api/stream/channels/noctown.js';
 import { NoteStreamingHidingService } from './api/stream/NoteStreamingHidingService.js';
 import { SigninWithPasskeyApiService } from './api/SigninWithPasskeyApiService.js';
 import { SlackNotificationService } from '@/core/SlackNotificationService.js';
@@ -86,7 +82,6 @@ import { SlackNotificationService } from '@/core/SlackNotificationService.js';
 		StreamingApiServerService,
 		MainChannel,
 		AdminChannel,
-		AntennaChannel,
 		ChannelChannel,
 		DriveChannel,
 		GlobalTimelineChannel,
@@ -94,9 +89,6 @@ import { SlackNotificationService } from '@/core/SlackNotificationService.js';
 		RoleTimelineChannel,
 		ChatUserChannel,
 		ChatRoomChannel,
-		ReversiChannel,
-		ReversiGameChannel,
-		NoctownChannel,
 		HomeTimelineChannel,
 		HybridTimelineChannel,
 		LocalTimelineChannel,

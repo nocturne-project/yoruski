@@ -32,7 +32,6 @@ export const columnTypes = [
 	'widgets',
 	'notifications',
 	'tl',
-	'antenna',
 	'list',
 	'channel',
 	'mentions',
@@ -51,7 +50,6 @@ export type Column = {
 	widgets?: ColumnWidget[];
 	active?: boolean;
 	flexible?: boolean;
-	antennaId?: string;
 	listId?: string;
 	channelId?: string;
 	roleId?: string;
@@ -62,7 +60,7 @@ export type Column = {
 	withSensitive?: boolean;
 	onlyFiles?: boolean;
 	soundSetting?: SoundStore;
-	// The cache for the name of the antenna, channel, list, or role
+	// The cache for the name of the channel, list, or role
 	timelineNameCache?: string;
 };
 

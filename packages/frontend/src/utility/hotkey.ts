@@ -81,7 +81,8 @@ const parseKeymap = (keymap: Keymap) => {
 const parsePatterns = (rawPatterns: keyof Keymap) => {
 	return rawPatterns.split('|').map(part => {
 		const keys = part.split('+').map(trimLower);
-		const which = parseKeyCode(keys.findLast(x => !MODIFIER_KEYS.includes(x)));
+		// Safari 15.4互換: findLast未サポートのため reverse().find() で代替
+		const which = parseKeyCode([...keys].reverse().find(x => !MODIFIER_KEYS.includes(x)));
 		const ctrl = keys.includes('ctrl');
 		const alt = keys.includes('alt');
 		const shift = keys.includes('shift');

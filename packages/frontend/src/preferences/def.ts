@@ -11,7 +11,6 @@ import type { Theme } from '@/theme.js';
 import type { SoundType } from '@/utility/sound.js';
 import type { Plugin } from '@/plugin.js';
 import type { DeviceKind } from '@/utility/device-kind.js';
-import type { DeckProfile } from '@/deck.js';
 import type { WatermarkPreset } from '@/utility/watermark/WatermarkRenderer.js';
 import type { ImageFramePreset } from '@/utility/image-frame-renderer/ImageFrameRenderer.js';
 import { genId } from '@/utility/id.js';
@@ -49,6 +48,10 @@ export type DataSaverStore = {
 	urlPreviewThumbnail: boolean;
 	disableUrlPreview: boolean;
 	code: boolean;
+	// 軽量化拡張: Blurhash簡易表示、アニメーション無効化、リアクション簡易表示
+	blurhashSimple: boolean;
+	disableAnimations: boolean;
+	simpleReactions: boolean;
 };
 
 type OmitStrict<T, K extends keyof T> = T extends any ? Pick<T, Exclude<keyof T, K>> : never;
@@ -89,15 +92,6 @@ export const PREF_DEF = definePreferences({
 			data: Record<string, any>;
 		}[],
 	},
-	'deck.profile': {
-		accountDependent: true,
-		default: null as string | null,
-	},
-	'deck.profiles': {
-		accountDependent: true,
-		default: [] as DeckProfile[],
-	},
-
 	emojiPalettes: {
 		serverDependent: true,
 		default: () => [{
@@ -345,6 +339,9 @@ export const PREF_DEF = definePreferences({
 			urlPreviewThumbnail: false,
 			disableUrlPreview: false,
 			code: false,
+			blurhashSimple: false,
+			disableAnimations: false,
+			simpleReactions: false,
 		} as DataSaverStore,
 	},
 	hemisphere: {
@@ -491,31 +488,6 @@ export const PREF_DEF = definePreferences({
 	},
 	'sound.on.chatMessage': {
 		default: { type: 'syuilo/pope1', volume: 1 } as SoundStore,
-	},
-
-	'deck.alwaysShowMainColumn': {
-		default: true,
-	},
-	'deck.navWindow': {
-		default: true,
-	},
-	'deck.useSimpleUiForNonRootPages': {
-		default: true,
-	},
-	'deck.columnAlign': {
-		default: 'center' as 'left' | 'center',
-	},
-	'deck.columnGap': {
-		default: 6,
-	},
-	'deck.menuPosition': {
-		default: 'bottom' as 'right' | 'bottom',
-	},
-	'deck.navbarPosition': {
-		default: 'left' as 'left' | 'top' | 'bottom',
-	},
-	'deck.wallpaper': {
-		default: null as string | null,
 	},
 
 	'chat.showSenderName': {

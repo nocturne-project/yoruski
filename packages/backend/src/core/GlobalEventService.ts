@@ -5,12 +5,10 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import * as Reversi from 'misskey-reversi';
 import type { MiChannel } from '@/models/Channel.js';
 import type { MiUser } from '@/models/User.js';
 import type { MiUserProfile } from '@/models/UserProfile.js';
 import type { MiNote } from '@/models/Note.js';
-import type { MiAntenna } from '@/models/Antenna.js';
 import type { MiDriveFile } from '@/models/DriveFile.js';
 import type { MiDriveFolder } from '@/models/DriveFolder.js';
 import type { MiUserList } from '@/models/UserList.js';
@@ -20,7 +18,7 @@ import type { MiPage } from '@/models/Page.js';
 import type { MiWebhook } from '@/models/Webhook.js';
 import type { MiSystemWebhook } from '@/models/SystemWebhook.js';
 import type { MiMeta } from '@/models/Meta.js';
-import { MiAvatarDecoration, MiChatMessage, MiChatRoom, MiChatRoomMembership, MiReversiGame, MiRole, MiRoleAssignment } from '@/models/_.js';
+import { MiAvatarDecoration, MiChatMessage, MiChatRoom, MiChatRoomMembership, MiRole, MiRoleAssignment } from '@/models/_.js';
 import type { Packed } from '@/misc/json-schema.js';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
@@ -68,7 +66,6 @@ export interface MainEventTypes {
 	readAllNotifications: undefined;
 	notificationFlushed: undefined;
 	unreadNotification: Packed<'Notification'>;
-	unreadAntenna: MiAntenna;
 	newChatMessage: Packed<'ChatMessage'>;
 	readAllAnnouncements: undefined;
 	myTokenRegenerated: undefined;
@@ -85,7 +82,6 @@ export interface MainEventTypes {
 		value: any | null;
 	};
 	driveFileCreated: Packed<'DriveFile'>;
-	readAntenna: MiAntenna;
 	receiveFollowRequest: Packed<'UserLite'>;
 	announcementCreated: {
 		announcement: Packed<'Announcement'>;
@@ -143,10 +139,6 @@ type NoteStreamEventTypes = {
 export interface UserListEventTypes {
 	userAdded: Packed<'UserLite'>;
 	userRemoved: Packed<'UserLite'>;
-}
-
-export interface AntennaEventTypes {
-	note: MiNote;
 }
 
 export interface RoleTimelineEventTypes {
@@ -244,37 +236,6 @@ export interface ChatEventTypes {
 	};
 }
 
-export interface ReversiEventTypes {
-	matched: {
-		game: Packed<'ReversiGameDetailed'>;
-	};
-	invited: {
-		user: Packed<'User'>;
-	};
-}
-
-export interface ReversiGameEventTypes {
-	changeReadyStates: {
-		user1: boolean;
-		user2: boolean;
-	};
-	updateSettings: {
-		userId: MiUser['id'];
-		key: string;
-		value: any;
-	};
-	log: Reversi.Serializer.Log & { id: string | null };
-	started: {
-		game: Packed<'ReversiGameDetailed'>;
-	};
-	ended: {
-		winnerId: MiUser['id'] | null;
-		game: Packed<'ReversiGameDetailed'>;
-	};
-	canceled: {
-		userId: MiUser['id'];
-	};
-}
 //#endregion
 
 // 辞書(interface or type)から{ type, body }ユニオンを定義
@@ -316,9 +277,6 @@ export interface InternalEventTypes {
 	systemWebhookCreated: MiSystemWebhook;
 	systemWebhookDeleted: MiSystemWebhook;
 	systemWebhookUpdated: MiSystemWebhook;
-	antennaCreated: MiAntenna;
-	antennaDeleted: MiAntenna;
-	antennaUpdated: MiAntenna;
 	avatarDecorationCreated: MiAvatarDecoration;
 	avatarDecorationDeleted: MiAvatarDecoration;
 	avatarDecorationUpdated: MiAvatarDecoration;
@@ -366,10 +324,6 @@ export type GlobalEvents = {
 		name: `roleTimelineStream:${MiRole['id']}`;
 		payload: EventTypesToEventPayload<RoleTimelineEventTypes>;
 	};
-	antenna: {
-		name: `antennaStream:${MiAntenna['id']}`;
-		payload: EventTypesToEventPayload<AntennaEventTypes>;
-	};
 	admin: {
 		name: `adminStream:${MiUser['id']}`;
 		payload: EventTypesToEventPayload<AdminEventTypes>;
@@ -385,26 +339,6 @@ export type GlobalEvents = {
 	chatRoom: {
 		name: `chatRoomStream:${MiChatRoom['id']}`;
 		payload: EventTypesToEventPayload<ChatEventTypes>;
-	};
-	reversi: {
-		name: `reversiStream:${MiUser['id']}`;
-		payload: EventTypesToEventPayload<ReversiEventTypes>;
-	};
-	reversiGame: {
-		name: `reversiGameStream:${MiReversiGame['id']}`;
-		payload: EventTypesToEventPayload<ReversiGameEventTypes>;
-	};
-	noctown: {
-		name: 'noctownStream';
-		payload: { type: string; body: Record<string, unknown> | null };
-	};
-	noctownPlayer: {
-		name: `noctownPlayerStream:${string}`;
-		payload: { type: string; body: Record<string, unknown> | null };
-	};
-	paintChat: {
-		name: `paintChatStream:${string}`;
-		payload: { type: string; body: Record<string, unknown> | null };
 	};
 };
 
@@ -480,11 +414,6 @@ export class GlobalEventService {
 	}
 
 	@bindThis
-	public publishAntennaStream<K extends keyof AntennaEventTypes>(antennaId: MiAntenna['id'], type: K, value?: AntennaEventTypes[K]): void {
-		this.publish(`antennaStream:${antennaId}`, type, typeof value === 'undefined' ? null : value);
-	}
-
-	@bindThis
 	public publishRoleTimelineStream<K extends keyof RoleTimelineEventTypes>(roleId: MiRole['id'], type: K, value?: RoleTimelineEventTypes[K]): void {
 		this.publish(`roleTimelineStream:${roleId}`, type, typeof value === 'undefined' ? null : value);
 	}
@@ -511,29 +440,4 @@ export class GlobalEventService {
 		this.publish(`chatRoomStream:${toRoomId}`, type, typeof value === 'undefined' ? null : value);
 	}
 
-	@bindThis
-	public publishReversiStream<K extends keyof ReversiEventTypes>(userId: MiUser['id'], type: K, value?: ReversiEventTypes[K]): void {
-		this.publish(`reversiStream:${userId}`, type, typeof value === 'undefined' ? null : value);
-	}
-
-	@bindThis
-	public publishReversiGameStream<K extends keyof ReversiGameEventTypes>(gameId: MiReversiGame['id'], type: K, value?: ReversiGameEventTypes[K]): void {
-		this.publish(`reversiGameStream:${gameId}`, type, typeof value === 'undefined' ? null : value);
-	}
-
-	@bindThis
-	public publishNoctownStream(type: string, value?: Record<string, unknown>): void {
-		this.publish('noctownStream', type, typeof value === 'undefined' ? null : value);
-	}
-
-	@bindThis
-	public publishNoctownPlayerStream(playerId: string, type: string, value?: Record<string, unknown>): void {
-		this.publish(`noctownPlayerStream:${playerId}`, type, typeof value === 'undefined' ? null : value);
-	}
-
-	// ランダム絵チャットのルームストリームにイベントを配信する
-	@bindThis
-	public publishPaintChatStream(roomId: string, type: string, value?: Record<string, unknown>): void {
-		this.publish(`paintChatStream:${roomId}`, type, typeof value === 'undefined' ? null : value);
-	}
 }

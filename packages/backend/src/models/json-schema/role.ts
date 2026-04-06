@@ -252,10 +252,6 @@ export const packedRolePoliciesSchema = {
 			type: 'integer',
 			optional: false, nullable: false,
 		},
-		antennaLimit: {
-			type: 'integer',
-			optional: false, nullable: false,
-		},
 		wordMuteLimit: {
 			type: 'integer',
 			optional: false, nullable: false,
@@ -286,10 +282,6 @@ export const packedRolePoliciesSchema = {
 		},
 		avatarDecorationLimit: {
 			type: 'integer',
-			optional: false, nullable: false,
-		},
-		canImportAntennas: {
-			type: 'boolean',
 			optional: false, nullable: false,
 		},
 		canImportBlocking: {

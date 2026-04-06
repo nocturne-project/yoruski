@@ -56,10 +56,11 @@ export class CacheService implements OnApplicationShutdown {
 	) {
 		//this.onMessage = this.onMessage.bind(this);
 
-		this.userByIdCache = new MemoryKVCache<MiUser>(1000 * 60 * 5); // 5m
-		this.localUserByNativeTokenCache = new MemoryKVCache<MiLocalUser | null>(1000 * 60 * 5); // 5m
-		this.localUserByIdCache = new MemoryKVCache<MiLocalUser>(1000 * 60 * 5); // 5m
-		this.uriPersonCache = new MemoryKVCache<MiUser | null>(1000 * 60 * 5); // 5m
+		// maxSize: 小規模サーバー向けにキャッシュエントリ数を制限（メモリ削減）
+		this.userByIdCache = new MemoryKVCache<MiUser>(1000 * 60 * 5, 1000); // 5m, max 1000
+		this.localUserByNativeTokenCache = new MemoryKVCache<MiLocalUser | null>(1000 * 60 * 5, 500); // 5m, max 500
+		this.localUserByIdCache = new MemoryKVCache<MiLocalUser>(1000 * 60 * 5, 500); // 5m, max 500
+		this.uriPersonCache = new MemoryKVCache<MiUser | null>(1000 * 60 * 5, 2000); // 5m, max 2000
 
 		this.userProfileCache = new RedisKVCache<MiUserProfile>(this.redisClient, 'userProfile', {
 			lifetime: 1000 * 60 * 30, // 30m

@@ -13,7 +13,6 @@ import type { MiSystemWebhook, SystemWebhookEventType } from '@/models/SystemWeb
 import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';
 import { bindThis } from '@/decorators.js';
-import type { Antenna } from '@/server/api/endpoints/i/import-antennas.js';
 import { ApRequestCreator } from '@/core/activitypub/ApRequestService.js';
 import { type SystemWebhookPayload } from '@/core/SystemWebhookService.js';
 import type { Packed } from '@/misc/json-schema.js';
@@ -86,18 +85,6 @@ const REPEATABLE_SYSTEM_JOB_DEF = [{
 }, {
 	name: 'cleanExpiredChatMessages',
 	// 10分ごとに期限切れチャットメッセージを削除
-	pattern: '*/10 * * * *',
-}, {
-	name: 'cleanNoctownChatLogs',
-	// FR-029: 1時間ごとに24時間以上前のNoctownチャットログを削除
-	pattern: '0 * * * *',
-}, {
-	name: 'cleanExpiredNoctownTrades',
-	// 1分ごとに期限切れのNoctownトレードをexpiredステータスに更新
-	pattern: '* * * * *',
-}, {
-	name: 'cleanIdlePaintChatRooms',
-	// 10分ごとに1時間以上アイドルのお絵描きチャットルームを自動終了
 	pattern: '*/10 * * * *',
 }];
 
@@ -410,22 +397,6 @@ export class QueueService {
 	}
 
 	@bindThis
-	public createExportAntennasJob(user: ThinUser) {
-		return this.dbQueue.add('exportAntennas', {
-			user: { id: user.id },
-		}, {
-			removeOnComplete: {
-				age: 3600 * 24 * 7, // keep up to 7 days
-				count: 30,
-			},
-			removeOnFail: {
-				age: 3600 * 24 * 7, // keep up to 7 days
-				count: 100,
-			},
-		});
-	}
-
-	@bindThis
 	public createImportFollowingJob(user: ThinUser, fileId: MiDriveFile['id'], withReplies?: boolean) {
 		return this.dbQueue.add('importFollowing', {
 			user: { id: user.id },
@@ -533,23 +504,6 @@ export class QueueService {
 		return this.dbQueue.add('importCustomEmojis', {
 			user: { id: user.id },
 			fileId: fileId,
-		}, {
-			removeOnComplete: {
-				age: 3600 * 24 * 7, // keep up to 7 days
-				count: 30,
-			},
-			removeOnFail: {
-				age: 3600 * 24 * 7, // keep up to 7 days
-				count: 100,
-			},
-		});
-	}
-
-	@bindThis
-	public createImportAntennasJob(user: ThinUser, antenna: Antenna) {
-		return this.dbQueue.add('importAntennas', {
-			user: { id: user.id },
-			antenna,
 		}, {
 			removeOnComplete: {
 				age: 3600 * 24 * 7, // keep up to 7 days

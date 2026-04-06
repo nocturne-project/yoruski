@@ -231,14 +231,9 @@ const menuDef = computed<SuperMenuDef[]>(() => [{
 		active: currentPage.value?.route.name === 'performance',
 	}, {
 		icon: 'ti ti-message-question',
-		text: i18n.ts._noq.settings,
-		to: '/admin/noq',
-		active: currentPage.value?.route.name === 'noq',
-	}, {
-		icon: 'ti ti-brush',
-		text: 'ランダム絵チャット',
-		to: '/admin/paint-chat',
-		active: currentPage.value?.route.name === 'paint-chat',
+		text: i18n.ts._yoruq.settings,
+		to: '/admin/yoruq',
+		active: currentPage.value?.route.name === 'yoruq',
 	}],
 }, {
 	title: i18n.ts.info,

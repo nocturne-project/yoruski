@@ -29,7 +29,6 @@ import { GlobalTimelineChannel } from '@/server/api/stream/channels/global-timel
 import { UserListChannel } from '@/server/api/stream/channels/user-list.js';
 import { HashtagChannel } from '@/server/api/stream/channels/hashtag.js';
 import { RoleTimelineChannel } from '@/server/api/stream/channels/role-timeline.js';
-import { AntennaChannel } from '@/server/api/stream/channels/antenna.js';
 import { ChannelChannel } from '@/server/api/stream/channels/channel.js';
 import { DriveChannel } from '@/server/api/stream/channels/drive.js';
 import { ServerStatsChannel } from '@/server/api/stream/channels/server-stats.js';
@@ -37,11 +36,6 @@ import { QueueStatsChannel } from '@/server/api/stream/channels/queue-stats.js';
 import { AdminChannel } from '@/server/api/stream/channels/admin.js';
 import { ChatUserChannel } from '@/server/api/stream/channels/chat-user.js';
 import { ChatRoomChannel } from '@/server/api/stream/channels/chat-room.js';
-import { ReversiChannel } from '@/server/api/stream/channels/reversi.js';
-import { ReversiGameChannel } from '@/server/api/stream/channels/reversi-game.js';
-import { PaintChatChannel } from '@/server/api/stream/channels/paint-chat.js';
-import { NoctownChannel } from '@/server/api/stream/channels/noctown.js';
-
 const MAX_CHANNELS_PER_CONNECTION = 32;
 
 /**
@@ -325,7 +319,6 @@ export default class Connection {
 			case 'userList': return UserListChannel;
 			case 'hashtag': return HashtagChannel;
 			case 'roleTimeline': return RoleTimelineChannel;
-			case 'antenna': return AntennaChannel;
 			case 'channel': return ChannelChannel;
 			case 'drive': return DriveChannel;
 			case 'serverStats': return ServerStatsChannel;
@@ -333,10 +326,6 @@ export default class Connection {
 			case 'admin': return AdminChannel;
 			case 'chatUser': return ChatUserChannel;
 			case 'chatRoom': return ChatRoomChannel;
-			case 'reversi': return ReversiChannel;
-			case 'reversiGame': return ReversiGameChannel;
-			case 'paintChat': return PaintChatChannel;
-			case 'noctown': return NoctownChannel;
 
 			default:
 				throw new Error(`no such channel: ${name}`);

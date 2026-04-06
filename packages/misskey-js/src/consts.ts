@@ -11,7 +11,6 @@ import type {
 	Note,
 	Page,
 	Role,
-	ReversiGameDetailed,
 	SystemWebhook,
 	ChatRoom,
 } from './autogen/models.js';
@@ -37,7 +36,7 @@ export const notificationTypes = [
 	'test',
 	'login',
 	'createToken',
-	'noqQuestion',
+	'yoruqQuestion',
 ] as const;
 
 export const noteVisibilities = ['public', 'home', 'followers', 'specified'] as const;
@@ -126,8 +125,6 @@ export const permissions = [
 	'read:admin:drive',
 	'write:admin:ad',
 	'read:admin:ad',
-	'write:admin:noctown',
-	'read:admin:noctown',
 	'write:invite-codes',
 	'read:invite-codes',
 	'write:clip-favorite',
@@ -136,8 +133,8 @@ export const permissions = [
 	'write:report-abuse',
 	'write:chat',
 	'read:chat',
-	'write:noq',
-	'read:noq',
+	'write:yoruq',
+	'read:yoruq',
 ] as const;
 
 export const moderationLogTypes = [
@@ -249,17 +246,9 @@ export const queueTypes = [
 	'systemWebhookDeliver',
 ] as const;
 
-// See: packages/backend/src/core/ReversiService.ts@L410
-export const reversiUpdateKeys = [
-	'map',
-	'bw',
-	'isLlotheo',
-	'canPutEverywhere',
-	'loopedBoard',
-	'timeLimitForEachTurn',
-] as const satisfies (keyof ReversiGameDetailed)[];
-
-export type ReversiUpdateKey = typeof reversiUpdateKeys[number];
+// リバーシ削除済み: 後方互換のため型のみ残す
+export const reversiUpdateKeys = [] as const;
+export type ReversiUpdateKey = never;
 
 type AvatarDecoration = {
 	id: string;

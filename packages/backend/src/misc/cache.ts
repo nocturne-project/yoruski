@@ -209,10 +209,15 @@ export class RedisSingleCache<T> {
 export class MemoryKVCache<T> {
 	private readonly cache = new Map<string, { date: number; value: T; }>();
 	private readonly gcIntervalHandle = setInterval(() => this.gc(), 1000 * 60 * 3); // 3m
+	// maxSize: キャッシュエントリ数の上限。超過時はLRU（最も古いエントリ）から削除
+	private readonly maxSize: number | undefined;
 
 	constructor(
 		private readonly lifetime: number,
-	) {}
+		maxSize?: number,
+	) {
+		this.maxSize = maxSize;
+	}
 
 	@bindThis
 	/**
@@ -220,10 +225,21 @@ export class MemoryKVCache<T> {
 	 * @deprecated これを直接呼び出すべきではない。InternalEventなどで変更を全てのプロセス/マシンに通知するべき
 	 */
 	public set(key: string, value: T): void {
+		// LRU: 既存キーを削除して末尾に再挿入（Map挿入順を利用）
+		if (this.cache.has(key)) {
+			this.cache.delete(key);
+		}
 		this.cache.set(key, {
 			date: Date.now(),
 			value,
 		});
+		// maxSize超過時: 最も古いエントリ（Map先頭）を削除
+		if (this.maxSize != null && this.cache.size > this.maxSize) {
+			const oldestKey = this.cache.keys().next().value;
+			if (oldestKey != null) {
+				this.cache.delete(oldestKey);
+			}
+		}
 	}
 
 	@bindThis
@@ -234,6 +250,9 @@ export class MemoryKVCache<T> {
 			this.cache.delete(key);
 			return undefined;
 		}
+		// LRU: アクセス時に末尾に移動
+		this.cache.delete(key);
+		this.cache.set(key, cached);
 		return cached.value;
 	}
 

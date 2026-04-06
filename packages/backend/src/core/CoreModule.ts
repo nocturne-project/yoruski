@@ -20,7 +20,6 @@ import { AccountMoveService } from './AccountMoveService.js';
 import { AccountUpdateService } from './AccountUpdateService.js';
 import { AiService } from './AiService.js';
 import { AnnouncementService } from './AnnouncementService.js';
-import { AntennaService } from './AntennaService.js';
 import { AchievementService } from './AchievementService.js';
 import { AvatarDecorationService } from './AvatarDecorationService.js';
 import { CaptchaService } from './CaptchaService.js';
@@ -41,6 +40,8 @@ import { InternalStorageService } from './InternalStorageService.js';
 import { MetaService } from './MetaService.js';
 import { MfmService } from './MfmService.js';
 import { ModerationLogService } from './ModerationLogService.js';
+import { NightPointService } from './NightPointService.js';
+import { NightTimeService } from './NightTimeService.js';
 import { NoteCreateService } from './NoteCreateService.js';
 import { NoteDeleteService } from './NoteDeleteService.js';
 import { NotePiningService } from './NotePiningService.js';
@@ -76,31 +77,9 @@ import { FeaturedService } from './FeaturedService.js';
 import { FanoutTimelineService } from './FanoutTimelineService.js';
 import { ChannelFollowingService } from './ChannelFollowingService.js';
 import { ChatService } from './ChatService.js';
-import { DrawingCanvasService } from './DrawingCanvasService.js';
-import { DrawingSettingsService } from './DrawingSettingsService.js';
 import { RegistryApiService } from './RegistryApiService.js';
-import { ReversiService } from './ReversiService.js';
-import { NoctownService } from './NoctownService.js';
-import { NoctownTransactionService } from './NoctownTransactionService.js';
-import { NoqestionService } from './NoqestionService.js';
-import { PaintChatService } from './PaintChatService.js';
-import { PaintChatCanvasService } from './PaintChatCanvasService.js';
-import { PaintChatMatchingService } from './PaintChatMatchingService.js';
-import { PaintChatPublishService } from './PaintChatPublishService.js';
+import { YoruQuestionService } from './YoruQuestionService.js';
 import { PageService } from './PageService.js';
-
-// Noctown misc services
-import { ShopNpcService } from '@/misc/noctown/shop-npc-service.js';
-import { TradeService } from '@/misc/noctown/trade-service.js';
-import { PlayerItemService } from '@/misc/noctown/player-item-service.js';
-import { UniqueItemService } from '@/misc/noctown/unique-item-service.js';
-import { ItemDropService } from '@/misc/noctown/item-drop-service.js';
-import { ChestRespawnService } from '@/misc/noctown/chest-respawn-service.js';
-import { FenceService } from '@/misc/noctown/fence-service.js';
-import { ScoreCalculatorService } from '@/misc/noctown/score-calculator.js';
-import { NoctownPermissionService } from '@/misc/noctown/permission-check.js';
-import { NoctownNoteSubscriptionService } from '@/misc/noctown/note-subscription.js';
-import { RecipeSeedService } from '@/misc/noctown/recipe-seed.js';
 
 import { ChartLoggerService } from './chart/ChartLoggerService.js';
 import FederationChart from './chart/charts/federation.js';
@@ -119,7 +98,6 @@ import { ChartManagementService } from './chart/ChartManagementService.js';
 
 import { AbuseUserReportEntityService } from './entities/AbuseUserReportEntityService.js';
 import { AnnouncementEntityService } from './entities/AnnouncementEntityService.js';
-import { AntennaEntityService } from './entities/AntennaEntityService.js';
 import { AppEntityService } from './entities/AppEntityService.js';
 import { AuthSessionEntityService } from './entities/AuthSessionEntityService.js';
 import { BlockingEntityService } from './entities/BlockingEntityService.js';
@@ -152,7 +130,6 @@ import { UserListEntityService } from './entities/UserListEntityService.js';
 import { FlashEntityService } from './entities/FlashEntityService.js';
 import { FlashLikeEntityService } from './entities/FlashLikeEntityService.js';
 import { RoleEntityService } from './entities/RoleEntityService.js';
-import { ReversiGameEntityService } from './entities/ReversiGameEntityService.js';
 import { MetaEntityService } from './entities/MetaEntityService.js';
 
 import { ApAudienceService } from './activitypub/ApAudienceService.js';
@@ -186,7 +163,6 @@ const $AccountMoveService: Provider = { provide: 'AccountMoveService', useExisti
 const $AccountUpdateService: Provider = { provide: 'AccountUpdateService', useExisting: AccountUpdateService };
 const $AiService: Provider = { provide: 'AiService', useExisting: AiService };
 const $AnnouncementService: Provider = { provide: 'AnnouncementService', useExisting: AnnouncementService };
-const $AntennaService: Provider = { provide: 'AntennaService', useExisting: AntennaService };
 const $AchievementService: Provider = { provide: 'AchievementService', useExisting: AchievementService };
 const $AvatarDecorationService: Provider = { provide: 'AvatarDecorationService', useExisting: AvatarDecorationService };
 const $CaptchaService: Provider = { provide: 'CaptchaService', useExisting: CaptchaService };
@@ -206,6 +182,8 @@ const $InternalStorageService: Provider = { provide: 'InternalStorageService', u
 const $MetaService: Provider = { provide: 'MetaService', useExisting: MetaService };
 const $MfmService: Provider = { provide: 'MfmService', useExisting: MfmService };
 const $ModerationLogService: Provider = { provide: 'ModerationLogService', useExisting: ModerationLogService };
+const $NightPointService: Provider = { provide: 'NightPointService', useExisting: NightPointService };
+const $NightTimeService: Provider = { provide: 'NightTimeService', useExisting: NightTimeService };
 const $NoteCreateService: Provider = { provide: 'NoteCreateService', useExisting: NoteCreateService };
 const $NoteDeleteService: Provider = { provide: 'NoteDeleteService', useExisting: NoteDeleteService };
 const $NotePiningService: Provider = { provide: 'NotePiningService', useExisting: NotePiningService };
@@ -248,27 +226,9 @@ const $FanoutTimelineEndpointService: Provider = { provide: 'FanoutTimelineEndpo
 const $ChannelFollowingService: Provider = { provide: 'ChannelFollowingService', useExisting: ChannelFollowingService };
 const $ChannelMutingService: Provider = { provide: 'ChannelMutingService', useExisting: ChannelMutingService };
 const $ChatService: Provider = { provide: 'ChatService', useExisting: ChatService };
-const $DrawingCanvasService: Provider = { provide: 'DrawingCanvasService', useExisting: DrawingCanvasService };
-const $DrawingSettingsService: Provider = { provide: 'DrawingSettingsService', useExisting: DrawingSettingsService };
 const $RegistryApiService: Provider = { provide: 'RegistryApiService', useExisting: RegistryApiService };
-const $ReversiService: Provider = { provide: 'ReversiService', useExisting: ReversiService };
-const $NoctownService: Provider = { provide: 'NoctownService', useExisting: NoctownService };
-const $NoctownTransactionService: Provider = { provide: 'NoctownTransactionService', useExisting: NoctownTransactionService };
-const $NoqestionService: Provider = { provide: 'NoqestionService', useExisting: NoqestionService };
+const $YoruQuestionService: Provider = { provide: 'YoruQuestionService', useExisting: YoruQuestionService };
 const $PageService: Provider = { provide: 'PageService', useExisting: PageService };
-
-// Noctown misc services providers
-const $ShopNpcService: Provider = { provide: 'ShopNpcService', useExisting: ShopNpcService };
-const $TradeService: Provider = { provide: 'TradeService', useExisting: TradeService };
-const $PlayerItemService: Provider = { provide: 'PlayerItemService', useExisting: PlayerItemService };
-const $UniqueItemService: Provider = { provide: 'UniqueItemService', useExisting: UniqueItemService };
-const $ItemDropService: Provider = { provide: 'ItemDropService', useExisting: ItemDropService };
-const $ChestRespawnService: Provider = { provide: 'ChestRespawnService', useExisting: ChestRespawnService };
-const $FenceService: Provider = { provide: 'FenceService', useExisting: FenceService };
-const $ScoreCalculatorService: Provider = { provide: 'ScoreCalculatorService', useExisting: ScoreCalculatorService };
-const $NoctownPermissionService: Provider = { provide: 'NoctownPermissionService', useExisting: NoctownPermissionService };
-const $NoctownNoteSubscriptionService: Provider = { provide: 'NoctownNoteSubscriptionService', useExisting: NoctownNoteSubscriptionService };
-const $RecipeSeedService: Provider = { provide: 'RecipeSeedService', useExisting: RecipeSeedService };
 
 const $ChartLoggerService: Provider = { provide: 'ChartLoggerService', useExisting: ChartLoggerService };
 const $FederationChart: Provider = { provide: 'FederationChart', useExisting: FederationChart };
@@ -288,7 +248,6 @@ const $ChartManagementService: Provider = { provide: 'ChartManagementService', u
 const $AbuseUserReportEntityService: Provider = { provide: 'AbuseUserReportEntityService', useExisting: AbuseUserReportEntityService };
 const $AnnouncementEntityService: Provider = { provide: 'AnnouncementEntityService', useExisting: AnnouncementEntityService };
 const $AbuseReportNotificationRecipientEntityService: Provider = { provide: 'AbuseReportNotificationRecipientEntityService', useExisting: AbuseReportNotificationRecipientEntityService };
-const $AntennaEntityService: Provider = { provide: 'AntennaEntityService', useExisting: AntennaEntityService };
 const $AppEntityService: Provider = { provide: 'AppEntityService', useExisting: AppEntityService };
 const $AuthSessionEntityService: Provider = { provide: 'AuthSessionEntityService', useExisting: AuthSessionEntityService };
 const $BlockingEntityService: Provider = { provide: 'BlockingEntityService', useExisting: BlockingEntityService };
@@ -321,7 +280,6 @@ const $UserListEntityService: Provider = { provide: 'UserListEntityService', use
 const $FlashEntityService: Provider = { provide: 'FlashEntityService', useExisting: FlashEntityService };
 const $FlashLikeEntityService: Provider = { provide: 'FlashLikeEntityService', useExisting: FlashLikeEntityService };
 const $RoleEntityService: Provider = { provide: 'RoleEntityService', useExisting: RoleEntityService };
-const $ReversiGameEntityService: Provider = { provide: 'ReversiGameEntityService', useExisting: ReversiGameEntityService };
 const $MetaEntityService: Provider = { provide: 'MetaEntityService', useExisting: MetaEntityService };
 const $SystemWebhookEntityService: Provider = { provide: 'SystemWebhookEntityService', useExisting: SystemWebhookEntityService };
 
@@ -357,7 +315,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AccountUpdateService,
 		AiService,
 		AnnouncementService,
-		AntennaService,
 		AchievementService,
 		AvatarDecorationService,
 		CaptchaService,
@@ -377,6 +334,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MetaService,
 		MfmService,
 		ModerationLogService,
+		NightPointService,
+		NightTimeService,
 		NoteCreateService,
 		NoteDeleteService,
 		NotePiningService,
@@ -419,31 +378,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		ChannelFollowingService,
 		ChannelMutingService,
 		ChatService,
-		DrawingCanvasService,
-		DrawingSettingsService,
 		RegistryApiService,
-		ReversiService,
-		NoctownService,
-		NoctownTransactionService,
 		PageService,
-		NoqestionService,
-		PaintChatService,
-		PaintChatCanvasService,
-		PaintChatMatchingService,
-		PaintChatPublishService,
-
-		// Noctown misc services
-		ShopNpcService,
-		TradeService,
-		PlayerItemService,
-		UniqueItemService,
-		ItemDropService,
-		ChestRespawnService,
-		FenceService,
-		ScoreCalculatorService,
-		NoctownPermissionService,
-		NoctownNoteSubscriptionService,
-		RecipeSeedService,
+		YoruQuestionService,
 
 		ChartLoggerService,
 		FederationChart,
@@ -463,7 +400,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AbuseUserReportEntityService,
 		AnnouncementEntityService,
 		AbuseReportNotificationRecipientEntityService,
-		AntennaEntityService,
 		AppEntityService,
 		AuthSessionEntityService,
 		BlockingEntityService,
@@ -496,7 +432,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		FlashEntityService,
 		FlashLikeEntityService,
 		RoleEntityService,
-		ReversiGameEntityService,
 		MetaEntityService,
 		SystemWebhookEntityService,
 
@@ -529,7 +464,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AccountUpdateService,
 		$AiService,
 		$AnnouncementService,
-		$AntennaService,
 		$AchievementService,
 		$AvatarDecorationService,
 		$CaptchaService,
@@ -549,6 +483,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MetaService,
 		$MfmService,
 		$ModerationLogService,
+		$NightPointService,
+		$NightTimeService,
 		$NoteCreateService,
 		$NoteDeleteService,
 		$NotePiningService,
@@ -591,27 +527,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$ChannelFollowingService,
 		$ChannelMutingService,
 		$ChatService,
-		$DrawingCanvasService,
-		$DrawingSettingsService,
 		$RegistryApiService,
-		$ReversiService,
-		$NoctownService,
-		$NoctownTransactionService,
 		$PageService,
-		$NoqestionService,
-
-		// Noctown misc services (string-based)
-		$ShopNpcService,
-		$TradeService,
-		$PlayerItemService,
-		$UniqueItemService,
-		$ItemDropService,
-		$ChestRespawnService,
-		$FenceService,
-		$ScoreCalculatorService,
-		$NoctownPermissionService,
-		$NoctownNoteSubscriptionService,
-		$RecipeSeedService,
+		$YoruQuestionService,
 
 		$ChartLoggerService,
 		$FederationChart,
@@ -631,7 +549,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AbuseUserReportEntityService,
 		$AnnouncementEntityService,
 		$AbuseReportNotificationRecipientEntityService,
-		$AntennaEntityService,
 		$AppEntityService,
 		$AuthSessionEntityService,
 		$BlockingEntityService,
@@ -664,7 +581,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$FlashEntityService,
 		$FlashLikeEntityService,
 		$RoleEntityService,
-		$ReversiGameEntityService,
 		$MetaEntityService,
 		$SystemWebhookEntityService,
 
@@ -697,7 +613,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AccountUpdateService,
 		AiService,
 		AnnouncementService,
-		AntennaService,
 		AchievementService,
 		AvatarDecorationService,
 		CaptchaService,
@@ -717,6 +632,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MetaService,
 		MfmService,
 		ModerationLogService,
+		NightPointService,
+		NightTimeService,
 		NoteCreateService,
 		NoteDeleteService,
 		NotePiningService,
@@ -759,31 +676,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		ChannelFollowingService,
 		ChannelMutingService,
 		ChatService,
-		DrawingCanvasService,
-		DrawingSettingsService,
 		RegistryApiService,
-		ReversiService,
-		NoctownService,
-		NoctownTransactionService,
 		PageService,
-		NoqestionService,
-		PaintChatService,
-		PaintChatCanvasService,
-		PaintChatMatchingService,
-		PaintChatPublishService,
-
-		// Noctown misc services
-		ShopNpcService,
-		TradeService,
-		PlayerItemService,
-		UniqueItemService,
-		ItemDropService,
-		ChestRespawnService,
-		FenceService,
-		ScoreCalculatorService,
-		NoctownPermissionService,
-		NoctownNoteSubscriptionService,
-		RecipeSeedService,
+		YoruQuestionService,
 
 		FederationChart,
 		NotesChart,
@@ -802,7 +697,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AbuseUserReportEntityService,
 		AnnouncementEntityService,
 		AbuseReportNotificationRecipientEntityService,
-		AntennaEntityService,
 		AppEntityService,
 		AuthSessionEntityService,
 		BlockingEntityService,
@@ -835,7 +729,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		FlashEntityService,
 		FlashLikeEntityService,
 		RoleEntityService,
-		ReversiGameEntityService,
 		MetaEntityService,
 		SystemWebhookEntityService,
 
@@ -868,7 +761,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AccountUpdateService,
 		$AiService,
 		$AnnouncementService,
-		$AntennaService,
 		$AchievementService,
 		$AvatarDecorationService,
 		$CaptchaService,
@@ -888,6 +780,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MetaService,
 		$MfmService,
 		$ModerationLogService,
+		$NightPointService,
+		$NightTimeService,
 		$NoteCreateService,
 		$NoteDeleteService,
 		$NotePiningService,
@@ -929,27 +823,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$ChannelFollowingService,
 		$ChannelMutingService,
 		$ChatService,
-		$DrawingCanvasService,
-		$DrawingSettingsService,
 		$RegistryApiService,
-		$ReversiService,
-		$NoctownService,
-		$NoctownTransactionService,
 		$PageService,
-		$NoqestionService,
-
-		// Noctown misc services (string-based)
-		$ShopNpcService,
-		$TradeService,
-		$PlayerItemService,
-		$UniqueItemService,
-		$ItemDropService,
-		$ChestRespawnService,
-		$FenceService,
-		$ScoreCalculatorService,
-		$NoctownPermissionService,
-		$NoctownNoteSubscriptionService,
-		$RecipeSeedService,
+		$YoruQuestionService,
 
 		$FederationChart,
 		$NotesChart,
@@ -968,7 +844,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AbuseUserReportEntityService,
 		$AnnouncementEntityService,
 		$AbuseReportNotificationRecipientEntityService,
-		$AntennaEntityService,
 		$AppEntityService,
 		$AuthSessionEntityService,
 		$BlockingEntityService,
@@ -1001,7 +876,6 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$FlashEntityService,
 		$FlashLikeEntityService,
 		$RoleEntityService,
-		$ReversiGameEntityService,
 		$MetaEntityService,
 		$SystemWebhookEntityService,
 

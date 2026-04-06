@@ -36,7 +36,6 @@ import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { UserWebhookService } from '@/core/UserWebhookService.js';
 import { HashtagService } from '@/core/HashtagService.js';
-import { AntennaService } from '@/core/AntennaService.js';
 import { QueueService } from '@/core/QueueService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
@@ -45,6 +44,8 @@ import { ApDeliverManagerService } from '@/core/activitypub/ApDeliverManagerServ
 import { RemoteUserResolveService } from '@/core/RemoteUserResolveService.js';
 import { bindThis } from '@/decorators.js';
 import { DB_MAX_NOTE_TEXT_LENGTH } from '@/const.js';
+import { NightPointService } from '@/core/NightPointService.js';
+import { NightTimeService } from '@/core/NightTimeService.js';
 import { RoleService } from '@/core/RoleService.js';
 import { SearchService } from '@/core/SearchService.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
@@ -212,12 +213,13 @@ export class NoteCreateService implements OnApplicationShutdown {
 		private relayService: RelayService,
 		private federatedInstanceService: FederatedInstanceService,
 		private hashtagService: HashtagService,
-		private antennaService: AntennaService,
 		private webhookService: UserWebhookService,
 		private featuredService: FeaturedService,
 		private remoteUserResolveService: RemoteUserResolveService,
 		private apDeliverManagerService: ApDeliverManagerService,
 		private apRendererService: ApRendererService,
+		private nightPointService: NightPointService,
+		private nightTimeService: NightTimeService,
 		private roleService: RoleService,
 		private searchService: SearchService,
 		private notesChart: NotesChart,
@@ -453,6 +455,11 @@ export class NoteCreateService implements OnApplicationShutdown {
 			data.visibility = 'home';
 		}
 
+		// 夜間限定ローカルTL: 昼間はpublic投稿をhomeに強制変換（チャンネル投稿を除く）
+		if (data.visibility === 'public' && data.channel == null && !this.nightTimeService.isNightTime()) {
+			data.visibility = 'home';
+		}
+
 		if (data.renote) {
 			switch (data.renote.visibility) {
 				case 'public':
@@ -567,6 +574,11 @@ export class NoteCreateService implements OnApplicationShutdown {
 		}
 
 		const note = await this.insertNote(user, data, tags, emojis, mentionedUsers);
+
+		// 夜間ポイント付与: 夜間のpublic投稿（チャンネル除く）にポイントを付与
+		if (data.visibility === 'public' && data.channel == null) {
+			this.nightPointService.awardPoints(user as MiUser, note).catch(() => {});
+		}
 
 		setImmediate('post created', { signal: this.#shutdownController.signal }).then(
 			() => this.postNoteCreated(note, user, data, silent, tags!, mentionedUsers!),
@@ -713,11 +725,6 @@ export class NoteCreateService implements OnApplicationShutdown {
 		this.incNotesCountOfUser(user);
 
 		this.pushToTl(note, user);
-
-		this.antennaService.addNoteToAntennas({
-			...note,
-			channel: data.channel ?? null,
-		}, user);
 
 		if (data.reply) {
 			this.saveReply(data.reply, note);

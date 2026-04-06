@@ -460,10 +460,6 @@ export const store = markRaw(new Pizzax('base', {
 		where: 'device',
 		default: { type: 'syuilo/waon', volume: 1 },
 	},
-	sound_antenna: {
-		where: 'device',
-		default: { type: 'syuilo/triple', volume: 1 },
-	},
 	sound_channel: {
 		where: 'device',
 		default: { type: 'syuilo/square-pico', volume: 1 },

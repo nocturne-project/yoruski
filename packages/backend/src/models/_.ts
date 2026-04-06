@@ -14,12 +14,10 @@ import { MiAccessToken } from '@/models/AccessToken.js';
 import { MiAd } from '@/models/Ad.js';
 import { MiAnnouncement } from '@/models/Announcement.js';
 import { MiAnnouncementRead } from '@/models/AnnouncementRead.js';
-import { MiAntenna } from '@/models/Antenna.js';
 import { MiApp } from '@/models/App.js';
 import { MiAuthSession } from '@/models/AuthSession.js';
 import { MiAvatarDecoration } from '@/models/AvatarDecoration.js';
 import { MiBlocking } from '@/models/Blocking.js';
-import { MiBubbleGameRecord } from '@/models/BubbleGameRecord.js';
 import { MiChannel } from '@/models/Channel.js';
 import { MiChannelFavorite } from '@/models/ChannelFavorite.js';
 import { MiChannelFollowing } from '@/models/ChannelFollowing.js';
@@ -33,8 +31,6 @@ import { MiChatSecretSettings } from '@/models/ChatSecretSettings.js';
 import { MiClip } from '@/models/Clip.js';
 import { MiClipFavorite } from '@/models/ClipFavorite.js';
 import { MiClipNote } from '@/models/ClipNote.js';
-import { MiDrawingRoomSettings } from '@/models/DrawingRoomSettings.js';
-import { MiDrawingUserSettings } from '@/models/DrawingUserSettings.js';
 import { MiDriveFile } from '@/models/DriveFile.js';
 import { MiDriveFolder } from '@/models/DriveFolder.js';
 import { MiEmoji } from '@/models/Emoji.js';
@@ -49,6 +45,7 @@ import { MiInstance } from '@/models/Instance.js';
 import { MiMeta } from '@/models/Meta.js';
 import { MiModerationLog } from '@/models/ModerationLog.js';
 import { MiMuting } from '@/models/Muting.js';
+import { MiNightPoint } from '@/models/NightPoint.js';
 import { MiNote } from '@/models/Note.js';
 import { MiNoteDraft } from '@/models/NoteDraft.js';
 import { MiNoteFavorite } from '@/models/NoteFavorite.js';
@@ -66,7 +63,6 @@ import { MiRegistryItem } from '@/models/RegistryItem.js';
 import { MiRelay } from '@/models/Relay.js';
 import { MiRenoteMuting } from '@/models/RenoteMuting.js';
 import { MiRetentionAggregation } from '@/models/RetentionAggregation.js';
-import { MiReversiGame } from '@/models/ReversiGame.js';
 import { MiRole } from '@/models/Role.js';
 import { MiRoleAssignment } from '@/models/RoleAssignment.js';
 import { MiSignin } from '@/models/Signin.js';
@@ -87,58 +83,10 @@ import { MiUserProfile } from '@/models/UserProfile.js';
 import { MiUserPublickey } from '@/models/UserPublickey.js';
 import { MiUserSecurityKey } from '@/models/UserSecurityKey.js';
 import { MiWebhook } from '@/models/Webhook.js';
-import { NoctownPlayer } from '@/models/noctown/NoctownPlayer.js';
-import { NoctownItem } from '@/models/noctown/NoctownItem.js';
-import { NoctownPlayerItem } from '@/models/noctown/NoctownPlayerItem.js';
-import { NoctownWallet } from '@/models/noctown/NoctownWallet.js';
-import { NoctownQuest } from '@/models/noctown/NoctownQuest.js';
-import { NoctownNpc } from '@/models/noctown/NoctownNpc.js';
-import { NoctownPlacedItem } from '@/models/noctown/NoctownPlacedItem.js';
-import { NoctownDroppedItem } from '@/models/noctown/NoctownDroppedItem.js';
-import { NoctownWorld } from '@/models/noctown/NoctownWorld.js';
-import { NoctownWorldChunk } from '@/models/noctown/NoctownWorldChunk.js';
-import { NoctownPlayerScore } from '@/models/noctown/NoctownPlayerScore.js';
-import { NoctownPlayerStatistics } from '@/models/noctown/NoctownPlayerStatistics.js';
-import { NoctownFarmPlot } from '@/models/noctown/NoctownFarmPlot.js';
-import { NoctownCrop } from '@/models/noctown/NoctownCrop.js';
-import { NoctownChicken } from '@/models/noctown/NoctownChicken.js';
-import { NoctownCow } from '@/models/noctown/NoctownCow.js';
-import { NoctownRecipe } from '@/models/noctown/NoctownRecipe.js';
-import { NoctownRecipeIngredient } from '@/models/noctown/NoctownRecipeIngredient.js';
-import { NoctownTrade } from '@/models/noctown/NoctownTrade.js';
-import { NoctownTradeItem } from '@/models/noctown/NoctownTradeItem.js';
-import { NoctownInteriorMap } from '@/models/noctown/NoctownInteriorMap.js';
-import { NoctownShopInventory } from '@/models/noctown/NoctownShopInventory.js';
-import { NoctownTreasureChest } from '@/models/noctown/NoctownTreasureChest.js';
-import { NoctownHouse } from '@/models/noctown/NoctownHouse.js';
-import { NoctownHouseWallItem } from '@/models/noctown/NoctownHouseWallItem.js';
-import { NoctownHouseFurniture } from '@/models/noctown/NoctownHouseFurniture.js';
-import { NoctownBulletinBoard } from '@/models/noctown/NoctownBulletinBoard.js';
-import { NoctownBulletinPost } from '@/models/noctown/NoctownBulletinPost.js';
-import { NoctownBulletinLike } from '@/models/noctown/NoctownBulletinLike.js';
-import { NoctownAgent } from '@/models/noctown/NoctownAgent.js';
-import { NoctownGacha } from '@/models/noctown/NoctownGacha.js';
-import { NoctownGachaItem } from '@/models/noctown/NoctownGachaItem.js';
-import { NoctownGachaPull } from '@/models/noctown/NoctownGachaPull.js';
-import { NoctownEvent } from '@/models/noctown/NoctownEvent.js';
-import { NoctownEventReward } from '@/models/noctown/NoctownEventReward.js';
-import { NoctownEventParticipation } from '@/models/noctown/NoctownEventParticipation.js';
-import { NoctownUniqueItem } from '@/models/noctown/NoctownUniqueItem.js';
-import { NoctownRankingBoard } from '@/models/noctown/NoctownRankingBoard.js';
-import { NoctownChatLog } from '@/models/noctown/NoctownChatLog.js';
-import { NoctownChatLogRecipient } from '@/models/noctown/NoctownChatLogRecipient.js';
-import { NoctownTransactionLog } from '@/models/noctown/NoctownTransactionLog.js';
-import { NoqUserSetting } from '@/models/NoqUserSetting.js';
-import { NoqQuestion } from '@/models/NoqQuestion.js';
-import { NoqMutedUser } from '@/models/NoqMutedUser.js';
-import { NoqReportedQuestion } from '@/models/NoqReportedQuestion.js';
-import { PaintChatRoom } from '@/models/PaintChatRoom.js';
-import { PaintChatParticipant } from '@/models/PaintChatParticipant.js';
-import { PaintChatMessage } from '@/models/PaintChatMessage.js';
-import { PaintChatReport } from '@/models/PaintChatReport.js';
-import { PaintChatBlock } from '@/models/PaintChatBlock.js';
-import { PaintChatPublish } from '@/models/PaintChatPublish.js';
-import { PaintChatSetting } from '@/models/PaintChatSetting.js';
+import { YoruqUserSetting } from '@/models/YoruqUserSetting.js';
+import { YoruqQuestion } from '@/models/YoruqQuestion.js';
+import { YoruqMutedUser } from '@/models/YoruqMutedUser.js';
+import { YoruqReportedQuestion } from '@/models/YoruqReportedQuestion.js';
 import type { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity.js';
 
 export interface MiRepository<T extends ObjectLiteral> {
@@ -158,7 +106,6 @@ export {
 	MiAd,
 	MiAnnouncement,
 	MiAnnouncementRead,
-	MiAntenna,
 	MiApp,
 	MiAvatarDecoration,
 	MiAuthSession,
@@ -169,8 +116,6 @@ export {
 	MiClip,
 	MiClipNote,
 	MiClipFavorite,
-	MiDrawingRoomSettings,
-	MiDrawingUserSettings,
 	MiDriveFile,
 	MiDriveFolder,
 	MiEmoji,
@@ -183,6 +128,7 @@ export {
 	MiMeta,
 	MiModerationLog,
 	MiMuting,
+	MiNightPoint,
 	MiRenoteMuting,
 	MiNote,
 	MiNoteDraft,
@@ -229,60 +175,10 @@ export {
 	MiChatRoomInvitation,
 	MiChatApproval,
 	MiChatSecretSettings,
-	MiBubbleGameRecord,
-	MiReversiGame,
-	NoctownPlayer,
-	NoctownItem,
-	NoctownPlayerItem,
-	NoctownWallet,
-	NoctownQuest,
-	NoctownNpc,
-	NoctownPlacedItem,
-	NoctownDroppedItem,
-	NoctownWorld,
-	NoctownWorldChunk,
-	NoctownPlayerScore,
-	NoctownPlayerStatistics,
-	NoctownFarmPlot,
-	NoctownCrop,
-	NoctownChicken,
-	NoctownCow,
-	NoctownRecipe,
-	NoctownRecipeIngredient,
-	NoctownTrade,
-	NoctownTradeItem,
-	NoctownInteriorMap,
-	NoctownShopInventory,
-	NoctownTreasureChest,
-	NoctownHouse,
-	NoctownHouseWallItem,
-	NoctownHouseFurniture,
-	NoctownBulletinBoard,
-	NoctownBulletinPost,
-	NoctownBulletinLike,
-	NoctownAgent,
-	NoctownGacha,
-	NoctownGachaItem,
-	NoctownGachaPull,
-	NoctownEvent,
-	NoctownEventReward,
-	NoctownEventParticipation,
-	NoctownUniqueItem,
-	NoctownRankingBoard,
-	NoctownChatLog,
-	NoctownChatLogRecipient,
-	NoctownTransactionLog,
-	NoqUserSetting,
-	NoqQuestion,
-	NoqMutedUser,
-	NoqReportedQuestion,
-	PaintChatRoom,
-	PaintChatParticipant,
-	PaintChatMessage,
-	PaintChatReport,
-	PaintChatBlock,
-	PaintChatPublish,
-	PaintChatSetting,
+	YoruqUserSetting,
+	YoruqQuestion,
+	YoruqMutedUser,
+	YoruqReportedQuestion,
 };
 
 export type AbuseUserReportsRepository = Repository<MiAbuseUserReport> & MiRepository<MiAbuseUserReport>;
@@ -293,7 +189,6 @@ export type AccessTokensRepository = Repository<MiAccessToken> & MiRepository<Mi
 export type AdsRepository = Repository<MiAd> & MiRepository<MiAd>;
 export type AnnouncementsRepository = Repository<MiAnnouncement> & MiRepository<MiAnnouncement>;
 export type AnnouncementReadsRepository = Repository<MiAnnouncementRead> & MiRepository<MiAnnouncementRead>;
-export type AntennasRepository = Repository<MiAntenna> & MiRepository<MiAntenna>;
 export type AppsRepository = Repository<MiApp> & MiRepository<MiApp>;
 export type AvatarDecorationsRepository = Repository<MiAvatarDecoration> & MiRepository<MiAvatarDecoration>;
 export type AuthSessionsRepository = Repository<MiAuthSession> & MiRepository<MiAuthSession>;
@@ -304,8 +199,6 @@ export type ChannelMutingRepository = Repository<MiChannelMuting> & MiRepository
 export type ClipsRepository = Repository<MiClip> & MiRepository<MiClip>;
 export type ClipNotesRepository = Repository<MiClipNote> & MiRepository<MiClipNote>;
 export type ClipFavoritesRepository = Repository<MiClipFavorite> & MiRepository<MiClipFavorite>;
-export type DrawingRoomSettingsRepository = Repository<MiDrawingRoomSettings> & MiRepository<MiDrawingRoomSettings>;
-export type DrawingUserSettingsRepository = Repository<MiDrawingUserSettings> & MiRepository<MiDrawingUserSettings>;
 export type DriveFilesRepository = Repository<MiDriveFile> & MiRepository<MiDriveFile>;
 export type DriveFoldersRepository = Repository<MiDriveFolder> & MiRepository<MiDriveFolder>;
 export type EmojisRepository = Repository<MiEmoji> & MiRepository<MiEmoji>;
@@ -319,6 +212,7 @@ export type MetasRepository = Repository<MiMeta> & MiRepository<MiMeta>;
 export type ModerationLogsRepository = Repository<MiModerationLog> & MiRepository<MiModerationLog>;
 export type MutingsRepository = Repository<MiMuting> & MiRepository<MiMuting>;
 export type RenoteMutingsRepository = Repository<MiRenoteMuting> & MiRepository<MiRenoteMuting>;
+export type NightPointsRepository = Repository<MiNightPoint> & MiRepository<MiNightPoint>;
 export type NotesRepository = Repository<MiNote> & MiRepository<MiNote>;
 export type NoteDraftsRepository = Repository<MiNoteDraft> & MiRepository<MiNoteDraft>;
 export type NoteFavoritesRepository = Repository<MiNoteFavorite> & MiRepository<MiNoteFavorite>;
@@ -364,57 +258,7 @@ export type ChatRoomMembershipsRepository = Repository<MiChatRoomMembership> & M
 export type ChatRoomInvitationsRepository = Repository<MiChatRoomInvitation> & MiRepository<MiChatRoomInvitation>;
 export type ChatApprovalsRepository = Repository<MiChatApproval> & MiRepository<MiChatApproval>;
 export type ChatSecretSettingsRepository = Repository<MiChatSecretSettings> & MiRepository<MiChatSecretSettings>;
-export type BubbleGameRecordsRepository = Repository<MiBubbleGameRecord> & MiRepository<MiBubbleGameRecord>;
-export type ReversiGamesRepository = Repository<MiReversiGame> & MiRepository<MiReversiGame>;
-export type NoctownPlayersRepository = Repository<NoctownPlayer> & MiRepository<NoctownPlayer>;
-export type NoctownItemsRepository = Repository<NoctownItem> & MiRepository<NoctownItem>;
-export type NoctownPlayerItemsRepository = Repository<NoctownPlayerItem> & MiRepository<NoctownPlayerItem>;
-export type NoctownWalletsRepository = Repository<NoctownWallet> & MiRepository<NoctownWallet>;
-export type NoctownQuestsRepository = Repository<NoctownQuest> & MiRepository<NoctownQuest>;
-export type NoctownNpcsRepository = Repository<NoctownNpc> & MiRepository<NoctownNpc>;
-export type NoctownPlacedItemsRepository = Repository<NoctownPlacedItem> & MiRepository<NoctownPlacedItem>;
-export type NoctownDroppedItemsRepository = Repository<NoctownDroppedItem> & MiRepository<NoctownDroppedItem>;
-export type NoctownWorldsRepository = Repository<NoctownWorld> & MiRepository<NoctownWorld>;
-export type NoctownWorldChunksRepository = Repository<NoctownWorldChunk> & MiRepository<NoctownWorldChunk>;
-export type NoctownPlayerScoresRepository = Repository<NoctownPlayerScore> & MiRepository<NoctownPlayerScore>;
-export type NoctownPlayerStatisticsRepository = Repository<NoctownPlayerStatistics> & MiRepository<NoctownPlayerStatistics>;
-export type NoctownFarmPlotsRepository = Repository<NoctownFarmPlot> & MiRepository<NoctownFarmPlot>;
-export type NoctownCropsRepository = Repository<NoctownCrop> & MiRepository<NoctownCrop>;
-export type NoctownChickensRepository = Repository<NoctownChicken> & MiRepository<NoctownChicken>;
-export type NoctownCowsRepository = Repository<NoctownCow> & MiRepository<NoctownCow>;
-export type NoctownRecipesRepository = Repository<NoctownRecipe> & MiRepository<NoctownRecipe>;
-export type NoctownRecipeIngredientsRepository = Repository<NoctownRecipeIngredient> & MiRepository<NoctownRecipeIngredient>;
-export type NoctownTradesRepository = Repository<NoctownTrade> & MiRepository<NoctownTrade>;
-export type NoctownTradeItemsRepository = Repository<NoctownTradeItem> & MiRepository<NoctownTradeItem>;
-export type NoctownInteriorMapsRepository = Repository<NoctownInteriorMap> & MiRepository<NoctownInteriorMap>;
-export type NoctownShopInventoriesRepository = Repository<NoctownShopInventory> & MiRepository<NoctownShopInventory>;
-export type NoctownTreasureChestsRepository = Repository<NoctownTreasureChest> & MiRepository<NoctownTreasureChest>;
-export type NoctownHousesRepository = Repository<NoctownHouse> & MiRepository<NoctownHouse>;
-export type NoctownHouseWallItemsRepository = Repository<NoctownHouseWallItem> & MiRepository<NoctownHouseWallItem>;
-export type NoctownHouseFurnituresRepository = Repository<NoctownHouseFurniture> & MiRepository<NoctownHouseFurniture>;
-export type NoctownBulletinBoardsRepository = Repository<NoctownBulletinBoard> & MiRepository<NoctownBulletinBoard>;
-export type NoctownBulletinPostsRepository = Repository<NoctownBulletinPost> & MiRepository<NoctownBulletinPost>;
-export type NoctownBulletinLikesRepository = Repository<NoctownBulletinLike> & MiRepository<NoctownBulletinLike>;
-export type NoctownAgentsRepository = Repository<NoctownAgent> & MiRepository<NoctownAgent>;
-export type NoctownGachasRepository = Repository<NoctownGacha> & MiRepository<NoctownGacha>;
-export type NoctownGachaItemsRepository = Repository<NoctownGachaItem> & MiRepository<NoctownGachaItem>;
-export type NoctownGachaPullsRepository = Repository<NoctownGachaPull> & MiRepository<NoctownGachaPull>;
-export type NoctownEventsRepository = Repository<NoctownEvent> & MiRepository<NoctownEvent>;
-export type NoctownEventRewardsRepository = Repository<NoctownEventReward> & MiRepository<NoctownEventReward>;
-export type NoctownEventParticipationsRepository = Repository<NoctownEventParticipation> & MiRepository<NoctownEventParticipation>;
-export type NoctownUniqueItemsRepository = Repository<NoctownUniqueItem> & MiRepository<NoctownUniqueItem>;
-export type NoctownRankingBoardsRepository = Repository<NoctownRankingBoard> & MiRepository<NoctownRankingBoard>;
-export type NoctownChatLogsRepository = Repository<NoctownChatLog> & MiRepository<NoctownChatLog>;
-export type NoctownChatLogRecipientsRepository = Repository<NoctownChatLogRecipient> & MiRepository<NoctownChatLogRecipient>;
-export type NoctownTransactionLogsRepository = Repository<NoctownTransactionLog> & MiRepository<NoctownTransactionLog>;
-export type NoqUserSettingsRepository = Repository<NoqUserSetting> & MiRepository<NoqUserSetting>;
-export type NoqQuestionsRepository = Repository<NoqQuestion> & MiRepository<NoqQuestion>;
-export type NoqMutedUsersRepository = Repository<NoqMutedUser> & MiRepository<NoqMutedUser>;
-export type NoqReportedQuestionsRepository = Repository<NoqReportedQuestion> & MiRepository<NoqReportedQuestion>;
-export type PaintChatRoomsRepository = Repository<PaintChatRoom> & MiRepository<PaintChatRoom>;
-export type PaintChatParticipantsRepository = Repository<PaintChatParticipant> & MiRepository<PaintChatParticipant>;
-export type PaintChatMessagesRepository = Repository<PaintChatMessage> & MiRepository<PaintChatMessage>;
-export type PaintChatReportsRepository = Repository<PaintChatReport> & MiRepository<PaintChatReport>;
-export type PaintChatBlocksRepository = Repository<PaintChatBlock> & MiRepository<PaintChatBlock>;
-export type PaintChatPublishesRepository = Repository<PaintChatPublish> & MiRepository<PaintChatPublish>;
-export type PaintChatSettingsRepository = Repository<PaintChatSetting> & MiRepository<PaintChatSetting>;
+export type YoruqUserSettingsRepository = Repository<YoruqUserSetting> & MiRepository<YoruqUserSetting>;
+export type YoruqQuestionsRepository = Repository<YoruqQuestion> & MiRepository<YoruqQuestion>;
+export type YoruqMutedUsersRepository = Repository<YoruqMutedUser> & MiRepository<YoruqMutedUser>;
+export type YoruqReportedQuestionsRepository = Repository<YoruqReportedQuestion> & MiRepository<YoruqReportedQuestion>;

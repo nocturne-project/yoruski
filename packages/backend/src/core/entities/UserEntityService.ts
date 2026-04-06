@@ -313,23 +313,6 @@ export class UserEntityService implements OnModuleInit {
 	}
 
 	@bindThis
-	public async getHasUnreadAntenna(userId: MiUser['id']): Promise<boolean> {
-		/*
-		const myAntennas = (await this.antennaService.getAntennas()).filter(a => a.userId === userId);
-
-		const isUnread = (myAntennas.length > 0 ? await this.antennaNotesRepository.exists({
-			where: {
-				antennaId: In(myAntennas.map(x => x.id)),
-				read: false,
-			},
-		}) : false);
-
-		return isUnread;
-		*/
-		return false; // TODO
-	}
-
-	@bindThis
 	public async getNotificationsInfo(userId: MiUser['id']): Promise<{
 		hasUnread: boolean;
 		unreadCount: number;
@@ -604,7 +587,7 @@ export class UserEntityService implements OnModuleInit {
 				hasUnreadChatMessages: this.chatService.hasUnreadMessages(user.id),
 				hasUnreadAnnouncement: unreadAnnouncements!.length > 0,
 				unreadAnnouncements,
-				hasUnreadAntenna: this.getHasUnreadAntenna(user.id),
+				hasUnreadAntenna: false,
 				hasUnreadChannel: false, // 後方互換性のため
 				hasUnreadNotification: notificationsInfo?.hasUnread, // 後方互換性のため
 				hasPendingReceivedFollowRequest: this.getHasPendingReceivedFollowRequest(user.id),

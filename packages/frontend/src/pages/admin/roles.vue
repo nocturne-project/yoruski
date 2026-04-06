@@ -195,13 +195,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 						</MkInput>
 					</MkFolder>
 
-					<MkFolder v-if="matchQuery([i18n.ts._role._options.antennaMax, 'antennaLimit'])">
-						<template #label>{{ i18n.ts._role._options.antennaMax }}</template>
-						<template #suffix>{{ policies.antennaLimit }}</template>
-						<MkInput v-model="policies.antennaLimit" type="number">
-						</MkInput>
-					</MkFolder>
-
 					<MkFolder v-if="matchQuery([i18n.ts._role._options.wordMuteMax, 'wordMuteLimit'])">
 						<template #label>{{ i18n.ts._role._options.wordMuteMax }}</template>
 						<template #suffix>{{ policies.wordMuteLimit }}</template>
@@ -258,14 +251,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<template #suffix>{{ policies.avatarDecorationLimit }}</template>
 						<MkInput v-model="avatarDecorationLimit" type="number" :min="0" :max="16" @update:modelValue="updateAvatarDecorationLimit">
 						</MkInput>
-					</MkFolder>
-
-					<MkFolder v-if="matchQuery([i18n.ts._role._options.canImportAntennas, 'canImportAntennas'])">
-						<template #label>{{ i18n.ts._role._options.canImportAntennas }}</template>
-						<template #suffix>{{ policies.canImportAntennas ? i18n.ts.yes : i18n.ts.no }}</template>
-						<MkSwitch v-model="policies.canImportAntennas">
-							<template #label>{{ i18n.ts.enable }}</template>
-						</MkSwitch>
 					</MkFolder>
 
 					<MkFolder v-if="matchQuery([i18n.ts._role._options.canImportBlocking, 'canImportBlocking'])">

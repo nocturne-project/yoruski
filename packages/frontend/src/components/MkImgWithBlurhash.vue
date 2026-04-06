@@ -200,7 +200,8 @@ async function draw() {
 
 	if (props.hash == null) return;
 
-	if (props.onlyAvgColor) return;
+	// dataSaver.blurhashSimple有効時も平均色のみ表示（Blurhash描画をスキップ）
+	if (props.onlyAvgColor || prefer.s.dataSaver.blurhashSimple) return;
 
 	const work = await canvasPromise;
 	if (work instanceof WorkerMultiDispatch) {

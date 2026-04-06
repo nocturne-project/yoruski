@@ -53,14 +53,6 @@ export const ROUTE_DEF = [{
 	path: '/clips/:clipId',
 	component: page(() => import('@/pages/clip.vue')),
 }, {
-	path: '/paintchat',
-	component: page(() => import('@/pages/paintchat/index.vue')),
-	loginRequired: true,
-}, {
-	path: '/paintchat/:roomId',
-	component: page(() => import('@/pages/paintchat/room.vue')),
-	loginRequired: true,
-}, {
 	path: '/chat',
 	component: chatPage(() => import('@/pages/chat/home.vue')),
 	loginRequired: true,
@@ -165,9 +157,9 @@ export const ROUTE_DEF = [{
 		name: 'mute-block',
 		component: page(() => import('@/pages/settings/mute-block.vue')),
 	}, {
-		path: '/noq',
-		name: 'noq',
-		component: page(() => import('@/pages/settings/noq.vue')),
+		path: '/yoruq',
+		name: 'yoruq',
+		component: page(() => import('@/pages/settings/yoruq.vue')),
 	}, {
 		path: '/connect',
 		name: 'connect',
@@ -184,10 +176,6 @@ export const ROUTE_DEF = [{
 		path: '/webhook/new',
 		name: 'connect',
 		component: page(() => import('@/pages/settings/webhook.new.vue')),
-	}, {
-		path: '/deck',
-		name: 'deck',
-		component: page(() => import('@/pages/settings/deck.vue')),
 	}, {
 		path: '/custom-css',
 		name: 'preferences',
@@ -292,8 +280,8 @@ export const ROUTE_DEF = [{
 	path: '/scratchpad',
 	component: page(() => import('@/pages/scratchpad.vue')),
 }, {
-	path: '/noq/decryption',
-	component: page(() => import('@/pages/noq-decryption.vue')),
+	path: '/yoruq/decryption',
+	component: page(() => import('@/pages/yoruq-decryption.vue')),
 	loginRequired: true,
 }, {
 	path: '/preview',
@@ -523,20 +511,16 @@ export const ROUTE_DEF = [{
 		name: 'system-webhook',
 		component: page(() => import('@/pages/admin/system-webhook.vue')),
 	}, {
-		path: '/noq',
-		name: 'noq',
-		component: page(() => import('@/pages/admin/noq.vue')),
-	}, {
-		path: '/paint-chat',
-		name: 'paint-chat',
-		component: page(() => import('@/pages/admin/paint-chat.vue')),
+		path: '/yoruq',
+		name: 'yoruq',
+		component: page(() => import('@/pages/admin/yoruq.vue')),
 	}, {
 		path: '/',
 		component: page(() => import('@/pages/_empty_.vue')),
 	}],
 }, {
-	path: '/my/noq',
-	component: page(() => import('@/pages/my-noq.vue')),
+	path: '/my/yoruq',
+	component: page(() => import('@/pages/my-yoruq.vue')),
 	loginRequired: true,
 }, {
 	path: '/my/notifications',
@@ -579,24 +563,8 @@ export const ROUTE_DEF = [{
 	component: page(() => import('@/pages/my-clips/index.vue')),
 	loginRequired: true,
 }, {
-	path: '/my/antennas/create',
-	component: page(() => import('@/pages/my-antennas/create.vue')),
-	loginRequired: true,
-}, {
-	path: '/my/antennas/:antennaId',
-	component: page(() => import('@/pages/my-antennas/edit.vue')),
-	loginRequired: true,
-}, {
-	path: '/my/antennas',
-	component: page(() => import('@/pages/my-antennas/index.vue')),
-	loginRequired: true,
-}, {
 	path: '/timeline/list/:listId',
 	component: page(() => import('@/pages/user-list-timeline.vue')),
-	loginRequired: true,
-}, {
-	path: '/timeline/antenna/:antennaId',
-	component: page(() => import('@/pages/antenna-timeline.vue')),
 	loginRequired: true,
 }, {
 	path: '/timeline/role/:roleId',
@@ -607,28 +575,8 @@ export const ROUTE_DEF = [{
 	component: page(() => import('@/pages/clicker.vue')),
 	loginRequired: true,
 }, {
-	path: '/games',
-	component: page(() => import('@/pages/games.vue')),
-	loginRequired: false,
-}, {
-	path: '/bubble-game',
-	component: page(() => import('@/pages/drop-and-fusion.vue')),
-	loginRequired: true,
-}, {
-	path: '/reversi',
-	component: page(() => import('@/pages/reversi/index.vue')),
-	loginRequired: false,
-}, {
-	path: '/reversi/g/:gameId',
-	component: page(() => import('@/pages/reversi/game.vue')),
-	loginRequired: false,
-}, {
 	path: '/qr',
 	component: page(() => import('@/pages/qr.vue')),
-	loginRequired: true,
-}, {
-	path: '/noctown',
-	component: page(() => import('@/pages/noctown/index.vue')),
 	loginRequired: true,
 }, {
 	path: '/debug',

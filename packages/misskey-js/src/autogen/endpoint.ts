@@ -75,27 +75,6 @@ import type {
 	AdminInviteListRequest,
 	AdminInviteListResponse,
 	AdminMetaResponse,
-	AdminNoctownGachaAddItemRequest,
-	AdminNoctownGachaAddItemResponse,
-	AdminNoctownGachaCreateRequest,
-	AdminNoctownGachaCreateResponse,
-	AdminNoctownGachaDeleteRequest,
-	AdminNoctownGachaItemsRequest,
-	AdminNoctownGachaItemsResponse,
-	AdminNoctownGachaListRequest,
-	AdminNoctownGachaListResponse,
-	AdminNoctownGachaRemoveItemRequest,
-	AdminNoctownGachaUpdateRequest,
-	AdminNoqDiscloseRequest,
-	AdminNoqDiscloseResponse,
-	AdminNoqSettingsResponse,
-	AdminNoqSettingsUpdateRequest,
-	AdminNoqSettingsUpdateResponse,
-	AdminPaintChatSettingsResponse,
-	AdminPaintChatSettingsUpdateRequest,
-	AdminPaintChatSettingsUpdateResponse,
-	AdminPaintChatStegoExtractRequest,
-	AdminPaintChatStegoExtractResponse,
 	AdminPromoCreateRequest,
 	AdminQueueClearRequest,
 	AdminQueueDeliverDelayedResponse,
@@ -160,20 +139,15 @@ import type {
 	AdminUpdateProxyAccountResponse,
 	AdminUpdateUserNoteRequest,
 	AdminUpdateUserSuspendedReasonRequest,
+	AdminYoruqDiscloseRequest,
+	AdminYoruqDiscloseResponse,
+	AdminYoruqSettingsResponse,
+	AdminYoruqSettingsUpdateRequest,
+	AdminYoruqSettingsUpdateResponse,
 	AnnouncementsRequest,
 	AnnouncementsResponse,
 	AnnouncementsShowRequest,
 	AnnouncementsShowResponse,
-	AntennasCreateRequest,
-	AntennasCreateResponse,
-	AntennasDeleteRequest,
-	AntennasListResponse,
-	AntennasNotesRequest,
-	AntennasNotesResponse,
-	AntennasShowRequest,
-	AntennasShowResponse,
-	AntennasUpdateRequest,
-	AntennasUpdateResponse,
 	ApGetRequest,
 	ApGetResponse,
 	ApShowRequest,
@@ -195,9 +169,6 @@ import type {
 	BlockingDeleteResponse,
 	BlockingListRequest,
 	BlockingListResponse,
-	BubbleGameRankingRequest,
-	BubbleGameRankingResponse,
-	BubbleGameRegisterRequest,
 	ChannelsCreateRequest,
 	ChannelsCreateResponse,
 	ChannelsFavoriteRequest,
@@ -309,15 +280,6 @@ import type {
 	ClipsUnfavoriteRequest,
 	ClipsUpdateRequest,
 	ClipsUpdateResponse,
-	DrawingCanvasRequest,
-	DrawingCanvasResponse,
-	DrawingSaveRequest,
-	DrawingSettingsRoomGetRequest,
-	DrawingSettingsRoomGetResponse,
-	DrawingSettingsRoomUpdateRequest,
-	DrawingSettingsUserGetRequest,
-	DrawingSettingsUserGetResponse,
-	DrawingSettingsUserUpdateRequest,
 	DriveResponse,
 	DriveFilesRequest,
 	DriveFilesResponse,
@@ -466,7 +428,6 @@ import type {
 	IGalleryLikesResponse,
 	IGalleryPostsRequest,
 	IGalleryPostsResponse,
-	IImportAntennasRequest,
 	IImportBlockingRequest,
 	IImportFollowingRequest,
 	IImportMutingRequest,
@@ -530,223 +491,10 @@ import type {
 	MuteListResponse,
 	MyAppsRequest,
 	MyAppsResponse,
-	NoctownAdminItemCreateRequest,
-	NoctownAdminItemCreateResponse,
-	NoctownAdminItemDistributeRequest,
-	NoctownAdminItemDistributeResponse,
-	NoctownAgentEquipRequest,
-	NoctownAgentEquipResponse,
-	NoctownAgentFeedRequest,
-	NoctownAgentFeedResponse,
-	NoctownAgentHintRequest,
-	NoctownAgentHintResponse,
-	NoctownAgentListResponse,
-	NoctownBulletinAttachItemRequest,
-	NoctownBulletinAttachItemResponse,
-	NoctownBulletinBoardsRequest,
-	NoctownBulletinBoardsResponse,
-	NoctownBulletinCreatePostRequest,
-	NoctownBulletinCreatePostResponse,
-	NoctownBulletinDeletePostRequest,
-	NoctownBulletinLikeRequest,
-	NoctownBulletinLikeResponse,
-	NoctownBulletinPostsRequest,
-	NoctownBulletinPostsResponse,
-	NoctownBulletinUnlikeRequest,
-	NoctownBulletinUnlikeResponse,
-	NoctownChatHistoryRequest,
-	NoctownChatHistoryResponse,
-	NoctownChatLogReceiveRequest,
-	NoctownChatLogReceiveResponse,
-	NoctownChestOpenRequest,
-	NoctownChestOpenResponse,
-	NoctownChickenCollectEggsRequest,
-	NoctownChickenCollectEggsResponse,
-	NoctownChickenFeedRequest,
-	NoctownChickenFeedResponse,
-	NoctownChickenListResponse,
-	NoctownChickenPlaceRequest,
-	NoctownChickenPlaceResponse,
-	NoctownContainerOpenRequest,
-	NoctownContainerOpenResponse,
-	NoctownContainerOpenPlacedRequest,
-	NoctownContainerOpenPlacedResponse,
-	NoctownContainerSetItemsRequest,
-	NoctownContainerSetItemsResponse,
-	NoctownCowCollectMilkRequest,
-	NoctownCowCollectMilkResponse,
-	NoctownCowFeedRequest,
-	NoctownCowFeedResponse,
-	NoctownCowListResponse,
-	NoctownCowPlaceRequest,
-	NoctownCowPlaceResponse,
-	NoctownCraftExecuteRequest,
-	NoctownCraftExecuteResponse,
-	NoctownCraftRecipesRequest,
-	NoctownCraftRecipesResponse,
-	NoctownEventClaimRewardRequest,
-	NoctownEventClaimRewardResponse,
-	NoctownEventJoinRequest,
-	NoctownEventListRequest,
-	NoctownEventListResponse,
-	NoctownEventProgressRequest,
-	NoctownEventProgressResponse,
-	NoctownFarmCreateRequest,
-	NoctownFarmCreateResponse,
-	NoctownFarmHarvestRequest,
-	NoctownFarmHarvestResponse,
-	NoctownFarmListResponse,
-	NoctownFarmPlantRequest,
-	NoctownFarmPlantResponse,
-	NoctownFarmWaterRequest,
-	NoctownFarmWaterResponse,
-	NoctownFishingCastRequest,
-	NoctownFishingCastResponse,
-	NoctownFishingCatchResponse,
-	NoctownGachaListResponse,
-	NoctownGachaPullRequest,
-	NoctownGachaPullResponse,
-	NoctownHarvestWoodRequest,
-	NoctownHarvestWoodResponse,
-	NoctownHouseEnterRequest,
-	NoctownHouseEnterResponse,
-	NoctownHouseExitRequest,
-	NoctownHouseExitResponse,
-	NoctownHouseFurnitureListRequest,
-	NoctownHouseFurnitureListResponse,
-	NoctownHouseFurnitureMoveRequest,
-	NoctownHouseFurnitureMoveResponse,
-	NoctownHouseFurniturePlaceRequest,
-	NoctownHouseFurniturePlaceResponse,
-	NoctownHouseFurnitureRemoveRequest,
-	NoctownHouseFurnitureRemoveResponse,
-	NoctownHouseGetResponse,
-	NoctownHouseNearbyRequest,
-	NoctownHouseNearbyResponse,
-	NoctownHousePlaceRequest,
-	NoctownHousePlaceResponse,
-	NoctownHouseRemoveRequest,
-	NoctownHouseRemoveResponse,
-	NoctownHouseRenameRequest,
-	NoctownHouseRenameResponse,
-	NoctownHouseWallAttachRequest,
-	NoctownHouseWallAttachResponse,
-	NoctownHouseWallListRequest,
-	NoctownHouseWallListResponse,
-	NoctownHouseWallRemoveRequest,
-	NoctownHouseWallRemoveResponse,
-	NoctownHouseWallSetRequest,
-	NoctownHouseWallSetResponse,
-	NoctownItemCreateRequest,
-	NoctownItemCreateResponse,
-	NoctownItemDetailRequest,
-	NoctownItemDetailResponse,
-	NoctownItemDropRequest,
-	NoctownItemDropResponse,
-	NoctownItemDropCurrencyRequest,
-	NoctownItemDropCurrencyResponse,
-	NoctownItemDroppedRequest,
-	NoctownItemDroppedResponse,
-	NoctownItemInventoryResponse,
-	NoctownItemMyCreationsRequest,
-	NoctownItemMyCreationsResponse,
-	NoctownItemPickupRequest,
-	NoctownItemPickupResponse,
-	NoctownItemPickupPlacedRequest,
-	NoctownItemPickupPlacedResponse,
-	NoctownItemPlaceRequest,
-	NoctownItemPlaceResponse,
-	NoctownItemPlacedRequest,
-	NoctownItemPlacedResponse,
-	NoctownItemRetrieveRequest,
-	NoctownItemRetrieveResponse,
-	NoctownItemUpdateCreationRequest,
-	NoctownMapChunkRequest,
-	NoctownMapChunkResponse,
-	NoctownNpcNearbyRequest,
-	NoctownNpcNearbyResponse,
-	NoctownPetsCreateRequest,
-	NoctownPetsCreateResponse,
-	NoctownPetsDeleteRequest,
-	NoctownPetsDeleteResponse,
-	NoctownPetsListResponse,
-	NoctownPetsNearbyRequest,
-	NoctownPetsNearbyResponse,
-	NoctownPetsRenameRequest,
-	NoctownPetsRenameResponse,
-	NoctownPetsShowRequest,
-	NoctownPetsShowResponse,
-	NoctownPlayerResponse,
-	NoctownPlayerEquipSkinRequest,
-	NoctownPlayerEquipSkinResponse,
-	NoctownPlayerPositionRequest,
-	NoctownPlayerPositionResponse,
-	NoctownPlayerUnequipSkinResponse,
-	NoctownPlayersNearbyRequest,
-	NoctownPlayersNearbyResponse,
-	NoctownQuestAbandonRequest,
-	NoctownQuestAbandonResponse,
-	NoctownQuestCompleteRequest,
-	NoctownQuestCompleteResponse,
-	NoctownQuestListResponse,
-	NoctownQuestStartRequest,
-	NoctownQuestStartResponse,
-	NoctownRankingCategoryRequest,
-	NoctownRankingCategoryResponse,
-	NoctownRankingTotalRequest,
-	NoctownRankingTotalResponse,
-	NoctownSaisenHistoryRequest,
-	NoctownSaisenHistoryResponse,
-	NoctownSaisenOfferRequest,
-	NoctownSaisenOfferResponse,
-	NoctownShopBuyRequest,
-	NoctownShopBuyResponse,
-	NoctownShopSellRequest,
-	NoctownShopSellResponse,
-	NoctownTradeAddItemsRequest,
-	NoctownTradeAddItemsResponse,
-	NoctownTradeBarterRequest,
-	NoctownTradeBarterResponse,
-	NoctownTradeCancelRequest,
-	NoctownTradeCancelResponse,
-	NoctownTradeConfirmRequest,
-	NoctownTradeConfirmResponse,
-	NoctownTradeDetailRequest,
-	NoctownTradeDetailResponse,
-	NoctownTradeExecuteRequest,
-	NoctownTradeExecuteResponse,
-	NoctownTradeListResponse,
-	NoctownTradeRequestRequest,
-	NoctownTradeRequestResponse,
-	NoctownTradeRespondRequest,
-	NoctownTradeRespondResponse,
-	NoctownTradeUnconfirmRequest,
-	NoctownTradeUnconfirmResponse,
-	NoqAnnounceRequest,
-	NoqAnnounceResponse,
-	NoqMuteCreateRequest,
-	NoqMuteDeleteRequest,
-	NoqMuteListResponse,
-	NoqQuestionsAnswerRequest,
-	NoqQuestionsAnswerResponse,
-	NoqQuestionsAnsweredRequest,
-	NoqQuestionsAnsweredResponse,
-	NoqQuestionsDeleteRequest,
-	NoqQuestionsReceivedRequest,
-	NoqQuestionsReceivedResponse,
-	NoqQuestionsReportRequest,
-	NoqQuestionsReportResponse,
-	NoqQuestionsSendRequest,
-	NoqQuestionsSendResponse,
-	NoqQuestionsSentRequest,
-	NoqQuestionsSentResponse,
-	NoqSettingsGenerateKeyRequest,
-	NoqSettingsGenerateKeyResponse,
-	NoqSettingsGetResponse,
-	NoqSettingsShowRequest,
-	NoqSettingsShowResponse,
-	NoqSettingsUpdateRequest,
-	NoqSettingsUpdateResponse,
+	NightPointsMyResponse,
+	NightPointsRankingRequest,
+	NightPointsRankingResponse,
+	NightStatusResponse,
 	NotesRequest,
 	NotesResponse,
 	NotesChildrenRequest,
@@ -830,35 +578,6 @@ import type {
 	PagesShowResponse,
 	PagesUnlikeRequest,
 	PagesUpdateRequest,
-	PaintChatCanvasRequest,
-	PaintChatCanvasResponse,
-	PaintChatDiceRequest,
-	PaintChatDiceResponse,
-	PaintChatJoinResponse,
-	PaintChatLeaveRequest,
-	PaintChatLeaveResponse,
-	PaintChatLeaveQueueResponse,
-	PaintChatMessageRequest,
-	PaintChatMessageResponse,
-	PaintChatMessagesRequest,
-	PaintChatMessagesResponse,
-	PaintChatPublishAgreeRequest,
-	PaintChatPublishAgreeResponse,
-	PaintChatPublishMessageRequest,
-	PaintChatPublishMessageResponse,
-	PaintChatPublishMyArtRequest,
-	PaintChatPublishMyArtResponse,
-	PaintChatPublishRejectRequest,
-	PaintChatPublishRejectResponse,
-	PaintChatReportRequest,
-	PaintChatReportResponse,
-	PaintChatRoomRequest,
-	PaintChatRoomResponse,
-	PaintChatSaveColorsRequest,
-	PaintChatSettingsResponse,
-	PaintChatSoloResponse,
-	PaintChatTopicRequest,
-	PaintChatTopicResponse,
 	PingResponse,
 	PinnedUsersResponse,
 	PromoReadRequest,
@@ -869,17 +588,6 @@ import type {
 	RequestResetPasswordRequest,
 	ResetPasswordRequest,
 	RetentionResponse,
-	ReversiCancelMatchRequest,
-	ReversiGamesRequest,
-	ReversiGamesResponse,
-	ReversiInvitationsResponse,
-	ReversiMatchRequest,
-	ReversiMatchResponse,
-	ReversiShowGameRequest,
-	ReversiShowGameResponse,
-	ReversiSurrenderRequest,
-	ReversiVerifyRequest,
-	ReversiVerifyResponse,
 	RolesListRequest,
 	RolesListResponse,
 	RolesNotesRequest,
@@ -960,6 +668,31 @@ import type {
 	V2AdminEmojiListRequest,
 	V2AdminEmojiListResponse,
 	VerifyEmailRequest,
+	YoruqAnnounceRequest,
+	YoruqAnnounceResponse,
+	YoruqMuteCreateRequest,
+	YoruqMuteDeleteRequest,
+	YoruqMuteListResponse,
+	YoruqQuestionsAnswerRequest,
+	YoruqQuestionsAnswerResponse,
+	YoruqQuestionsAnsweredRequest,
+	YoruqQuestionsAnsweredResponse,
+	YoruqQuestionsDeleteRequest,
+	YoruqQuestionsReceivedRequest,
+	YoruqQuestionsReceivedResponse,
+	YoruqQuestionsReportRequest,
+	YoruqQuestionsReportResponse,
+	YoruqQuestionsSendRequest,
+	YoruqQuestionsSendResponse,
+	YoruqQuestionsSentRequest,
+	YoruqQuestionsSentResponse,
+	YoruqSettingsGenerateKeyRequest,
+	YoruqSettingsGenerateKeyResponse,
+	YoruqSettingsGetResponse,
+	YoruqSettingsShowRequest,
+	YoruqSettingsShowResponse,
+	YoruqSettingsUpdateRequest,
+	YoruqSettingsUpdateResponse,
 } from './entities.js';
 
 export type Endpoints = {
@@ -1017,19 +750,6 @@ export type Endpoints = {
 	'admin/invite/create': { req: AdminInviteCreateRequest; res: AdminInviteCreateResponse };
 	'admin/invite/list': { req: AdminInviteListRequest; res: AdminInviteListResponse };
 	'admin/meta': { req: EmptyRequest; res: AdminMetaResponse };
-	'admin/noctown/gacha/add-item': { req: AdminNoctownGachaAddItemRequest; res: AdminNoctownGachaAddItemResponse };
-	'admin/noctown/gacha/create': { req: AdminNoctownGachaCreateRequest; res: AdminNoctownGachaCreateResponse };
-	'admin/noctown/gacha/delete': { req: AdminNoctownGachaDeleteRequest; res: EmptyResponse };
-	'admin/noctown/gacha/items': { req: AdminNoctownGachaItemsRequest; res: AdminNoctownGachaItemsResponse };
-	'admin/noctown/gacha/list': { req: AdminNoctownGachaListRequest; res: AdminNoctownGachaListResponse };
-	'admin/noctown/gacha/remove-item': { req: AdminNoctownGachaRemoveItemRequest; res: EmptyResponse };
-	'admin/noctown/gacha/update': { req: AdminNoctownGachaUpdateRequest; res: EmptyResponse };
-	'admin/noq/disclose': { req: AdminNoqDiscloseRequest; res: AdminNoqDiscloseResponse };
-	'admin/noq/settings': { req: EmptyRequest; res: AdminNoqSettingsResponse };
-	'admin/noq/settings/update': { req: AdminNoqSettingsUpdateRequest; res: AdminNoqSettingsUpdateResponse };
-	'admin/paint-chat/settings': { req: EmptyRequest; res: AdminPaintChatSettingsResponse };
-	'admin/paint-chat/settings/update': { req: AdminPaintChatSettingsUpdateRequest; res: AdminPaintChatSettingsUpdateResponse };
-	'admin/paint-chat/stego/extract': { req: AdminPaintChatStegoExtractRequest; res: AdminPaintChatStegoExtractResponse };
 	'admin/promo/create': { req: AdminPromoCreateRequest; res: EmptyResponse };
 	'admin/queue/clear': { req: AdminQueueClearRequest; res: EmptyResponse };
 	'admin/queue/deliver-delayed': { req: EmptyRequest; res: AdminQueueDeliverDelayedResponse };
@@ -1077,14 +797,11 @@ export type Endpoints = {
 	'admin/update-proxy-account': { req: AdminUpdateProxyAccountRequest; res: AdminUpdateProxyAccountResponse };
 	'admin/update-user-note': { req: AdminUpdateUserNoteRequest; res: EmptyResponse };
 	'admin/update-user-suspended-reason': { req: AdminUpdateUserSuspendedReasonRequest; res: EmptyResponse };
+	'admin/yoruq/disclose': { req: AdminYoruqDiscloseRequest; res: AdminYoruqDiscloseResponse };
+	'admin/yoruq/settings': { req: EmptyRequest; res: AdminYoruqSettingsResponse };
+	'admin/yoruq/settings/update': { req: AdminYoruqSettingsUpdateRequest; res: AdminYoruqSettingsUpdateResponse };
 	'announcements': { req: AnnouncementsRequest; res: AnnouncementsResponse };
 	'announcements/show': { req: AnnouncementsShowRequest; res: AnnouncementsShowResponse };
-	'antennas/create': { req: AntennasCreateRequest; res: AntennasCreateResponse };
-	'antennas/delete': { req: AntennasDeleteRequest; res: EmptyResponse };
-	'antennas/list': { req: EmptyRequest; res: AntennasListResponse };
-	'antennas/notes': { req: AntennasNotesRequest; res: AntennasNotesResponse };
-	'antennas/show': { req: AntennasShowRequest; res: AntennasShowResponse };
-	'antennas/update': { req: AntennasUpdateRequest; res: AntennasUpdateResponse };
 	'ap/get': { req: ApGetRequest; res: ApGetResponse };
 	'ap/show': { req: ApShowRequest; res: ApShowResponse };
 	'app/create': { req: AppCreateRequest; res: AppCreateResponse };
@@ -1096,8 +813,6 @@ export type Endpoints = {
 	'blocking/create': { req: BlockingCreateRequest; res: BlockingCreateResponse };
 	'blocking/delete': { req: BlockingDeleteRequest; res: BlockingDeleteResponse };
 	'blocking/list': { req: BlockingListRequest; res: BlockingListResponse };
-	'bubble-game/ranking': { req: BubbleGameRankingRequest; res: BubbleGameRankingResponse };
-	'bubble-game/register': { req: BubbleGameRegisterRequest; res: EmptyResponse };
 	'channels/create': { req: ChannelsCreateRequest; res: ChannelsCreateResponse };
 	'channels/favorite': { req: ChannelsFavoriteRequest; res: EmptyResponse };
 	'channels/featured': { req: EmptyRequest; res: ChannelsFeaturedResponse };
@@ -1168,12 +883,6 @@ export type Endpoints = {
 	'clips/show': { req: ClipsShowRequest; res: ClipsShowResponse };
 	'clips/unfavorite': { req: ClipsUnfavoriteRequest; res: EmptyResponse };
 	'clips/update': { req: ClipsUpdateRequest; res: ClipsUpdateResponse };
-	'drawing/canvas': { req: DrawingCanvasRequest; res: DrawingCanvasResponse };
-	'drawing/save': { req: DrawingSaveRequest; res: EmptyResponse };
-	'drawing/settings/room/get': { req: DrawingSettingsRoomGetRequest; res: DrawingSettingsRoomGetResponse };
-	'drawing/settings/room/update': { req: DrawingSettingsRoomUpdateRequest; res: EmptyResponse };
-	'drawing/settings/user/get': { req: DrawingSettingsUserGetRequest; res: DrawingSettingsUserGetResponse };
-	'drawing/settings/user/update': { req: DrawingSettingsUserUpdateRequest; res: EmptyResponse };
 	'drive': { req: EmptyRequest; res: DriveResponse };
 	'drive/files': { req: DriveFilesRequest; res: DriveFilesResponse };
 	'drive/files/attached-chat-messages': { req: DriveFilesAttachedChatMessagesRequest; res: DriveFilesAttachedChatMessagesResponse };
@@ -1261,7 +970,6 @@ export type Endpoints = {
 	'i/change-password': { req: IChangePasswordRequest; res: EmptyResponse };
 	'i/claim-achievement': { req: IClaimAchievementRequest; res: EmptyResponse };
 	'i/delete-account': { req: IDeleteAccountRequest; res: EmptyResponse };
-	'i/export-antennas': { req: EmptyRequest; res: EmptyResponse };
 	'i/export-blocking': { req: EmptyRequest; res: EmptyResponse };
 	'i/export-clips': { req: EmptyRequest; res: EmptyResponse };
 	'i/export-favorites': { req: EmptyRequest; res: EmptyResponse };
@@ -1272,7 +980,6 @@ export type Endpoints = {
 	'i/favorites': { req: IFavoritesRequest; res: IFavoritesResponse };
 	'i/gallery/likes': { req: IGalleryLikesRequest; res: IGalleryLikesResponse };
 	'i/gallery/posts': { req: IGalleryPostsRequest; res: IGalleryPostsResponse };
-	'i/import-antennas': { req: IImportAntennasRequest; res: EmptyResponse };
 	'i/import-blocking': { req: IImportBlockingRequest; res: EmptyResponse };
 	'i/import-following': { req: IImportFollowingRequest; res: EmptyResponse };
 	'i/import-muting': { req: IImportMutingRequest; res: EmptyResponse };
@@ -1314,125 +1021,9 @@ export type Endpoints = {
 	'mute/delete': { req: MuteDeleteRequest; res: EmptyResponse };
 	'mute/list': { req: MuteListRequest; res: MuteListResponse };
 	'my/apps': { req: MyAppsRequest; res: MyAppsResponse };
-	'noctown/admin/item/create': { req: NoctownAdminItemCreateRequest; res: NoctownAdminItemCreateResponse };
-	'noctown/admin/item/distribute': { req: NoctownAdminItemDistributeRequest; res: NoctownAdminItemDistributeResponse };
-	'noctown/agent/equip': { req: NoctownAgentEquipRequest; res: NoctownAgentEquipResponse };
-	'noctown/agent/feed': { req: NoctownAgentFeedRequest; res: NoctownAgentFeedResponse };
-	'noctown/agent/hint': { req: NoctownAgentHintRequest; res: NoctownAgentHintResponse };
-	'noctown/agent/list': { req: EmptyRequest; res: NoctownAgentListResponse };
-	'noctown/bulletin/attach-item': { req: NoctownBulletinAttachItemRequest; res: NoctownBulletinAttachItemResponse };
-	'noctown/bulletin/boards': { req: NoctownBulletinBoardsRequest; res: NoctownBulletinBoardsResponse };
-	'noctown/bulletin/create-post': { req: NoctownBulletinCreatePostRequest; res: NoctownBulletinCreatePostResponse };
-	'noctown/bulletin/delete-post': { req: NoctownBulletinDeletePostRequest; res: EmptyResponse };
-	'noctown/bulletin/like': { req: NoctownBulletinLikeRequest; res: NoctownBulletinLikeResponse };
-	'noctown/bulletin/posts': { req: NoctownBulletinPostsRequest; res: NoctownBulletinPostsResponse };
-	'noctown/bulletin/unlike': { req: NoctownBulletinUnlikeRequest; res: NoctownBulletinUnlikeResponse };
-	'noctown/chat-history': { req: NoctownChatHistoryRequest; res: NoctownChatHistoryResponse };
-	'noctown/chat-log/receive': { req: NoctownChatLogReceiveRequest; res: NoctownChatLogReceiveResponse };
-	'noctown/chest/open': { req: NoctownChestOpenRequest; res: NoctownChestOpenResponse };
-	'noctown/chicken/collect-eggs': { req: NoctownChickenCollectEggsRequest; res: NoctownChickenCollectEggsResponse };
-	'noctown/chicken/feed': { req: NoctownChickenFeedRequest; res: NoctownChickenFeedResponse };
-	'noctown/chicken/list': { req: EmptyRequest; res: NoctownChickenListResponse };
-	'noctown/chicken/place': { req: NoctownChickenPlaceRequest; res: NoctownChickenPlaceResponse };
-	'noctown/container/open': { req: NoctownContainerOpenRequest; res: NoctownContainerOpenResponse };
-	'noctown/container/open-placed': { req: NoctownContainerOpenPlacedRequest; res: NoctownContainerOpenPlacedResponse };
-	'noctown/container/set-items': { req: NoctownContainerSetItemsRequest; res: NoctownContainerSetItemsResponse };
-	'noctown/cow/collect-milk': { req: NoctownCowCollectMilkRequest; res: NoctownCowCollectMilkResponse };
-	'noctown/cow/feed': { req: NoctownCowFeedRequest; res: NoctownCowFeedResponse };
-	'noctown/cow/list': { req: EmptyRequest; res: NoctownCowListResponse };
-	'noctown/cow/place': { req: NoctownCowPlaceRequest; res: NoctownCowPlaceResponse };
-	'noctown/craft/execute': { req: NoctownCraftExecuteRequest; res: NoctownCraftExecuteResponse };
-	'noctown/craft/recipes': { req: NoctownCraftRecipesRequest; res: NoctownCraftRecipesResponse };
-	'noctown/event/claim-reward': { req: NoctownEventClaimRewardRequest; res: NoctownEventClaimRewardResponse };
-	'noctown/event/join': { req: NoctownEventJoinRequest; res: EmptyResponse };
-	'noctown/event/list': { req: NoctownEventListRequest; res: NoctownEventListResponse };
-	'noctown/event/progress': { req: NoctownEventProgressRequest; res: NoctownEventProgressResponse };
-	'noctown/farm/create': { req: NoctownFarmCreateRequest; res: NoctownFarmCreateResponse };
-	'noctown/farm/harvest': { req: NoctownFarmHarvestRequest; res: NoctownFarmHarvestResponse };
-	'noctown/farm/list': { req: EmptyRequest; res: NoctownFarmListResponse };
-	'noctown/farm/plant': { req: NoctownFarmPlantRequest; res: NoctownFarmPlantResponse };
-	'noctown/farm/water': { req: NoctownFarmWaterRequest; res: NoctownFarmWaterResponse };
-	'noctown/fishing/cast': { req: NoctownFishingCastRequest; res: NoctownFishingCastResponse };
-	'noctown/fishing/catch': { req: EmptyRequest; res: NoctownFishingCatchResponse };
-	'noctown/gacha/list': { req: EmptyRequest; res: NoctownGachaListResponse };
-	'noctown/gacha/pull': { req: NoctownGachaPullRequest; res: NoctownGachaPullResponse };
-	'noctown/harvest/wood': { req: NoctownHarvestWoodRequest; res: NoctownHarvestWoodResponse };
-	'noctown/house/enter': { req: NoctownHouseEnterRequest; res: NoctownHouseEnterResponse };
-	'noctown/house/exit': { req: NoctownHouseExitRequest; res: NoctownHouseExitResponse };
-	'noctown/house/furniture/list': { req: NoctownHouseFurnitureListRequest; res: NoctownHouseFurnitureListResponse };
-	'noctown/house/furniture/move': { req: NoctownHouseFurnitureMoveRequest; res: NoctownHouseFurnitureMoveResponse };
-	'noctown/house/furniture/place': { req: NoctownHouseFurniturePlaceRequest; res: NoctownHouseFurniturePlaceResponse };
-	'noctown/house/furniture/remove': { req: NoctownHouseFurnitureRemoveRequest; res: NoctownHouseFurnitureRemoveResponse };
-	'noctown/house/get': { req: EmptyRequest; res: NoctownHouseGetResponse };
-	'noctown/house/nearby': { req: NoctownHouseNearbyRequest; res: NoctownHouseNearbyResponse };
-	'noctown/house/place': { req: NoctownHousePlaceRequest; res: NoctownHousePlaceResponse };
-	'noctown/house/remove': { req: NoctownHouseRemoveRequest; res: NoctownHouseRemoveResponse };
-	'noctown/house/rename': { req: NoctownHouseRenameRequest; res: NoctownHouseRenameResponse };
-	'noctown/house/wall/attach': { req: NoctownHouseWallAttachRequest; res: NoctownHouseWallAttachResponse };
-	'noctown/house/wall/list': { req: NoctownHouseWallListRequest; res: NoctownHouseWallListResponse };
-	'noctown/house/wall/remove': { req: NoctownHouseWallRemoveRequest; res: NoctownHouseWallRemoveResponse };
-	'noctown/house/wall/set': { req: NoctownHouseWallSetRequest; res: NoctownHouseWallSetResponse };
-	'noctown/item/create': { req: NoctownItemCreateRequest; res: NoctownItemCreateResponse };
-	'noctown/item/detail': { req: NoctownItemDetailRequest; res: NoctownItemDetailResponse };
-	'noctown/item/drop': { req: NoctownItemDropRequest; res: NoctownItemDropResponse };
-	'noctown/item/drop-currency': { req: NoctownItemDropCurrencyRequest; res: NoctownItemDropCurrencyResponse };
-	'noctown/item/dropped': { req: NoctownItemDroppedRequest; res: NoctownItemDroppedResponse };
-	'noctown/item/inventory': { req: EmptyRequest; res: NoctownItemInventoryResponse };
-	'noctown/item/my-creations': { req: NoctownItemMyCreationsRequest; res: NoctownItemMyCreationsResponse };
-	'noctown/item/pickup': { req: NoctownItemPickupRequest; res: NoctownItemPickupResponse };
-	'noctown/item/pickup-placed': { req: NoctownItemPickupPlacedRequest; res: NoctownItemPickupPlacedResponse };
-	'noctown/item/place': { req: NoctownItemPlaceRequest; res: NoctownItemPlaceResponse };
-	'noctown/item/placed': { req: NoctownItemPlacedRequest; res: NoctownItemPlacedResponse };
-	'noctown/item/retrieve': { req: NoctownItemRetrieveRequest; res: NoctownItemRetrieveResponse };
-	'noctown/item/update-creation': { req: NoctownItemUpdateCreationRequest; res: EmptyResponse };
-	'noctown/map/chunk': { req: NoctownMapChunkRequest; res: NoctownMapChunkResponse };
-	'noctown/npc/nearby': { req: NoctownNpcNearbyRequest; res: NoctownNpcNearbyResponse };
-	'noctown/pets/create': { req: NoctownPetsCreateRequest; res: NoctownPetsCreateResponse };
-	'noctown/pets/delete': { req: NoctownPetsDeleteRequest; res: NoctownPetsDeleteResponse };
-	'noctown/pets/list': { req: EmptyRequest; res: NoctownPetsListResponse };
-	'noctown/pets/nearby': { req: NoctownPetsNearbyRequest; res: NoctownPetsNearbyResponse };
-	'noctown/pets/rename': { req: NoctownPetsRenameRequest; res: NoctownPetsRenameResponse };
-	'noctown/pets/show': { req: NoctownPetsShowRequest; res: NoctownPetsShowResponse };
-	'noctown/player': { req: EmptyRequest; res: NoctownPlayerResponse };
-	'noctown/player/equip-skin': { req: NoctownPlayerEquipSkinRequest; res: NoctownPlayerEquipSkinResponse };
-	'noctown/player/position': { req: NoctownPlayerPositionRequest; res: NoctownPlayerPositionResponse };
-	'noctown/player/unequip-skin': { req: EmptyRequest; res: NoctownPlayerUnequipSkinResponse };
-	'noctown/players/nearby': { req: NoctownPlayersNearbyRequest; res: NoctownPlayersNearbyResponse };
-	'noctown/quest/abandon': { req: NoctownQuestAbandonRequest; res: NoctownQuestAbandonResponse };
-	'noctown/quest/complete': { req: NoctownQuestCompleteRequest; res: NoctownQuestCompleteResponse };
-	'noctown/quest/list': { req: EmptyRequest; res: NoctownQuestListResponse };
-	'noctown/quest/start': { req: NoctownQuestStartRequest; res: NoctownQuestStartResponse };
-	'noctown/ranking/category': { req: NoctownRankingCategoryRequest; res: NoctownRankingCategoryResponse };
-	'noctown/ranking/total': { req: NoctownRankingTotalRequest; res: NoctownRankingTotalResponse };
-	'noctown/saisen/history': { req: NoctownSaisenHistoryRequest; res: NoctownSaisenHistoryResponse };
-	'noctown/saisen/offer': { req: NoctownSaisenOfferRequest; res: NoctownSaisenOfferResponse };
-	'noctown/shop/buy': { req: NoctownShopBuyRequest; res: NoctownShopBuyResponse };
-	'noctown/shop/sell': { req: NoctownShopSellRequest; res: NoctownShopSellResponse };
-	'noctown/trade/add-items': { req: NoctownTradeAddItemsRequest; res: NoctownTradeAddItemsResponse };
-	'noctown/trade/barter': { req: NoctownTradeBarterRequest; res: NoctownTradeBarterResponse };
-	'noctown/trade/cancel': { req: NoctownTradeCancelRequest; res: NoctownTradeCancelResponse };
-	'noctown/trade/confirm': { req: NoctownTradeConfirmRequest; res: NoctownTradeConfirmResponse };
-	'noctown/trade/detail': { req: NoctownTradeDetailRequest; res: NoctownTradeDetailResponse };
-	'noctown/trade/execute': { req: NoctownTradeExecuteRequest; res: NoctownTradeExecuteResponse };
-	'noctown/trade/list': { req: EmptyRequest; res: NoctownTradeListResponse };
-	'noctown/trade/request': { req: NoctownTradeRequestRequest; res: NoctownTradeRequestResponse };
-	'noctown/trade/respond': { req: NoctownTradeRespondRequest; res: NoctownTradeRespondResponse };
-	'noctown/trade/unconfirm': { req: NoctownTradeUnconfirmRequest; res: NoctownTradeUnconfirmResponse };
-	'noq/announce': { req: NoqAnnounceRequest; res: NoqAnnounceResponse };
-	'noq/mute/create': { req: NoqMuteCreateRequest; res: EmptyResponse };
-	'noq/mute/delete': { req: NoqMuteDeleteRequest; res: EmptyResponse };
-	'noq/mute/list': { req: EmptyRequest; res: NoqMuteListResponse };
-	'noq/questions/answer': { req: NoqQuestionsAnswerRequest; res: NoqQuestionsAnswerResponse };
-	'noq/questions/answered': { req: NoqQuestionsAnsweredRequest; res: NoqQuestionsAnsweredResponse };
-	'noq/questions/delete': { req: NoqQuestionsDeleteRequest; res: EmptyResponse };
-	'noq/questions/received': { req: NoqQuestionsReceivedRequest; res: NoqQuestionsReceivedResponse };
-	'noq/questions/report': { req: NoqQuestionsReportRequest; res: NoqQuestionsReportResponse };
-	'noq/questions/send': { req: NoqQuestionsSendRequest; res: NoqQuestionsSendResponse };
-	'noq/questions/sent': { req: NoqQuestionsSentRequest; res: NoqQuestionsSentResponse };
-	'noq/settings/generate-key': { req: NoqSettingsGenerateKeyRequest; res: NoqSettingsGenerateKeyResponse };
-	'noq/settings/get': { req: EmptyRequest; res: NoqSettingsGetResponse };
-	'noq/settings/show': { req: NoqSettingsShowRequest; res: NoqSettingsShowResponse };
-	'noq/settings/update': { req: NoqSettingsUpdateRequest; res: NoqSettingsUpdateResponse };
+	'night-points/my': { req: EmptyRequest; res: NightPointsMyResponse };
+	'night-points/ranking': { req: NightPointsRankingRequest; res: NightPointsRankingResponse };
+	'night-status': { req: EmptyRequest; res: NightStatusResponse };
 	'notes': { req: NotesRequest; res: NotesResponse };
 	'notes/children': { req: NotesChildrenRequest; res: NotesChildrenResponse };
 	'notes/clips': { req: NotesClipsRequest; res: NotesClipsResponse };
@@ -1487,23 +1078,6 @@ export type Endpoints = {
 	'pages/show': { req: PagesShowRequest; res: PagesShowResponse };
 	'pages/unlike': { req: PagesUnlikeRequest; res: EmptyResponse };
 	'pages/update': { req: PagesUpdateRequest; res: EmptyResponse };
-	'paint-chat/canvas': { req: PaintChatCanvasRequest; res: PaintChatCanvasResponse };
-	'paint-chat/dice': { req: PaintChatDiceRequest; res: PaintChatDiceResponse };
-	'paint-chat/join': { req: EmptyRequest; res: PaintChatJoinResponse };
-	'paint-chat/leave': { req: PaintChatLeaveRequest; res: PaintChatLeaveResponse };
-	'paint-chat/leave-queue': { req: EmptyRequest; res: PaintChatLeaveQueueResponse };
-	'paint-chat/message': { req: PaintChatMessageRequest; res: PaintChatMessageResponse };
-	'paint-chat/messages': { req: PaintChatMessagesRequest; res: PaintChatMessagesResponse };
-	'paint-chat/publish/agree': { req: PaintChatPublishAgreeRequest; res: PaintChatPublishAgreeResponse };
-	'paint-chat/publish/message': { req: PaintChatPublishMessageRequest; res: PaintChatPublishMessageResponse };
-	'paint-chat/publish/my-art': { req: PaintChatPublishMyArtRequest; res: PaintChatPublishMyArtResponse };
-	'paint-chat/publish/reject': { req: PaintChatPublishRejectRequest; res: PaintChatPublishRejectResponse };
-	'paint-chat/report': { req: PaintChatReportRequest; res: PaintChatReportResponse };
-	'paint-chat/room': { req: PaintChatRoomRequest; res: PaintChatRoomResponse };
-	'paint-chat/save-colors': { req: PaintChatSaveColorsRequest; res: EmptyResponse };
-	'paint-chat/settings': { req: EmptyRequest; res: PaintChatSettingsResponse };
-	'paint-chat/solo': { req: EmptyRequest; res: PaintChatSoloResponse };
-	'paint-chat/topic': { req: PaintChatTopicRequest; res: PaintChatTopicResponse };
 	'ping': { req: EmptyRequest; res: PingResponse };
 	'pinned-users': { req: EmptyRequest; res: PinnedUsersResponse };
 	'promo/read': { req: PromoReadRequest; res: EmptyResponse };
@@ -1514,13 +1088,6 @@ export type Endpoints = {
 	'reset-db': { req: EmptyRequest; res: EmptyResponse };
 	'reset-password': { req: ResetPasswordRequest; res: EmptyResponse };
 	'retention': { req: EmptyRequest; res: RetentionResponse };
-	'reversi/cancel-match': { req: ReversiCancelMatchRequest; res: EmptyResponse };
-	'reversi/games': { req: ReversiGamesRequest; res: ReversiGamesResponse };
-	'reversi/invitations': { req: EmptyRequest; res: ReversiInvitationsResponse };
-	'reversi/match': { req: ReversiMatchRequest; res: ReversiMatchResponse };
-	'reversi/show-game': { req: ReversiShowGameRequest; res: ReversiShowGameResponse };
-	'reversi/surrender': { req: ReversiSurrenderRequest; res: EmptyResponse };
-	'reversi/verify': { req: ReversiVerifyRequest; res: ReversiVerifyResponse };
 	'roles/list': { req: RolesListRequest; res: RolesListResponse };
 	'roles/notes': { req: RolesNotesRequest; res: RolesNotesResponse };
 	'roles/show': { req: RolesShowRequest; res: RolesShowResponse };
@@ -1567,6 +1134,21 @@ export type Endpoints = {
 	'users/update-memo': { req: UsersUpdateMemoRequest; res: EmptyResponse };
 	'v2/admin/emoji/list': { req: V2AdminEmojiListRequest; res: V2AdminEmojiListResponse };
 	'verify-email': { req: VerifyEmailRequest; res: EmptyResponse };
+	'yoruq/announce': { req: YoruqAnnounceRequest; res: YoruqAnnounceResponse };
+	'yoruq/mute/create': { req: YoruqMuteCreateRequest; res: EmptyResponse };
+	'yoruq/mute/delete': { req: YoruqMuteDeleteRequest; res: EmptyResponse };
+	'yoruq/mute/list': { req: EmptyRequest; res: YoruqMuteListResponse };
+	'yoruq/questions/answer': { req: YoruqQuestionsAnswerRequest; res: YoruqQuestionsAnswerResponse };
+	'yoruq/questions/answered': { req: YoruqQuestionsAnsweredRequest; res: YoruqQuestionsAnsweredResponse };
+	'yoruq/questions/delete': { req: YoruqQuestionsDeleteRequest; res: EmptyResponse };
+	'yoruq/questions/received': { req: YoruqQuestionsReceivedRequest; res: YoruqQuestionsReceivedResponse };
+	'yoruq/questions/report': { req: YoruqQuestionsReportRequest; res: YoruqQuestionsReportResponse };
+	'yoruq/questions/send': { req: YoruqQuestionsSendRequest; res: YoruqQuestionsSendResponse };
+	'yoruq/questions/sent': { req: YoruqQuestionsSentRequest; res: YoruqQuestionsSentResponse };
+	'yoruq/settings/generate-key': { req: YoruqSettingsGenerateKeyRequest; res: YoruqSettingsGenerateKeyResponse };
+	'yoruq/settings/get': { req: EmptyRequest; res: YoruqSettingsGetResponse };
+	'yoruq/settings/show': { req: YoruqSettingsShowRequest; res: YoruqSettingsShowResponse };
+	'yoruq/settings/update': { req: YoruqSettingsUpdateRequest; res: YoruqSettingsUpdateResponse };
 };
 
 /**

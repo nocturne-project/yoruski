@@ -32,3 +32,9 @@ packages/backend/test/compose.yml
 
 claude
 .claude
+specs/
+.specify/
+openspec/
+bin/
+*.log
+.env*

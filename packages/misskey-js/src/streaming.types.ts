@@ -1,5 +1,4 @@
 import {
-	Antenna,
 	ChatMessage,
 	ChatMessageLite,
 	DriveFile,
@@ -21,16 +20,7 @@ import {
 	QueueStatsLog,
 	ServerStats,
 	ServerStatsLog,
-	ReversiGameDetailed,
 } from './entities.js';
-import {
-	ReversiUpdateKey,
-} from './consts.js';
-
-type ReversiUpdateSettings<K extends ReversiUpdateKey> = {
-	key: K;
-	value: ReversiGameDetailed[K];
-};
 
 export type Channels = {
 	main: {
@@ -49,7 +39,6 @@ export type Channels = {
 			readAllNotifications: () => void;
 			unreadNotification: (payload: Notification) => void;
 			notificationFlushed: () => void;
-			unreadAntenna: (payload: Antenna) => void;
 			newChatMessage: (payload: ChatMessage) => void;
 			readAllAnnouncements: () => void;
 			myTokenRegenerated: () => void;
@@ -61,7 +50,6 @@ export type Channels = {
 				value: any | null;
 			}) => void;
 			driveFileCreated: (payload: DriveFile) => void;
-			readAntenna: (payload: Antenna) => void;
 			receiveFollowRequest: (payload: User) => void;
 			announcementCreated: (payload: AnnouncementCreated) => void;
 		};
@@ -205,104 +193,6 @@ export type Channels = {
 			}
 		};
 		receives: null;
-	};
-	reversi: {
-		params: null;
-		events: {
-			matched: (payload: { game: ReversiGameDetailed }) => void;
-			invited: (payload: { user: User }) => void;
-		};
-		receives: null;
-	};
-	reversiGame: {
-		params: {
-			gameId: string;
-		};
-		events: {
-			started: (payload: { game: ReversiGameDetailed; }) => void;
-			ended: (payload: { winnerId: User['id'] | null; game: ReversiGameDetailed; }) => void;
-			canceled: (payload: { userId: User['id']; }) => void;
-			changeReadyStates: (payload: { user1: boolean; user2: boolean; }) => void;
-			updateSettings: <K extends ReversiUpdateKey>(payload: { userId: User['id']; key: K; value: ReversiGameDetailed[K]; }) => void;
-			log: (payload: {
-				time: number;
-				player: boolean;
-				operation: 'put';
-				pos: number;
-			} & { id: string | null }) => void;
-		};
-		receives: {
-			putStone: {
-				pos: number;
-				id: string;
-			};
-			ready: boolean;
-			cancel: null | Record<string, never>;
-			updateSettings: ReversiUpdateSettings<ReversiUpdateKey>;
-			claimTimeIsUp: null | Record<string, never>;
-		}
-	};
-	noctown: {
-		params: null;
-		events: {
-			playerMoved: (payload: {
-				id: string;
-				userId: string;
-				username: string;
-				avatarUrl: string | null;
-				positionX: number;
-				positionY: number;
-				positionZ: number;
-				rotation: number;
-				isOnline: boolean;
-			}) => void;
-			playerJoined: (payload: {
-				id: string;
-				userId: string;
-				username: string;
-				avatarUrl: string | null;
-				positionX: number;
-				positionY: number;
-				positionZ: number;
-				rotation: number;
-				isOnline: boolean;
-			}) => void;
-			playerLeft: (payload: { playerId: string }) => void;
-			itemDropped: (payload: {
-				id: string;
-				itemId: string;
-				positionX: number;
-				positionY: number;
-				positionZ: number;
-			}) => void;
-			itemPicked: (payload: {
-				droppedItemId: string;
-				playerId: string;
-			}) => void;
-		};
-		receives: {
-			move: {
-				x: number;
-				y: number;
-				z: number;
-				rotation?: number;
-			};
-			pickItem: {
-				droppedItemId: string;
-			};
-			placeItem: {
-				playerItemId: string;
-				x: number;
-				y: number;
-				z: number;
-				rotation?: number;
-			};
-			interact: {
-				targetType: string;
-				targetId: string;
-			};
-			heartbeat: Record<string, never>;
-		};
 	};
 	chatUser: {
 		params: {

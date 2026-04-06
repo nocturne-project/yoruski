@@ -106,7 +106,6 @@ type Source = {
 
 	perChannelMaxNoteCacheCount?: number;
 	perUserNotificationsMaxCount?: number;
-	deactivateAntennaThreshold?: number;
 	pidFile: string;
 
 	logging?: {
@@ -120,6 +119,12 @@ type Source = {
 		enableSignupErrorNotification?: boolean;
 		botToken?: string;
 		channelId?: string;
+	};
+
+	// 夜間限定ローカルTL設定（yoru.noc.ski独自）
+	nightTime?: {
+		latitude: number;
+		longitude: number;
 	};
 };
 
@@ -216,12 +221,15 @@ export type Config = {
 	} | undefined;
 	perChannelMaxNoteCacheCount: number;
 	perUserNotificationsMaxCount: number;
-	deactivateAntennaThreshold: number;
 	pidFile: string;
 	slack: {
 		enableSignupErrorNotification?: boolean;
 		botToken?: string;
 		channelId?: string;
+	} | undefined;
+	nightTime: {
+		latitude: number;
+		longitude: number;
 	} | undefined;
 };
 
@@ -354,7 +362,6 @@ export function loadConfig(): Config {
 		frontendEmbedManifestExists: frontendEmbedManifestExists,
 		perChannelMaxNoteCacheCount: config.perChannelMaxNoteCacheCount ?? 1000,
 		perUserNotificationsMaxCount: config.perUserNotificationsMaxCount ?? 500,
-		deactivateAntennaThreshold: config.deactivateAntennaThreshold ?? (1000 * 60 * 60 * 24 * 7),
 		pidFile: config.pidFile,
 		logging: {
 			sql: {
@@ -363,6 +370,7 @@ export function loadConfig(): Config {
 			},
 		},
 		slack: config.slack,
+		nightTime: config.nightTime,
 	};
 };
 

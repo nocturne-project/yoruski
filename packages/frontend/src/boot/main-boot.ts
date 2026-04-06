@@ -39,7 +39,8 @@ export async function mainBoot() {
 		if (!$i) uiStyle = 'visitor';
 
 		if (searchParams.has('zen')) uiStyle = 'zen';
-		if (uiStyle === 'deck' && prefer.s['deck.useSimpleUiForNonRootPages'] && window.location.pathname !== '/') uiStyle = 'zen';
+		// デッキUI削除: deckモードはuniversalにフォールバック
+		if (uiStyle === 'deck') uiStyle = 'universal';
 
 		if (searchParams.has('ui')) uiStyle = searchParams.get('ui');
 
@@ -47,9 +48,6 @@ export async function mainBoot() {
 		switch (uiStyle) {
 			case 'zen':
 				rootComponent = await import('@/ui/zen.vue').then(x => x.default);
-				break;
-			case 'deck':
-				rootComponent = await import('@/ui/deck.vue').then(x => x.default);
 				break;
 			case 'visitor':
 				rootComponent = await import('@/ui/visitor.vue').then(x => x.default);

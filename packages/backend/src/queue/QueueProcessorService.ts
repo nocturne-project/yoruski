@@ -24,13 +24,11 @@ import { ExportFollowingProcessorService } from './processors/ExportFollowingPro
 import { ExportMutingProcessorService } from './processors/ExportMutingProcessorService.js';
 import { ExportBlockingProcessorService } from './processors/ExportBlockingProcessorService.js';
 import { ExportUserListsProcessorService } from './processors/ExportUserListsProcessorService.js';
-import { ExportAntennasProcessorService } from './processors/ExportAntennasProcessorService.js';
 import { ImportFollowingProcessorService } from './processors/ImportFollowingProcessorService.js';
 import { ImportMutingProcessorService } from './processors/ImportMutingProcessorService.js';
 import { ImportBlockingProcessorService } from './processors/ImportBlockingProcessorService.js';
 import { ImportUserListsProcessorService } from './processors/ImportUserListsProcessorService.js';
 import { ImportCustomEmojisProcessorService } from './processors/ImportCustomEmojisProcessorService.js';
-import { ImportAntennasProcessorService } from './processors/ImportAntennasProcessorService.js';
 import { DeleteAccountProcessorService } from './processors/DeleteAccountProcessorService.js';
 import { ExportFavoritesProcessorService } from './processors/ExportFavoritesProcessorService.js';
 import { CleanRemoteFilesProcessorService } from './processors/CleanRemoteFilesProcessorService.js';
@@ -45,9 +43,6 @@ import { CleanProcessorService } from './processors/CleanProcessorService.js';
 import { AggregateRetentionProcessorService } from './processors/AggregateRetentionProcessorService.js';
 import { CleanRemoteNotesProcessorService } from './processors/CleanRemoteNotesProcessorService.js';
 import { CleanExpiredChatMessagesProcessorService } from './processors/CleanExpiredChatMessagesProcessorService.js';
-import { CleanNoctownChatLogsProcessorService } from './processors/CleanNoctownChatLogsProcessorService.js';
-import { CleanExpiredNoctownTradesProcessorService } from './processors/CleanExpiredNoctownTradesProcessorService.js';
-import { CleanIdlePaintChatRoomsProcessorService } from './processors/CleanIdlePaintChatRoomsProcessorService.js';
 import { QueueLoggerService } from './QueueLoggerService.js';
 import { QUEUE, baseWorkerOptions } from './const.js';
 
@@ -111,13 +106,11 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		private exportMutingProcessorService: ExportMutingProcessorService,
 		private exportBlockingProcessorService: ExportBlockingProcessorService,
 		private exportUserListsProcessorService: ExportUserListsProcessorService,
-		private exportAntennasProcessorService: ExportAntennasProcessorService,
 		private importFollowingProcessorService: ImportFollowingProcessorService,
 		private importMutingProcessorService: ImportMutingProcessorService,
 		private importBlockingProcessorService: ImportBlockingProcessorService,
 		private importUserListsProcessorService: ImportUserListsProcessorService,
 		private importCustomEmojisProcessorService: ImportCustomEmojisProcessorService,
-		private importAntennasProcessorService: ImportAntennasProcessorService,
 		private deleteAccountProcessorService: DeleteAccountProcessorService,
 		private deleteFileProcessorService: DeleteFileProcessorService,
 		private cleanRemoteFilesProcessorService: CleanRemoteFilesProcessorService,
@@ -132,9 +125,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		private cleanProcessorService: CleanProcessorService,
 		private cleanRemoteNotesProcessorService: CleanRemoteNotesProcessorService,
 		private cleanExpiredChatMessagesProcessorService: CleanExpiredChatMessagesProcessorService,
-		private cleanNoctownChatLogsProcessorService: CleanNoctownChatLogsProcessorService,
-		private cleanExpiredNoctownTradesProcessorService: CleanExpiredNoctownTradesProcessorService,
-		private cleanIdlePaintChatRoomsProcessorService: CleanIdlePaintChatRoomsProcessorService,
 	) {
 		this.logger = this.queueLoggerService.logger;
 
@@ -185,9 +175,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 					case 'clean': return this.cleanProcessorService.process();
 					case 'cleanRemoteNotes': return this.cleanRemoteNotesProcessorService.process(job);
 					case 'cleanExpiredChatMessages': return this.cleanExpiredChatMessagesProcessorService.process(job);
-					case 'cleanNoctownChatLogs': return this.cleanNoctownChatLogsProcessorService.process(job);
-					case 'cleanExpiredNoctownTrades': return this.cleanExpiredNoctownTradesProcessorService.process(job);
-					case 'cleanIdlePaintChatRooms': return this.cleanIdlePaintChatRoomsProcessorService.process(job);
 					default: throw new Error(`unrecognized job type ${job.name} for system`);
 				}
 			};
@@ -235,16 +222,14 @@ export class QueueProcessorService implements OnApplicationShutdown {
 					case 'exportMuting': return this.exportMutingProcessorService.process(job);
 					case 'exportBlocking': return this.exportBlockingProcessorService.process(job);
 					case 'exportUserLists': return this.exportUserListsProcessorService.process(job);
-					case 'exportAntennas': return this.exportAntennasProcessorService.process(job);
-					case 'importFollowing': return this.importFollowingProcessorService.process(job);
+						case 'importFollowing': return this.importFollowingProcessorService.process(job);
 					case 'importFollowingToDb': return this.importFollowingProcessorService.processDb(job);
 					case 'importMuting': return this.importMutingProcessorService.process(job);
 					case 'importBlocking': return this.importBlockingProcessorService.process(job);
 					case 'importBlockingToDb': return this.importBlockingProcessorService.processDb(job);
 					case 'importUserLists': return this.importUserListsProcessorService.process(job);
 					case 'importCustomEmojis': return this.importCustomEmojisProcessorService.process(job);
-					case 'importAntennas': return this.importAntennasProcessorService.process(job);
-					case 'deleteAccount': return this.deleteAccountProcessorService.process(job);
+						case 'deleteAccount': return this.deleteAccountProcessorService.process(job);
 					default: throw new Error(`unrecognized job type ${job.name} for db`);
 				}
 			};

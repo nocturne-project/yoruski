@@ -46,7 +46,7 @@ export const notificationTypes = [
 	'createToken',
 	'app',
 	'test',
-	'noqQuestion',
+	'yoruqQuestion',
 ] as const;
 
 export const groupedNotificationTypes = [
@@ -71,14 +71,14 @@ export const followersVisibilities = ['public', 'followers', 'private'] as const
  *
  * （主にエクスポート完了通知で使用するものであり、既存のDBの名称等と必ずしも一致しない）
  */
-export const userExportableEntities = ['antenna', 'blocking', 'clip', 'customEmoji', 'favorite', 'following', 'muting', 'note', 'userList'] as const;
+export const userExportableEntities = ['blocking', 'clip', 'customEmoji', 'favorite', 'following', 'muting', 'note', 'userList'] as const;
 
 /**
  * ユーザーがインポートできるものの種類
  *
  * （主にインポート完了通知で使用するものであり、既存のDBの名称等と必ずしも一致しない）
  */
-export const userImportableEntities = ['antenna', 'blocking', 'customEmoji', 'following', 'muting', 'userList'] as const;
+export const userImportableEntities = ['blocking', 'customEmoji', 'following', 'muting', 'userList'] as const;
 
 export const moderationLogTypes = [
 	'updateServerSettings',
@@ -133,11 +133,6 @@ export const moderationLogTypes = [
 	'deleteGalleryPost',
 	'deleteChatRoom',
 	'updateProxyAccountDescription',
-	'createNoctownGacha',
-	'updateNoctownGacha',
-	'deleteNoctownGacha',
-	'addNoctownGachaItem',
-	'removeNoctownGachaItem',
 ] as const;
 
 export type ModerationLogPayloads = {
@@ -397,30 +392,6 @@ export type ModerationLogPayloads = {
 	updateProxyAccountDescription: {
 		before: string | null;
 		after: string | null;
-	};
-	createNoctownGacha: {
-		gachaId: string;
-		gachaName: string;
-	};
-	updateNoctownGacha: {
-		gachaId: string;
-		before: any;
-		after: any;
-	};
-	deleteNoctownGacha: {
-		gachaId: string;
-		gachaName: string;
-	};
-	addNoctownGachaItem: {
-		gachaId: string;
-		gachaName: string;
-		itemId: string;
-		itemName: string;
-	};
-	removeNoctownGachaItem: {
-		gachaItemId: string;
-		gachaId: string;
-		itemId: string;
 	};
 };
 

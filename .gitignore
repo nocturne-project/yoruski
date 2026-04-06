@@ -43,6 +43,7 @@ docker-compose.yml
 
 # Environment files
 .env.redis
+.env.db
 
 # misskey
 /build
@@ -117,3 +118,7 @@ scripts/deploy.sh
 
 # Claude workspace
 /claude
+.claude
+/bin
+compose.yml
+

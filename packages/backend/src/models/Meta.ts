@@ -739,13 +739,13 @@ export class MiMeta {
 		...id(),
 		nullable: true,
 	})
-	public noqBotAccountId: MiUser['id'] | null;
+	public yoruqBotAccountId: MiUser['id'] | null;
 
 	@ManyToOne(() => MiUser, {
 		onDelete: 'SET NULL',
 		nullable: true,
 	})
-	public noqBotAccount: MiUser | null;
+	public yoruqBotAccount: MiUser | null;
 }
 
 export type SoftwareSuspension = {
