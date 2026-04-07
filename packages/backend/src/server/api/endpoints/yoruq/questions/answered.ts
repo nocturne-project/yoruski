@@ -176,7 +176,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					const answerNote = await this.notesRepository.findOneBy({ id: question.answerNoteId });
 					if (answerNote?.text) {
 						// "A. "で始まる回答テキストを抽出
-						const match = answerNote.text.match(/^A\.\s*(.+?)(?=\n#Noquestion|\n\[質問する\]|$)/s);
+						const match = answerNote.text.match(/^A\.\s*(.+?)(?=\n#Yoruquestion|\n\[質問する\]|$)/s);
 						if (match) {
 							answerText = match[1].trim();
 						} else {

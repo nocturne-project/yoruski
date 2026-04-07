@@ -77,7 +77,7 @@ const canE2EAnswer = computed(() => {
 });
 
 // 質問文が長い（CW省略が発生する）かどうか
-// CW形式: 「Q. {質問文} (@username) #YoruQuestion」で100文字制限
+// CW形式: 「Q. {質問文} (@username) #Yoruquestion」で100文字制限
 // 質問文が約85文字を超えるとCWで省略される
 const isQuestionTextLong = computed(() => props.question.text.length > 85);
 
@@ -101,13 +101,13 @@ const pureAnswerText = computed(() => {
 });
 
 // CWテキスト（質問内容 + ハッシュタグ）
-// 仕様: 「Q. {質問文} #YoruQuestion」形式
+// 仕様: 「Q. {質問文} #Yoruquestion」形式
 // CWは最大100文字制限があるため、長い質問は省略する
 // username開示ありの場合のみ質問者情報を表示
 const cwText = computed(() => {
 	// 質問者情報は開示されている場合のみ表示（匿名の場合は表示しない）
 	const senderInfo = props.question.sender ? ` (@${props.question.sender.username})` : '';
-	const suffix = `${senderInfo} #YoruQuestion`;
+	const suffix = `${senderInfo} #Yoruquestion`;
 	const prefix = 'Q. ';
 	// CW上限100文字から prefix と suffix の長さを引いた残りが質問文に使える文字数
 	const maxQuestionLength = 100 - prefix.length - suffix.length;
@@ -123,7 +123,7 @@ const cwText = computed(() => {
 // 仕様: メッセージカード添付時も回答テキストは本文に含める（カードには質問のみ表示）
 const noteText = computed(() => {
 	const questionBoxUrl = `https://noc.ski/@${$i?.username}/yoruq`;
-	return `A. ${answerText.value}\n#YoruQuestion\n[質問する](${questionBoxUrl})`;
+	return `A. ${answerText.value}\n#Yoruquestion\n[質問する](${questionBoxUrl})`;
 });
 
 onMounted(() => {

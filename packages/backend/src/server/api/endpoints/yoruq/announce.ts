@@ -42,7 +42,7 @@ export const meta = {
 
 	errors: {
 		noqDisabled: {
-			message: 'Your Noquestion is disabled.',
+			message: 'Your Yoruquestion is disabled.',
 			code: 'NOQ_DISABLED',
 			id: '9f3c1e8a-4b7d-5c6f-8e9a-0b1c2d3e4f5a',
 		},
@@ -84,7 +84,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const noqUrl = `${this.config.url}/@${me.username}/yoruq`;
 
 			// 投稿テキストを生成
-			const text = `質問募集中！\n匿名で質問できます！\n\n${noqUrl}\n\n#Noquestion`;
+			const text = `質問募集中！\n匿名で質問できます！\n\n${noqUrl}\n\n#Yoruquestion`;
 
 			// ノートを作成
 			const note = await this.noteCreateService.create(me, {
