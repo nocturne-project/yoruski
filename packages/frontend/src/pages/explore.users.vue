@@ -29,7 +29,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 						<span :class="$style.rank">#{{ entry.rank }}</span>
 						<MkA :to="`/@${entry.user.username}`" :class="$style.rankUser">
 							<MkAvatar :user="entry.user" :class="$style.rankAvatar"/>
-							<span>{{ entry.user.name || entry.user.username }}</span>
+							<MkUserName :user="entry.user"/>
 						</MkA>
 						<span :class="$style.rankPoints">{{ entry.totalPoints }}pt</span>
 					</div>
