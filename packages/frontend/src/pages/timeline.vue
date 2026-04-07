@@ -5,8 +5,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <PageWithHeader v-model:tab="src" :actions="headerActions" :tabs="$i ? headerTabs : headerTabsWhenNotLogin" :swipable="true" :displayMyAvatar="true" :canOmitTitle="true">
-	<!-- 夜間限定ローカルTL: カウントダウン（タブ直下に密着表示） -->
-	<div v-if="src === 'local' && nightStatus.loaded.value" :class="[nightStatus.isNight.value ? $style.nightBarNight : $style.nightBarDay]">
+	<!-- 夜間限定ローカル・ソーシャルTL: カウントダウン（タブ直下に密着表示） -->
+	<div v-if="(src === 'local' || src === 'social') && nightStatus.loaded.value" :class="[nightStatus.isNight.value ? $style.nightBarNight : $style.nightBarDay]">
 		<i :class="nightStatus.isNight.value ? 'ti ti-moon-stars' : 'ti ti-sun'"></i>
 		<span v-if="nightStatus.isNight.value">{{ i18n.ts._yoruski?.sunriseCountdown ?? '日の出まで' }} {{ nightStatus.countdown.value }}</span>
 		<span v-else>{{ i18n.ts._yoruski?.sunsetCountdown ?? '日没まで' }} {{ nightStatus.countdown.value }}</span>
@@ -29,8 +29,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 			:onlyFiles="onlyFiles"
 			:sound="true"
 		>
-			<!-- 昼間のローカルTL: 夜間限定であることを説明 -->
-			<template v-if="src === 'local' && nightStatus.loaded.value && !nightStatus.isNight.value" #empty>
+			<!-- 昼間のローカル・ソーシャルTL: 夜間限定であることを説明 -->
+			<template v-if="(src === 'local' || src === 'social') && nightStatus.loaded.value && !nightStatus.isNight.value" #empty>
 				<div :class="$style.localDaytimeEmpty">
 					<i class="ti ti-moon-stars" :class="$style.localDaytimeIcon"></i>
 					<p :class="$style.localDaytimeTitle">ローカルタイムラインは夜間限定です</p>
@@ -256,9 +256,9 @@ onActivated(() => {
 	switchTlIfNeeded();
 });
 
-// 夜間状態が切り替わったらローカルTLを自動リロード
+// 夜間状態が切り替わったらローカル・ソーシャルTLを自動リロード
 watch(() => nightStatus.isNight.value, () => {
-	if (src.value === 'local') {
+	if (src.value === 'local' || src.value === 'social') {
 		tlComponent.value?.reloadTimeline();
 	}
 });

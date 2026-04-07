@@ -31,8 +31,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			tag="div"
 		>
 			<template v-for="(note, i) in paginator.items.value" :key="note.id">
-				<div v-if="virtualizedNotes.has(note.id)" :data-scroll-anchor="note.id" :data-virtual-note="note.id" :style="{ height: (noteHeights.get(note.id) ?? 80) + 'px' }" :class="$style.virtualPlaceholder"></div>
-				<div v-else-if="i > 0 && isSeparatorNeeded(paginator.items.value[i -1].createdAt, note.createdAt)" :data-scroll-anchor="note.id" :data-note-wrapper="note.id">
+				<div v-if="i > 0 && isSeparatorNeeded(paginator.items.value[i -1].createdAt, note.createdAt)" :data-scroll-anchor="note.id" :data-note-wrapper="note.id">
 					<div :class="$style.date">
 						<span><i class="ti ti-chevron-up"></i> {{ getSeparatorInfo(paginator.items.value[i -1].createdAt, note.createdAt)?.prevText }}</span>
 						<span style="height: 1em; width: 1px; background: var(--MI_THEME-divider);"></span>
@@ -104,62 +103,6 @@ provide('inTimeline', true);
 provide('tl_withSensitive', computed(() => props.withSensitive));
 provide('inChannel', computed(() => props.src === 'channel'));
 
-// 仮想スクロール: ビューポートから2画面分離れたノートをプレースホルダーに置換
-const virtualizedNotes = ref(new Set<string>());
-const noteHeights = new Map<string, number>();
-let virtualObserver: IntersectionObserver | null = null;
-
-// ノート要素のサイズを記録し、ビューポート外のノートを仮想化
-function setupVirtualScroll() {
-	if (typeof IntersectionObserver === 'undefined') return;
-
-	virtualObserver = new IntersectionObserver((entries) => {
-		const newSet = new Set(virtualizedNotes.value);
-		let changed = false;
-		for (const entry of entries) {
-			const noteId = (entry.target as HTMLElement).dataset.noteWrapper ?? (entry.target as HTMLElement).dataset.virtualNote;
-			if (!noteId) continue;
-
-			if (entry.isIntersecting) {
-				// ビューポート近傍に入った: 仮想化解除
-				if (newSet.delete(noteId)) changed = true;
-			} else {
-				// ビューポート外: 高さを記録して仮想化
-				if (!noteHeights.has(noteId)) {
-					noteHeights.set(noteId, entry.target.getBoundingClientRect().height);
-				}
-				if (!newSet.has(noteId) && noteHeights.has(noteId)) {
-					newSet.add(noteId);
-					changed = true;
-				}
-			}
-		}
-		if (changed) {
-			virtualizedNotes.value = newSet;
-		}
-	}, {
-		// ビューポートの上下2画面分をバッファとして確保
-		rootMargin: '200% 0px 200% 0px',
-	});
-}
-
-// DOM変更を監視して新しいノート要素をobserve
-let mutationObserver: MutationObserver | null = null;
-
-function observeNoteElements() {
-	if (!rootEl.value || !virtualObserver) return;
-	// 既存のノート要素を全てobserve
-	const elements = rootEl.value.querySelectorAll('[data-note-wrapper], [data-virtual-note]');
-	elements.forEach(el => virtualObserver!.observe(el));
-}
-
-function setupMutationObserver() {
-	if (!rootEl.value || !virtualObserver) return;
-	mutationObserver = new MutationObserver(() => {
-		observeNoteElements();
-	});
-	mutationObserver.observe(rootEl.value, { childList: true, subtree: true });
-}
 
 let paginator: IPaginator<Misskey.entities.Note>;
 
@@ -237,7 +180,6 @@ if (props.src === 'home') {
 
 onMounted(() => {
 	paginator.init();
-	setupVirtualScroll();
 
 	if (paginator.computedParams) {
 		watch(paginator.computedParams, () => {
@@ -268,24 +210,12 @@ watch(rootEl, (el) => {
 		scrollContainer = getScrollContainer(el);
 		if (scrollContainer == null) return;
 		scrollContainer.addEventListener('scroll', onScrollContainerScroll, { passive: true }); // ほんとはscrollendにしたいけどiosが非対応
-		// 仮想スクロール: ノート要素の監視開始
-		observeNoteElements();
-		setupMutationObserver();
 	}
 }, { immediate: true });
 
 onUnmounted(() => {
 	if (scrollContainer) {
 		scrollContainer.removeEventListener('scroll', onScrollContainerScroll);
-	}
-	// 仮想スクロールのクリーンアップ
-	if (virtualObserver) {
-		virtualObserver.disconnect();
-		virtualObserver = null;
-	}
-	if (mutationObserver) {
-		mutationObserver.disconnect();
-		mutationObserver = null;
 	}
 });
 
@@ -625,8 +555,4 @@ defineExpose({
 	background: var(--MI_THEME-panel);
 }
 
-.virtualPlaceholder {
-	background: var(--MI_THEME-panel);
-	border-bottom: solid 0.5px var(--MI_THEME-divider);
-}
 </style>
