@@ -253,7 +253,15 @@ export class ApInboxService {
 			return await this.relayService.relayAccepted(match[1]);
 		}
 
-		await this.userFollowingService.acceptFollowRequest(actor, follower);
+		try {
+			await this.userFollowingService.acceptFollowRequest(actor, follower);
+		} catch (err: any) {
+			// フォローリクエストが存在しない場合はスキップ（リトライしても解決しない）
+			if (err?.id === '8884c2dd-5795-4ac9-b27e-6a01d38190f9') {
+				return `skip: No follow request from ${actor.uri} to ${follower.id}`;
+			}
+			throw err;
+		}
 		return 'ok';
 	}
 

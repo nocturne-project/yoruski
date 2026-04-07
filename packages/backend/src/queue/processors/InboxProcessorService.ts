@@ -67,6 +67,14 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		const signature = job.data.signature;	// HTTP-signature
 		let activity = job.data.activity;
 
+		// 不正なactivityデータのバリデーション（リトライしない）
+		if (activity == null || typeof activity !== 'object' || Array.isArray(activity)) {
+			throw new Bull.UnrecoverableError(`skip: invalid activity data (type=${typeof activity}, isArray=${Array.isArray(activity)})`);
+		}
+		if (activity.actor == null) {
+			throw new Bull.UnrecoverableError(`skip: activity has no actor field (type=${activity.type ?? 'unknown'})`);
+		}
+
 		//#region Log
 		const info = Object.assign({}, activity);
 		delete info['@context'];
