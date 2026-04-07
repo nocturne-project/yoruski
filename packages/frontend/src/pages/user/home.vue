@@ -127,10 +127,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<b>{{ number(user.followersCount) }}</b>
 								<span>{{ i18n.ts.followers }}</span>
 							</MkA>
-							<!-- 夜間ポイント: ランキング順位とポイント数 -->
-							<span v-if="nightPoints != null" style="cursor: default;">
-								<b>{{ nightPoints.rank > 0 ? '#' + nightPoints.rank : '-' }}</b>
-								<span>{{ nightPoints.totalPoints }}pt</span>
+							<!-- 夜間ポイント: ランキング順位とポイント数（改行で分離表示） -->
+							<span v-if="nightPoints != null" style="cursor: default; display: inline-flex; flex-direction: column; align-items: center; line-height: 1.3;">
+								<b>{{ nightPoints.rank > 0 ? nightPoints.rank + '位' : '-' }}</b>
+								<span>{{ nightPoints.totalPoints }}p</span>
 							</span>
 						</div>
 					</div>
