@@ -5,7 +5,7 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { MoreThan } from 'typeorm';
-import type { NightPointsRepository } from '@/models/_.js';
+import type { NightPointsRepository, UsersRepository } from '@/models/_.js';
 import type { MiUser } from '@/models/User.js';
 import type { MiNote } from '@/models/Note.js';
 import { DI } from '@/di-symbols.js';
@@ -22,6 +22,9 @@ export class NightPointService {
 	constructor(
 		@Inject(DI.nightPointsRepository)
 		private nightPointsRepository: NightPointsRepository,
+
+		@Inject(DI.usersRepository)
+		private usersRepository: UsersRepository,
 
 		private idService: IdService,
 		private nightTimeService: NightTimeService,
@@ -73,14 +76,17 @@ export class NightPointService {
 
 	// 30日間ランキング取得（上位100名）
 	@bindThis
+	// ランキング取得: ローカルユーザーのみ対象
 	public async getRanking(limit = 100): Promise<{ userId: string; totalPoints: number; rank: number }[]> {
 		const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
 		const results = await this.nightPointsRepository
 			.createQueryBuilder('np')
+			.innerJoin('user', 'u', 'u.id = np."userId"')
 			.select('np."userId"', 'userId')
 			.addSelect('SUM(np.points)', 'totalPoints')
 			.where('np."createdAt" > :since', { since: thirtyDaysAgo })
+			.andWhere('u.host IS NULL')
 			.groupBy('np."userId"')
 			.orderBy('"totalPoints"', 'DESC')
 			.limit(limit)
