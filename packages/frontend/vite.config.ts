@@ -172,10 +172,11 @@ export function getConfig(): UserConfig {
 		},
 
 		build: {
+			// よるすきー: iOS 15.x Safari対応のためターゲットを引き下げ
 			target: [
 				'chrome116',
 				'firefox116',
-				'safari15.4',
+				'safari15',
 			],
 			manifest: 'manifest.json',
 			rollupOptions: {
