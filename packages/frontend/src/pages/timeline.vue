@@ -256,6 +256,13 @@ onActivated(() => {
 	switchTlIfNeeded();
 });
 
+// 夜間状態が切り替わったらローカルTLを自動リロード
+watch(() => nightStatus.isNight.value, () => {
+	if (src.value === 'local') {
+		tlComponent.value?.reloadTimeline();
+	}
+});
+
 const headerActions = computed<PageHeaderItem[]>(() => {
 	const items: PageHeaderItem[] = [{
 		icon: 'ti ti-dots',
