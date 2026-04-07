@@ -33,8 +33,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<template v-if="(src === 'local' || src === 'social') && nightStatus.loaded.value && !nightStatus.isNight.value" #empty>
 				<div :class="$style.localDaytimeEmpty">
 					<i class="ti ti-moon-stars" :class="$style.localDaytimeIcon"></i>
-					<p :class="$style.localDaytimeTitle">ローカルタイムラインは夜間限定です</p>
-					<p :class="$style.localDaytimeDesc">日没後にローカルタイムラインが開放されます。<br>それまではホームタイムラインをお楽しみください。</p>
+					<p :class="$style.localDaytimeTitle">{{ src === 'social' ? 'ソーシャルタイムラインは夜間限定です' : 'ローカルタイムラインは夜間限定です' }}</p>
+					<p :class="$style.localDaytimeDesc">日没後にタイムラインが開放されます。<br>それまではホームタイムラインをお楽しみください。</p>
 					<p :class="$style.localDaytimeCountdown">
 						<i class="ti ti-sun"></i> 日没まで {{ nightStatus.countdown.value }}
 					</p>
