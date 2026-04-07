@@ -121,4 +121,4 @@ scripts/deploy.sh
 .claude
 /bin
 compose.yml
-
+CLAUDE.md

@@ -497,13 +497,6 @@ export const PREF_DEF = definePreferences({
 		default: false,
 	},
 
-	'game.dropAndFusion': {
-		default: {
-			bgmVolume: 0.25,
-			sfxVolume: 1,
-		},
-	},
-
 	'experimental.stackingRouterView': {
 		default: false,
 	},

@@ -28,7 +28,19 @@ SPDX-License-Identifier: AGPL-3.0-only
 			:withSensitive="withSensitive"
 			:onlyFiles="onlyFiles"
 			:sound="true"
-		/>
+		>
+			<!-- 昼間のローカルTL: 夜間限定であることを説明 -->
+			<template v-if="src === 'local' && nightStatus.loaded.value && !nightStatus.isNight.value" #empty>
+				<div :class="$style.localDaytimeEmpty">
+					<i class="ti ti-moon-stars" :class="$style.localDaytimeIcon"></i>
+					<p :class="$style.localDaytimeTitle">ローカルタイムラインは夜間限定です</p>
+					<p :class="$style.localDaytimeDesc">日没後にローカルタイムラインが開放されます。<br>それまではホームタイムラインをお楽しみください。</p>
+					<p :class="$style.localDaytimeCountdown">
+						<i class="ti ti-sun"></i> 日没まで {{ nightStatus.countdown.value }}
+					</p>
+				</div>
+			</template>
+		</MkStreamingNotesTimeline>
 	</div>
 </PageWithHeader>
 </template>
@@ -396,5 +408,49 @@ definePage(() => ({
 .nightBarDay {
 	background: var(--MI_THEME-infoWarnBg, var(--MI_THEME-bg));
 	color: var(--MI_THEME-infoWarnFg, var(--MI_THEME-fg));
+}
+
+/* 昼間ローカルTL空状態の説明表示 */
+.localDaytimeEmpty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 48px 24px;
+	text-align: center;
+	color: var(--MI_THEME-fg);
+	opacity: 0.85;
+}
+
+.localDaytimeIcon {
+	font-size: 48px;
+	margin-bottom: 16px;
+	opacity: 0.5;
+}
+
+.localDaytimeTitle {
+	font-size: 1.1em;
+	font-weight: bold;
+	margin: 0 0 12px 0;
+}
+
+.localDaytimeDesc {
+	font-size: 0.9em;
+	margin: 0 0 20px 0;
+	opacity: 0.7;
+	line-height: 1.6;
+}
+
+.localDaytimeCountdown {
+	font-size: 1.2em;
+	margin: 0;
+	padding: 8px 20px;
+	border-radius: 999px;
+	background: var(--MI_THEME-infoWarnBg, var(--MI_THEME-bg));
+	color: var(--MI_THEME-infoWarnFg, var(--MI_THEME-fg));
+
+	i {
+		margin-right: 6px;
+	}
 }
 </style>

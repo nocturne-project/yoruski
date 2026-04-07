@@ -571,10 +571,6 @@ export const ROUTE_DEF = [{
 	component: page(() => import('@/pages/timeline.vue')),
 	loginRequired: true,
 }, {
-	path: '/clicker',
-	component: page(() => import('@/pages/clicker.vue')),
-	loginRequired: true,
-}, {
 	path: '/qr',
 	component: page(() => import('@/pages/qr.vue')),
 	loginRequired: true,
