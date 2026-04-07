@@ -12,6 +12,7 @@
  */
 import { ref, computed, onMounted } from 'vue';
 import * as Misskey from 'misskey-js';
+import { url as instanceUrl } from '@@/js/config.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { i18n } from '@/i18n.js';
 import { $i } from '@/i.js';
@@ -122,7 +123,7 @@ const cwText = computed(() => {
 // 本文（回答 + 質問箱リンク + ハッシュタグ）
 // 仕様: メッセージカード添付時も回答テキストは本文に含める（カードには質問のみ表示）
 const noteText = computed(() => {
-	const questionBoxUrl = `https://noc.ski/@${$i?.username}/yoruq`;
+	const questionBoxUrl = `${instanceUrl}/@${$i?.username}/yoruq`;
 	return `A. ${answerText.value}\n#Yoruquestion\n[質問する](${questionBoxUrl})`;
 });
 
