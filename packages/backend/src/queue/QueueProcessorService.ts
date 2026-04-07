@@ -276,10 +276,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.DELIVER),
 				autorun: false,
 				concurrency: this.config.deliverJobConcurrency ?? 128,
-				limiter: {
-					max: this.config.deliverJobPerSec ?? 128,
-					duration: 1000,
-				},
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
@@ -316,10 +312,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.INBOX),
 				autorun: false,
 				concurrency: this.config.inboxJobConcurrency ?? 16,
-				limiter: {
-					max: this.config.inboxJobPerSec ?? 32,
-					duration: 1000,
-				},
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
@@ -356,10 +348,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.USER_WEBHOOK_DELIVER),
 				autorun: false,
 				concurrency: 64,
-				limiter: {
-					max: 64,
-					duration: 1000,
-				},
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
@@ -396,10 +384,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.SYSTEM_WEBHOOK_DELIVER),
 				autorun: false,
 				concurrency: 16,
-				limiter: {
-					max: 16,
-					duration: 1000,
-				},
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
@@ -446,10 +430,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.RELATIONSHIP),
 				autorun: false,
 				concurrency: this.config.relationshipJobConcurrency ?? 16,
-				limiter: {
-					max: this.config.relationshipJobPerSec ?? 64,
-					duration: 1000,
-				},
 			});
 
 			const logger = this.logger.createSubLogger('relationship');
