@@ -1,46 +1,44 @@
 /**
- * 適応型イベントループスロットル
+ * ioredis Promiseスロットル
  *
  * BullMQのPromiseスピンによるCPU占有を防ぐ。
- * setTimeout(0)のlagでイベントループ状態を判定し、
- * アイドルスピン中はsetImmediateチェーンでCPUを一定量消費させる
- * （Promiseのmicrotask処理を相対的に遅くする効果）。
- *
- * Atomics.waitと違いメインスレッドをブロックしないため、
- * ジョブ処理を阻害しない。
+ * ioredisのsendCommandメソッドをパッチし、Redis応答のPromise解決後に
+ * 短いsetTimeout遅延を挿入する。これにより全Workerの全Redis通信が
+ * 自然にスロットルされる。
  *
  * entry.js（Misskeyメインプロセス）でのみ有効化。
  */
 
 if (process.argv[1] && process.argv[1].includes('entry.js')) {
-	let throttling = false;
+	// ioredisのロード後にパッチを適用するため、遅延実行
+	setTimeout(() => {
+		try {
+			const Redis = require('ioredis');
+			const originalSendCommand = Redis.prototype.sendCommand;
 
-	function checkLoop() {
-		const start = Date.now();
-		setTimeout(() => {
-			const lag = Date.now() - start;
-			if (lag < 2 && !throttling) {
-				// アイドルスピン検出 → スロットル開始
-				throttling = true;
-				slowDown();
-			}
-			setTimeout(checkLoop, throttling ? 200 : 500);
-		}, 0);
-	}
+			// コマンドカウンタ（全Redis接続で共有）
+			let commandCount = 0;
+			// N回に1回だけ遅延を入れる（全コマンドに入れるとジョブ処理が遅くなりすぎる）
+			const THROTTLE_EVERY = 20;
+			const DELAY_MS = 1;
 
-	// setImmediateチェーンでイベントループのcheckフェーズを占有し
-	// Promiseのmicrotask処理を遅くする
-	let slowDownCount = 0;
-	function slowDown() {
-		if (slowDownCount > 100) {
-			// 100回setImmediateした後、一旦停止して状態を再チェック
-			slowDownCount = 0;
-			throttling = false;
-			return;
+			Redis.prototype.sendCommand = function(command, stream) {
+				const result = originalSendCommand.call(this, command, stream);
+
+				commandCount++;
+				if (commandCount % THROTTLE_EVERY === 0) {
+					// N回に1回、Promise解決後に1ms遅延を挿入
+					return result.then(val => {
+						return new Promise(resolve => setTimeout(() => resolve(val), DELAY_MS));
+					}, err => {
+						return new Promise((_, reject) => setTimeout(() => reject(err), DELAY_MS));
+					});
+				}
+
+				return result;
+			};
+		} catch (e) {
+			// ioredisが見つからない場合は何もしない
 		}
-		slowDownCount++;
-		setImmediate(slowDown);
-	}
-
-	setTimeout(checkLoop, 5000);
+	}, 3000); // NestJS初期化後にパッチ
 }
