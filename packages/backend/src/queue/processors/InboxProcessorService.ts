@@ -64,6 +64,13 @@ export class InboxProcessorService implements OnApplicationShutdown {
 
 	@bindThis
 	public async process(job: Bull.Job<InboxJobData>): Promise<string> {
+		const jobStartTime = Date.now();
+		const jobId = job.id;
+		const logStep = (step: string) => {
+			const elapsed = Date.now() - jobStartTime;
+			this.logger.info(`[inbox-trace] job=${jobId} step=${step} elapsed=${elapsed}ms`);
+		};
+
 		const signature = job.data.signature;	// HTTP-signature
 		let activity = job.data.activity;
 
@@ -74,6 +81,8 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		if (activity.actor == null) {
 			throw new Bull.UnrecoverableError(`skip: activity has no actor field (type=${activity.type ?? 'unknown'})`);
 		}
+
+		logStep(`start type=${activity.type} actor=${String(activity.actor).slice(0, 60)}`);
 
 		//#region Log
 		const info = Object.assign({}, activity);
@@ -93,10 +102,12 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		}
 
 		// HTTP-Signature keyIdを元にDBから取得
+		logStep('getAuthUserFromKeyId');
 		let authUser: {
 			user: MiRemoteUser;
 			key: MiUserPublickey | null;
 		} | null = await this.apDbResolverService.getAuthUserFromKeyId(signature.keyId);
+		logStep('getAuthUserFromKeyId done');
 
 		// keyIdでわからなければ、activity.actorを元にDBから取得 || activity.actorを元にリモートから取得
 		if (authUser == null) {
@@ -124,7 +135,9 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		}
 
 		// HTTP-Signatureの検証
+		logStep('verifySignature');
 		const httpSignatureValidated = httpSignature.verifySignature(signature, authUser.key.keyPem);
+		logStep('verifySignature done');
 
 		// また、signatureのsignerは、activity.actorと一致する必要がある
 		if (!httpSignatureValidated || authUser.user.uri !== activity.actor) {
@@ -226,8 +239,10 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		});
 
 		// アクティビティを処理
+		logStep('performActivity');
 		try {
 			const result = await this.apInboxService.performActivity(authUser.user, activity);
+			logStep(`performActivity done result=${result?.slice(0, 30)}`);
 			if (result && !result.startsWith('ok')) {
 				this.logger.warn(`inbox activity ignored (maybe): id=${activity.id} reason=${result}`);
 				return result;

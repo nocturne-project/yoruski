@@ -51,6 +51,11 @@ export class DeliverProcessorService {
 
 	@bindThis
 	public async process(job: Bull.Job<DeliverJobData>): Promise<string> {
+		const jobStartTime = Date.now();
+		const logStep = (step: string) => {
+			this.logger.info(`[deliver-trace] job=${job.id} step=${step} elapsed=${Date.now() - jobStartTime}ms to=${job.data.to?.slice(0, 60)}`);
+		};
+		logStep('start');
 		const { host } = new URL(job.data.to);
 
 		if (!this.utilityService.isFederationAllowedUri(job.data.to)) {
@@ -81,7 +86,9 @@ export class DeliverProcessorService {
 		}
 
 		try {
+			logStep('signedPost');
 			await this.apRequestService.signedPost(job.data.user, job.data.to, job.data.content, job.data.digest);
+			logStep('signedPost done');
 
 			this.apRequestChart.deliverSucc();
 			this.federationChart.deliverd(host, true);
