@@ -1,26 +1,18 @@
 /**
  * イベントループスロットル
  * キュー専用プロセスでioredis/BullMQのPromiseサイクルがCPUを占有する問題の対策。
+ * Atomics.wait()でメインスレッドを定期的にブロックし、Promiseの高速ポーリングを中断する。
  *
- * ダミーHTTPサーバーを起動し、自分自身に定期的にリクエストを送信する。
- * HTTPリクエスト処理がイベントループに挟まることで、ioredisのPromiseサイクルが
- * 自然にスロットルされる（oru.skiのHTTPサーバー同居と同じ効果）。
+ * 注意: ブロック中はジョブ処理も止まるため、ブロック時間は最小限にする。
+ * 1ms/200ms = 0.5%のブロック率。CPUスピンを防ぎつつジョブ処理を維持する。
  */
 
-const http = require('http');
+const BLOCK_DURATION_MS = 1;   // 1回あたり1msブロック
+const INTERVAL_MS = 200;       // 200ms間隔
 
-const server = http.createServer((req, res) => {
-	res.writeHead(200);
-	res.end('ok');
-});
+const buf = new SharedArrayBuffer(4);
+const arr = new Int32Array(buf);
 
-server.listen(0, '127.0.0.1', () => {
-	const port = server.address().port;
-
-	// 50ms間隔で自分自身にリクエストを送信
-	setInterval(() => {
-		http.get(`http://127.0.0.1:${port}/`, (res) => {
-			res.resume(); // レスポンスを読み捨て
-		}).on('error', () => {}); // エラーは無視
-	}, 50);
-});
+setInterval(() => {
+	Atomics.wait(arr, 0, 0, BLOCK_DURATION_MS);
+}, INTERVAL_MS);
