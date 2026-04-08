@@ -2,10 +2,9 @@
  * イベントループスロットル
  * キュー専用プロセスでioredis/BullMQのPromiseサイクルがCPUを占有する問題の対策。
  *
- * ダミーHTTPサーバーを起動し、イベントループのpollフェーズにソケットI/O待機を追加。
- * HTTPサーバーのlistenソケットがpollフェーズでepoll_waitを呼び出し、
- * ioredisのPromiseサイクルを自然にスロットルする。
- * これはHTTPサーバー同居時と同じ動作を再現する。
+ * ダミーHTTPサーバーを起動し、自分自身に定期的にリクエストを送信する。
+ * HTTPリクエスト処理がイベントループに挟まることで、ioredisのPromiseサイクルが
+ * 自然にスロットルされる（oru.skiのHTTPサーバー同居と同じ効果）。
  */
 
 const http = require('http');
@@ -15,8 +14,13 @@ const server = http.createServer((req, res) => {
 	res.end('ok');
 });
 
-// ポート0で起動（OSが空きポートを自動割り当て、外部からはアクセスされない）
 server.listen(0, '127.0.0.1', () => {
-	// サーバーは起動するだけでリクエストを受ける必要はない
-	// listenソケットの存在がイベントループのpollフェーズを変化させる
+	const port = server.address().port;
+
+	// 50ms間隔で自分自身にリクエストを送信
+	setInterval(() => {
+		http.get(`http://127.0.0.1:${port}/`, (res) => {
+			res.resume(); // レスポンスを読み捨て
+		}).on('error', () => {}); // エラーは無視
+	}, 50);
 });
