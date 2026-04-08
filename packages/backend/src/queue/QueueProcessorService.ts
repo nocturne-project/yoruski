@@ -545,38 +545,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 
 	@bindThis
 	public async start(): Promise<void> {
-		// ワーカー診断: 各Workerのジョブ処理数を10秒ごとにログ出力
-		const workerStats: Record<string, { active: number; completed: number; failed: number }> = {};
-		const workers: [string, Bull.Worker][] = [
-			['system', this.systemQueueWorker],
-			['db', this.dbQueueWorker],
-			['deliver', this.deliverQueueWorker],
-			['inbox', this.inboxQueueWorker],
-			['userWebhook', this.userWebhookDeliverQueueWorker],
-			['systemWebhook', this.systemWebhookDeliverQueueWorker],
-			['relationship', this.relationshipQueueWorker],
-			['objectStorage', this.objectStorageQueueWorker],
-			['endedPoll', this.endedPollNotificationQueueWorker],
-			['scheduledNote', this.postScheduledNoteQueueWorker],
-		];
-
-		for (const [name, worker] of workers) {
-			workerStats[name] = { active: 0, completed: 0, failed: 0 };
-			worker.on('active', () => { workerStats[name].active++; });
-			worker.on('completed', () => { workerStats[name].completed++; });
-			worker.on('failed', () => { workerStats[name].failed++; });
-		}
-
-		setInterval(() => {
-			const cpuUsage = process.cpuUsage();
-			const memUsage = process.memoryUsage();
-			const entries = Object.entries(workerStats)
-				.filter(([, s]) => s.active > 0 || s.completed > 0 || s.failed > 0)
-				.map(([name, s]) => `${name}:a${s.active}/c${s.completed}/f${s.failed}`)
-				.join(' ');
-			this.logger.info(`[worker-diag] cpu_user=${(cpuUsage.user / 1000).toFixed(0)}ms cpu_sys=${(cpuUsage.system / 1000).toFixed(0)}ms rss=${(memUsage.rss / 1024 / 1024).toFixed(0)}MB heap=${(memUsage.heapUsed / 1024 / 1024).toFixed(0)}MB ${entries || '(idle)'}`);
-		}, 10000);
-
 		await Promise.all([
 			this.systemQueueWorker.run(),
 			this.dbQueueWorker.run(),
