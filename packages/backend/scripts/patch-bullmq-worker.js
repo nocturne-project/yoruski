@@ -40,20 +40,20 @@ const patches = [
 		'while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {',
 		`while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {
             // YORUSKI_YIELD_PATCH_1: 外側whileループのyield
-            await new Promise(r => setTimeout(r, 50));`,
+            await new Promise(r => setTimeout(r, 500));`,
 	],
 	// 2. 内側whileループのジョブフェッチ後にyield
 	[
 		'const job = await fetchedJob;',
 		`const job = await fetchedJob;
                 // YORUSKI_YIELD_PATCH_2: 内側whileループのyield
-                await new Promise(r => setTimeout(r, 10));`,
+                await new Promise(r => setTimeout(r, 100));`,
 	],
 	// 3. fetchキューのdoループにyield
 	[
 		'} while (!job && asyncFifoQueue.numQueued() > 0);',
 		`// YORUSKI_YIELD_PATCH_3: fetchキューループのyield
-                await new Promise(r => setTimeout(r, 10));
+                await new Promise(r => setTimeout(r, 100));
             } while (!job && asyncFifoQueue.numQueued() > 0);`,
 	],
 ];
