@@ -40,10 +40,11 @@ COPY --link . ./
 
 RUN git submodule update --init
 
-# よるすきー: BullMQ workerのポーリングループにyield追加（CPUスピン対策）
-RUN node packages/backend/scripts/patch-bullmq-worker.js
-
 RUN pnpm build
+
+# よるすきー: BullMQ workerのポーリングループにyield追加（CPUスピン対策）
+# pnpm buildの後にパッチ（buildでnode_modulesが再構成される可能性があるため）
+RUN node packages/backend/scripts/patch-bullmq-worker.js
 
 # Verify LANGS replacement in native-builder stage
 # 2026.3.1: boot.js moved to built/_frontend_vite_/loader/boot.js
