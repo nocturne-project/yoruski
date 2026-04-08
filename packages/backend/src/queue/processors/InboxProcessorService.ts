@@ -62,11 +62,17 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		this.updateInstanceQueue = new CollapsedQueue(process.env.NODE_ENV !== 'test' ? 60 * 1000 * 5 : 0, this.collapseUpdateInstanceJobs, this.performUpdateInstance);
 	}
 
+	// サンプリングカウンタ（100回に1回詳細ログ出力）
+	private inboxJobCount = 0;
+
 	@bindThis
 	public async process(job: Bull.Job<InboxJobData>): Promise<string> {
 		const jobStartTime = Date.now();
 		const jobId = job.id;
+		this.inboxJobCount++;
+		const shouldSample = this.inboxJobCount % 100 === 1;
 		const logStep = (step: string) => {
+			if (!shouldSample) return;
 			const elapsed = Date.now() - jobStartTime;
 			this.logger.info(`[inbox-trace] job=${jobId} step=${step} elapsed=${elapsed}ms`);
 		};
@@ -261,6 +267,14 @@ export class InboxProcessorService implements OnApplicationShutdown {
 			}
 			throw e;
 		}
+
+		// サマリーログ: サンプリング or 遅いジョブ（500ms以上）は必ず出力
+		const totalMs = Date.now() - jobStartTime;
+		if (shouldSample || totalMs >= 500) {
+			const host = this.utilityService.toPuny(new URL(signature.keyId).hostname);
+			this.logger.info(`[inbox-summary] #${this.inboxJobCount} type=${activity.type} host=${host} elapsed=${totalMs}ms`);
+		}
+
 		return 'ok';
 	}
 
