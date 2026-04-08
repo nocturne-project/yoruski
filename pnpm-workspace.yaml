@@ -35,3 +35,4 @@ minimumReleaseAgeExclude:
   - '@syuilo/aiscript'
   - 'tar' # 脆弱性対応 そのうち消す
   - 'fastify' # 脆弱性対応 そのうち消す
+  - 'bullmq' # CPU問題調査のためアップデート（ソースコード監査済み）

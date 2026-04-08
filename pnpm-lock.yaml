@@ -190,8 +190,8 @@ importers:
         specifier: 2.2.2
         version: 2.2.2
       bullmq:
-        specifier: 5.71.0
-        version: 5.71.0
+        specifier: 5.73.1
+        version: 5.73.1
       cacheable-lookup:
         specifier: 7.0.0
         version: 7.0.0
@@ -2552,9 +2552,6 @@ packages:
     peerDependenciesMeta:
       '@types/node':
         optional: true
-
-  '@ioredis/commands@1.5.0':
-    resolution: {integrity: sha512-eUgLqrMf8nJkZxT24JvVRrQya1vZkQh8BBeYNwGDqa5I0VUi8ACx7uFvAaLxintokpTenkK6DASvo/bvNbBGow==}
 
   '@ioredis/commands@1.5.1':
     resolution: {integrity: sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw==}
@@ -5620,8 +5617,8 @@ packages:
     resolution: {integrity: sha512-ZMANVnAixE6AWWnPzlW2KpUrxhm9woycYvPOo67jWHyFowASTEd9s+QN1EIMsSDtwhIxN4sWE1jotpuDUIgyIw==}
     engines: {node: '>=6.14.2'}
 
-  bullmq@5.71.0:
-    resolution: {integrity: sha512-aeNWh4drsafSKnAJeiNH/nZP/5O8ZdtdMbnOPZmpjXj7NZUP5YC901U3bIH41iZValm7d1i3c34ojv7q31m30w==}
+  bullmq@5.73.1:
+    resolution: {integrity: sha512-BdcY5R8PR62VziZGBmjDqPDb1Hhok2j8CJRslAI03sqzJ8k0wW1m9doBjdzBk7rrwNc3wb18bL9m/dniJ9N14g==}
 
   bundle-name@4.1.0:
     resolution: {integrity: sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==}
@@ -7391,8 +7388,8 @@ packages:
     resolution: {integrity: sha512-HVBe9OFuqs+Z6n64q09PQvP1/R4Bm+30PAyyD4wIEqssh3v9L21QjCVk4kRLucMBcDokJTcLjsGeVRlq/nH6DA==}
     engines: {node: '>=12.22.0'}
 
-  ioredis@5.9.3:
-    resolution: {integrity: sha512-VI5tMCdeoxZWU5vjHWsiE/Su76JGhBvWF1MJnV9ZtGltHk9BmD48oDq8Tj8haZ85aceXZMxLNDQZRVo5QKNgXA==}
+  ioredis@5.10.1:
+    resolution: {integrity: sha512-HuEDBTI70aYdx1v6U97SbNx9F1+svQKBDo30o0b9fw055LMepzpOOd0Ccg9Q6tbqmBSJaMuY0fB7yw9/vjBYCA==}
     engines: {node: '>=12.22.0'}
 
   ios-haptics@0.1.4:
@@ -12589,8 +12586,6 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.11.0
 
-  '@ioredis/commands@1.5.0': {}
-
   '@ioredis/commands@1.5.1': {}
 
   '@irojs/iro-core@1.2.1': {}
@@ -16313,10 +16308,10 @@ snapshots:
       node-gyp-build: 4.8.4
     optional: true
 
-  bullmq@5.71.0:
+  bullmq@5.73.1:
     dependencies:
       cron-parser: 4.9.0
-      ioredis: 5.9.3
+      ioredis: 5.10.1
       msgpackr: 1.11.5
       node-abort-controller: 3.1.1
       semver: 7.7.4
@@ -18485,9 +18480,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ioredis@5.9.3:
+  ioredis@5.10.1:
     dependencies:
-      '@ioredis/commands': 1.5.0
+      '@ioredis/commands': 1.5.1
       cluster-key-slot: 1.1.2
       debug: 4.4.3(supports-color@10.2.2)
       denque: 2.1.0
