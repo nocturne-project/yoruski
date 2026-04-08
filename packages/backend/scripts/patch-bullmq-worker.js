@@ -33,11 +33,11 @@ if (workerFiles.length === 0) {
 	process.exit(0);
 }
 
-const target = 'return this.moveToActive(client, token, this.opts.name);';
-const replacement = `{ // YORUSKI_YIELD_PATCH: キュー専用プロセスのCPUスピン対策
-                await new Promise(r => setTimeout(r, 50));
-                return this.moveToActive(client, token, this.opts.name);
-            }`;
+// mainLoopの外側whileループ冒頭にyieldを追加
+const target = 'while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {';
+const replacement = `while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {
+            // YORUSKI_YIELD_PATCH: キュー専用プロセスのCPUスピン対策（mainLoopの毎イテレーションで50ms yield）
+            await new Promise(r => setTimeout(r, 50));`;
 
 let patched = 0;
 for (const file of workerFiles) {
