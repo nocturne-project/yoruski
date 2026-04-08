@@ -1,7 +1,7 @@
 /**
- * BullMQ Worker mainLoop パッチ
+ * BullMQ Worker 包括的CPUスピン対策パッチ
  * キュー専用コンテナでBullMQのポーリングがCPUを占有する問題の対策。
- * mainLoopの全ループにyieldを追加。CJS版とESM版の両方にパッチ適用。
+ * 全ループ・ポーリング箇所にyieldを追加。CJS版とESM版の両方にパッチ適用。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -33,35 +33,45 @@ if (workerFiles.length === 0) {
 	process.exit(0);
 }
 
-// パッチ定義: [検索文字列, 置換文字列]
+const YIELD = 'await new Promise(r => setTimeout(r, 100)); /* YORUSKI_YIELD */';
+
 const patches = [
-	// 1. 外側whileループ冒頭にyield
+	// 1. mainLoopの外側whileループ冒頭
 	[
 		'while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {',
-		`while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {
-            // YORUSKI_YIELD_PATCH_1: 外側whileループのyield
-            await new Promise(r => setTimeout(r, 500));`,
+		`while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {\n            ${YIELD}`,
 	],
-	// 2. 内側whileループのジョブフェッチ後にyield
+	// 2. mainLoopの内側whileループ冒頭（ジョブフェッチループ）
 	[
-		'const job = await fetchedJob;',
-		`const job = await fetchedJob;
-                // YORUSKI_YIELD_PATCH_2: 内側whileループのyield
-                await new Promise(r => setTimeout(r, 100));`,
+		'while (!this.closing &&\n                !this.paused &&\n                !this.waiting &&\n                asyncFifoQueue.numTotal() < this._concurrency &&\n                !this.isRateLimited()) {',
+		`while (!this.closing &&\n                !this.paused &&\n                !this.waiting &&\n                asyncFifoQueue.numTotal() < this._concurrency &&\n                !this.isRateLimited()) {\n                ${YIELD}`,
 	],
-	// 3. fetchキューのdoループにyield
+	// 3. fetchキューのdoループ
 	[
 		'} while (!job && asyncFifoQueue.numQueued() > 0);',
-		`// YORUSKI_YIELD_PATCH_3: fetchキューループのyield
-                await new Promise(r => setTimeout(r, 100));
-            } while (!job && asyncFifoQueue.numQueued() > 0);`,
+		`${YIELD}\n            } while (!job && asyncFifoQueue.numQueued() > 0);`,
+	],
+	// 4. _getNextJobのmoveToActive呼び出し前（2箇所、replaceAllで対応）
+	[
+		'return this.moveToActive(client, token, this.opts.name);',
+		`${YIELD}\n                return this.moveToActive(client, token, this.opts.name);`,
+	],
+	// 5. retryIfFailedのdoループ
+	[
+		'} while (++retry < maxRetries);',
+		`${YIELD}\n        } while (++retry < maxRetries);`,
+	],
+	// 6. stalledCheckerのwhileループ冒頭
+	[
+		'while (!(this.closing || this.paused)) {\n            await this.checkConnectionError',
+		`while (!(this.closing || this.paused)) {\n            ${YIELD}\n            await this.checkConnectionError`,
 	],
 ];
 
 let patched = 0;
 for (const file of workerFiles) {
 	let content = fs.readFileSync(file, 'utf-8');
-	if (content.includes('YORUSKI_YIELD_PATCH')) {
+	if (content.includes('YORUSKI_YIELD')) {
 		console.log(`[patch-bullmq] Already patched: ${file}`);
 		continue;
 	}
@@ -76,7 +86,7 @@ for (const file of workerFiles) {
 
 	if (filePatches > 0) {
 		fs.writeFileSync(file, content);
-		console.log(`[patch-bullmq] Patched ${file} (${filePatches} patches)`);
+		console.log(`[patch-bullmq] Patched ${file} (${filePatches} patches applied)`);
 		patched++;
 	} else {
 		console.log(`[patch-bullmq] No targets found: ${file}`);
