@@ -41,16 +41,18 @@ if (content.includes('YORUSKI_YIELD_PATCH')) {
 	process.exit(0);
 }
 
-const target = 'const job = await fetchedJob;';
-const replacement = `const job = await fetchedJob;
-                // YORUSKI_YIELD_PATCH: キュー専用プロセスのCPUスピン対策
-                await new Promise(r => setTimeout(r, 10));`;
+// _getNextJobのmoveToActive呼び出し前にyieldを追加
+const target = 'return this.moveToActive(client, token, this.opts.name);';
+const replacement = `{ // YORUSKI_YIELD_PATCH: キュー専用プロセスのCPUスピン対策
+                await new Promise(r => setTimeout(r, 50));
+                return this.moveToActive(client, token, this.opts.name);
+            }`;
 
 if (!content.includes(target)) {
 	console.error('[patch-bullmq] Target string not found in worker.js');
 	process.exit(1);
 }
 
-content = content.replace(target, replacement);
+content = content.replaceAll(target, replacement);
 fs.writeFileSync(workerFile, content);
 console.log('[patch-bullmq] Patch applied successfully');
