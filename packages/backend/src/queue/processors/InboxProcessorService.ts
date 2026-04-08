@@ -70,7 +70,7 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		const jobStartTime = Date.now();
 		const jobId = job.id;
 		this.inboxJobCount++;
-		const shouldSample = this.inboxJobCount % 100 === 1;
+		const shouldSample = this.inboxJobCount % 10 === 1;
 		const logStep = (step: string) => {
 			if (!shouldSample) return;
 			const elapsed = Date.now() - jobStartTime;

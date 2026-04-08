@@ -56,7 +56,7 @@ export class DeliverProcessorService {
 	public async process(job: Bull.Job<DeliverJobData>): Promise<string> {
 		const jobStartTime = Date.now();
 		this.deliverJobCount++;
-		const shouldSample = this.deliverJobCount % 100 === 1;
+		const shouldSample = this.deliverJobCount % 10 === 1;
 		const logStep = (step: string) => {
 			if (!shouldSample) return;
 			this.logger.info(`[deliver-trace] job=${job.id} step=${step} elapsed=${Date.now() - jobStartTime}ms to=${job.data.to?.slice(0, 60)}`);
