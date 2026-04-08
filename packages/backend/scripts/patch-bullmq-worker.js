@@ -1,7 +1,7 @@
 /**
  * BullMQ Worker mainLoop パッチ
  * キュー専用コンテナでBullMQのポーリングがCPUを占有する問題の対策。
- * CJS版とESM版の両方にパッチを適用。
+ * mainLoopの全ループにyieldを追加。CJS版とESM版の両方にパッチ適用。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -33,11 +33,30 @@ if (workerFiles.length === 0) {
 	process.exit(0);
 }
 
-// mainLoopの外側whileループ冒頭にyieldを追加
-const target = 'while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {';
-const replacement = `while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {
-            // YORUSKI_YIELD_PATCH: キュー専用プロセスのCPUスピン対策（mainLoopの毎イテレーションで50ms yield）
-            await new Promise(r => setTimeout(r, 50));`;
+// パッチ定義: [検索文字列, 置換文字列]
+const patches = [
+	// 1. 外側whileループ冒頭にyield
+	[
+		'while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {',
+		`while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {
+            // YORUSKI_YIELD_PATCH_1: 外側whileループのyield
+            await new Promise(r => setTimeout(r, 50));`,
+	],
+	// 2. 内側whileループのジョブフェッチ後にyield
+	[
+		'const job = await fetchedJob;',
+		`const job = await fetchedJob;
+                // YORUSKI_YIELD_PATCH_2: 内側whileループのyield
+                await new Promise(r => setTimeout(r, 10));`,
+	],
+	// 3. fetchキューのdoループにyield
+	[
+		'} while (!job && asyncFifoQueue.numQueued() > 0);',
+		`// YORUSKI_YIELD_PATCH_3: fetchキューループのyield
+                await new Promise(r => setTimeout(r, 10));
+            } while (!job && asyncFifoQueue.numQueued() > 0);`,
+	],
+];
 
 let patched = 0;
 for (const file of workerFiles) {
@@ -46,14 +65,22 @@ for (const file of workerFiles) {
 		console.log(`[patch-bullmq] Already patched: ${file}`);
 		continue;
 	}
-	if (!content.includes(target)) {
-		console.log(`[patch-bullmq] Target not found: ${file}`);
-		continue;
+
+	let filePatches = 0;
+	for (const [target, replacement] of patches) {
+		if (content.includes(target)) {
+			content = content.replaceAll(target, replacement);
+			filePatches++;
+		}
 	}
-	content = content.replaceAll(target, replacement);
-	fs.writeFileSync(file, content);
-	console.log(`[patch-bullmq] Patched: ${file}`);
-	patched++;
+
+	if (filePatches > 0) {
+		fs.writeFileSync(file, content);
+		console.log(`[patch-bullmq] Patched ${file} (${filePatches} patches)`);
+		patched++;
+	} else {
+		console.log(`[patch-bullmq] No targets found: ${file}`);
+	}
 }
 
 console.log(`[patch-bullmq] Done: ${patched} files patched`);
