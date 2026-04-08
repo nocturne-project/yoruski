@@ -7,7 +7,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const nodeModulesDir = path.resolve(__dirname, '..', 'node_modules', '.pnpm');
+// Dockerビルド時は /misskey/node_modules/.pnpm、ローカルは packages/backend/node_modules/.pnpm
+const candidates = [
+	path.resolve(__dirname, '..', 'node_modules', '.pnpm'),
+	path.resolve(__dirname, '..', '..', '..', 'node_modules', '.pnpm'),
+	'/misskey/node_modules/.pnpm',
+];
+const nodeModulesDir = candidates.find(d => fs.existsSync(d));
 
 let workerFile = null;
 if (fs.existsSync(nodeModulesDir)) {
