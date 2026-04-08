@@ -2,41 +2,45 @@
  * 適応型イベントループスロットル
  *
  * BullMQのPromiseスピンによるCPU占有を防ぐ。
- * イベントループの応答時間を監視し、状態に応じてスロットル強度を変える:
- * - アイドル（スピン中）: setTimeoutが即座に発火する → 強くスロットル
- * - ジョブ処理中: setTimeoutが遅延する → スロットルを弱める
+ * setTimeout(0)のlagでイベントループ状態を判定し、
+ * アイドルスピン中はsetImmediateチェーンでCPUを一定量消費させる
+ * （Promiseのmicrotask処理を相対的に遅くする効果）。
+ *
+ * Atomics.waitと違いメインスレッドをブロックしないため、
+ * ジョブ処理を阻害しない。
  *
  * entry.js（Misskeyメインプロセス）でのみ有効化。
  */
 
 if (process.argv[1] && process.argv[1].includes('entry.js')) {
-	const buf = new SharedArrayBuffer(4);
-	const arr = new Int32Array(buf);
+	let throttling = false;
 
-	let idleCount = 0; // 連続アイドル検出回数
-
-	function adaptiveThrottle() {
+	function checkLoop() {
 		const start = Date.now();
-
 		setTimeout(() => {
 			const lag = Date.now() - start;
-
-			if (lag < 2) {
-				// イベントループが高速に回っている = アイドルスピン中
-				// スロットルを強化
-				idleCount = Math.min(idleCount + 1, 50);
-				const blockMs = Math.min(1 + Math.floor(idleCount / 5), 5);
-				Atomics.wait(arr, 0, 0, blockMs);
-				setTimeout(adaptiveThrottle, 100);
-			} else {
-				// イベントループが遅延している = ジョブ処理中
-				// スロットルを弱める
-				idleCount = Math.max(idleCount - 10, 0);
-				setTimeout(adaptiveThrottle, 500);
+			if (lag < 2 && !throttling) {
+				// アイドルスピン検出 → スロットル開始
+				throttling = true;
+				slowDown();
 			}
+			setTimeout(checkLoop, throttling ? 200 : 500);
 		}, 0);
 	}
 
-	// 起動5秒後に開始（初期化完了を待つ）
-	setTimeout(adaptiveThrottle, 5000);
+	// setImmediateチェーンでイベントループのcheckフェーズを占有し
+	// Promiseのmicrotask処理を遅くする
+	let slowDownCount = 0;
+	function slowDown() {
+		if (slowDownCount > 100) {
+			// 100回setImmediateした後、一旦停止して状態を再チェック
+			slowDownCount = 0;
+			throttling = false;
+			return;
+		}
+		slowDownCount++;
+		setImmediate(slowDown);
+	}
+
+	setTimeout(checkLoop, 5000);
 }
