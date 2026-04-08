@@ -369,6 +369,9 @@ importers:
       stringz:
         specifier: 2.1.0
         version: 2.1.0
+      suncalc:
+        specifier: 1.9.0
+        version: 1.9.0
       systeminformation:
         specifier: 5.31.4
         version: 5.31.4
@@ -10143,6 +10146,9 @@ packages:
     engines: {node: ^18.12.0 || ^20.9.0 || >=22.0}
     peerDependencies:
       postcss: ^8.4.32
+
+  suncalc@1.9.0:
+    resolution: {integrity: sha512-vMJ8Byp1uIPoj+wb9c1AdK4jpkSKVAywgHX0lqY7zt6+EWRRC3Z+0Ucfjy/0yxTVO1hwwchZe4uoFNqrIC24+A==}
 
   superagent@10.3.0:
     resolution: {integrity: sha512-B+4Ik7ROgVKrQsXTV0Jwp2u+PXYLSlqtDAhYnkkD+zn3yg8s/zjA2MeGayPoY/KICrbitwneDHrjSotxKL+0XQ==}
@@ -21658,6 +21664,8 @@ snapshots:
       browserslist: 4.28.1
       postcss: 8.5.8
       postcss-selector-parser: 7.1.1
+
+  suncalc@1.9.0: {}
 
   superagent@10.3.0:
     dependencies:
