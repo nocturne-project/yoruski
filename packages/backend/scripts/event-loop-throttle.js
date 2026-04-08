@@ -7,8 +7,8 @@
  * または require('./scripts/event-loop-throttle.js') で明示的にロード
  */
 
-const BLOCK_DURATION_MS = 10;  // 1回あたり10msブロック
-const INTERVAL_MS = 100;       // 100ms間隔
+const BLOCK_DURATION_MS = 1;   // 1回あたり1msブロック
+const INTERVAL_MS = 50;        // 50ms間隔
 
 const buf = new SharedArrayBuffer(4);
 const arr = new Int32Array(buf);
