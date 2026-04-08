@@ -40,6 +40,9 @@ COPY --link . ./
 
 RUN git submodule update --init
 
+# よるすきー: BullMQ workerのポーリングループにyield追加（CPUスピン対策）
+RUN node packages/backend/scripts/patch-bullmq-worker.js
+
 RUN pnpm build
 
 # Verify LANGS replacement in native-builder stage
