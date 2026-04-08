@@ -121,6 +121,8 @@ USER misskey
 WORKDIR /misskey
 
 COPY --chown=misskey:misskey --from=target-builder /misskey/node_modules ./node_modules
+# よるすきー: BullMQパッチ済みworker.jsをnative-builderから上書きコピー
+COPY --chown=misskey:misskey --from=native-builder /misskey/node_modules/.pnpm/bullmq@5.73.1/node_modules/bullmq/dist/cjs/classes/worker.js ./node_modules/.pnpm/bullmq@5.73.1/node_modules/bullmq/dist/cjs/classes/worker.js
 COPY --chown=misskey:misskey --from=target-builder /misskey/packages/backend/node_modules ./packages/backend/node_modules
 COPY --chown=misskey:misskey --from=target-builder /misskey/packages/misskey-js/node_modules ./packages/misskey-js/node_modules
 COPY --chown=misskey:misskey --from=native-builder /misskey/built ./built
