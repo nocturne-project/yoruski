@@ -1,8 +1,11 @@
 /**
- * BullMQ Worker パッチ: drained強制 + 古いyieldパッチ除去
+ * BullMQ Worker パッチ: _getNextJobを書き換えて常にwaitForJobを経由させる
  *
- * _getNextJob()のelse分岐（drained=false時）で、moveToActive()がnullを返したら
- * 強制的にdrained=trueに設定し、次のイテレーションでwaitForJob(XREAD BLOCK)に入るようにする。
+ * オリジナルの_getNextJob()はdrained=trueの時だけwaitForJob(XREAD BLOCK)を呼ぶ。
+ * drained=falseの時はmoveToActive()を直接呼び、ブロッキングなしの高速ループになる。
+ *
+ * パッチ後: drained状態に関係なく、常にwaitForJob()を呼んでからmoveToActive()する。
+ * これによりキューにジョブがあってもXREAD BLOCKで最小限のスリープが入る。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -38,33 +41,57 @@ let patched = 0;
 for (const file of workerFiles) {
 	let content = fs.readFileSync(file, 'utf-8');
 
-	// 古いYORUSKI_YIELDパッチを除去
-	if (content.includes('YORUSKI_YIELD')) {
-		content = content.replaceAll('await new Promise(r => setTimeout(r, 100)); /* YORUSKI_YIELD */\n', '');
-		content = content.replaceAll('await new Promise(r => setTimeout(r, 100)); /* YORUSKI_YIELD */', '');
-	}
+	// 古いパッチを除去
+	content = content.replace(/\/\/ YORUSKI_[A-Z_]+:.*\n/g, '');
+	content = content.replace(/await new Promise\(r => setTimeout\(r, \d+\)\);[^\n]*\n/g, '');
 
-	if (content.includes('YORUSKI_DRAIN_PATCH')) {
+	if (content.includes('YORUSKI_FORCE_WAIT')) {
 		console.log(`[patch-bullmq] Already patched: ${file}`);
 		continue;
 	}
 
-	// _getNextJob()のelse分岐でmoveToActiveの結果をチェックし、nullならdrained=trueを強制
-	const target = 'return this.moveToActive(client, token, this.opts.name);';
-	const replacement = `{
-                // YORUSKI_DRAIN_PATCH: moveToActiveがnullならdrained=trueを強制
-                const job = await this.moveToActive(client, token, this.opts.name);
-                if (!job) { this.drained = true; }
-                return job;
-            }`;
+	// _getNextJob()のif-else構造を書き換え
+	// 元: if (this.drained && ...) { waitForJob } else { moveToActive }
+	// 新: 常にwaitForJob→moveToActive
+	const oldCode = `if (this.drained && block && !this.limitUntil && !this.waiting) {
+            this.waiting = this.waitForJob(bclient, this.blockUntil);
+            try {
+                this.blockUntil = await this.waiting;
+                if (this.blockUntil <= 0 || this.blockUntil - Date.now() < 1) {
+                    return await this.moveToActive(client, token, this.opts.name);
+                }
+            }
+            finally {
+                this.waiting = null;
+            }
+        }
+        else {
+            if (!this.isRateLimited()) {
+                return this.moveToActive(client, token, this.opts.name);
+            }
+        }`;
 
-	if (content.includes(target)) {
-		content = content.replaceAll(target, replacement);
+	const newCode = `// YORUSKI_FORCE_WAIT: 常にwaitForJobを経由してCPUスピンを防止
+        if (!this.waiting && block) {
+            this.waiting = this.waitForJob(bclient, this.blockUntil);
+            try {
+                this.blockUntil = await this.waiting;
+            }
+            finally {
+                this.waiting = null;
+            }
+        }
+        if (!this.isRateLimited()) {
+            return this.moveToActive(client, token, this.opts.name);
+        }`;
+
+	if (content.includes(oldCode)) {
+		content = content.replace(oldCode, newCode);
 		fs.writeFileSync(file, content);
 		console.log(`[patch-bullmq] Patched: ${file}`);
 		patched++;
 	} else {
-		console.log(`[patch-bullmq] Target not found: ${file}`);
+		console.log(`[patch-bullmq] Target not found (may have old patches): ${file}`);
 	}
 }
 
