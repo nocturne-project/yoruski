@@ -1,44 +1,28 @@
 /**
- * ioredis Promiseスロットル
+ * Promise.prototype.then スロットル
  *
- * BullMQのPromiseスピンによるCPU占有を防ぐ。
- * ioredisのsendCommandメソッドをパッチし、Redis応答のPromise解決後に
- * 短いsetTimeout遅延を挿入する。これにより全Workerの全Redis通信が
- * 自然にスロットルされる。
+ * BullMQ/ioredisのPromiseスピンを防止するため、
+ * Promise.prototype.thenをパッチし、N回に1回setTimeoutでyieldを挿入する。
+ * これによりprocessTicksAndRejectionsの高速ループが中断される。
  *
  * entry.js（Misskeyメインプロセス）でのみ有効化。
  */
 
 if (process.argv[1] && process.argv[1].includes('entry.js')) {
-	// ioredisのロード後にパッチを適用するため、遅延実行
-	setTimeout(() => {
-		try {
-			const Redis = require('ioredis');
-			const originalSendCommand = Redis.prototype.sendCommand;
+	const originalThen = Promise.prototype.then;
+	let callCount = 0;
+	const THROTTLE_EVERY = 1000; // 1000回に1回yield
 
-			// コマンドカウンタ（全Redis接続で共有）
-			let commandCount = 0;
-			// N回に1回だけ遅延を入れる（全コマンドに入れるとジョブ処理が遅くなりすぎる）
-			const THROTTLE_EVERY = 5;
-			const DELAY_MS = 2;
-
-			Redis.prototype.sendCommand = function(command, stream) {
-				const result = originalSendCommand.call(this, command, stream);
-
-				commandCount++;
-				if (commandCount % THROTTLE_EVERY === 0) {
-					// N回に1回、Promise解決後に1ms遅延を挿入
-					return result.then(val => {
-						return new Promise(resolve => setTimeout(() => resolve(val), DELAY_MS));
-					}, err => {
-						return new Promise((_, reject) => setTimeout(() => reject(err), DELAY_MS));
-					});
-				}
-
-				return result;
-			};
-		} catch (e) {
-			// ioredisが見つからない場合は何もしない
+	Promise.prototype.then = function(onFulfilled, onRejected) {
+		callCount++;
+		if (callCount % THROTTLE_EVERY === 0) {
+			// N回に1回、解決前にsetTimeoutでイベントループにyield
+			return originalThen.call(this, (val) => {
+				return new Promise(resolve => {
+					setTimeout(() => resolve(onFulfilled ? onFulfilled(val) : val), 0);
+				});
+			}, onRejected);
 		}
-	}, 3000); // NestJS初期化後にパッチ
+		return originalThen.call(this, onFulfilled, onRejected);
+	};
 }
