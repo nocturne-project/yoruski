@@ -1,11 +1,8 @@
 /**
- * NestJS InterceptorsConsumer パッチ (CJS)
+ * async_hooksモジュール全体をフェイクに差し替え (CJS)
  *
- * NestJS 11.xのInterceptorsConsumerがasync_hooks.AsyncResourceを使用し、
- * 全Promise解決でpopAsyncContextが呼ばれてCPU 97%を消費する問題の対策。
- *
- * Module._resolveFilenameをフックし、NestJSが`async_hooks`をrequireした時に
- * AsyncResource.bindをno-opに差し替えたモジュールを返す。
+ * NestJS 11.xのInterceptorsConsumerがrequire('async_hooks')した時に
+ * フェイクモジュールを返すことで、async_hooksの有効化自体を防止する。
  *
  * entry.js（Misskeyメインプロセス）でのみ有効化。
  */
@@ -14,22 +11,40 @@
 
 if (process.argv[1] && process.argv[1].includes('entry.js')) {
 	const Module = require('module');
-	const originalRequire = Module.prototype.require;
+	const originalResolveFilename = Module._resolveFilename;
 
-	Module.prototype.require = function(id) {
-		const result = originalRequire.apply(this, arguments);
-
-		// async_hooksモジュールが読み込まれたら、AsyncResource.bindをno-opに
-		if (id === 'async_hooks') {
-			if (result.AsyncResource && result.AsyncResource.bind !== noopBind) {
-				result.AsyncResource.bind = noopBind;
-			}
-		}
-
-		return result;
+	// async_hooksのフェイクモジュール
+	const fakeAsyncHooks = {
+		createHook: () => ({ enable() {}, disable() {} }),
+		executionAsyncId: () => -1,
+		triggerAsyncId: () => -1,
+		executionAsyncResource: () => ({}),
+		AsyncResource: class NoopAsyncResource {
+			constructor() {}
+			runInAsyncScope(fn, thisArg, ...args) { return fn.apply(thisArg, args); }
+			emitBefore() {}
+			emitAfter() {}
+			emitDestroy() { return this; }
+			asyncId() { return -1; }
+			triggerAsyncId() { return -1; }
+			static bind(fn) { return fn; }
+		},
+		AsyncLocalStorage: class NoopAsyncLocalStorage {
+			disable() {}
+			getStore() { return undefined; }
+			run(store, fn, ...args) { return fn(...args); }
+			exit(fn, ...args) { return fn(...args); }
+			enterWith() {}
+		},
 	};
 
-	function noopBind(fn) {
-		return fn;
-	}
+	// require('async_hooks')をフックしてフェイクを返す
+	// ただしNode.js内部のモジュール解決は迂回できないため、Module._cacheに直接注入
+	const originalRequire = Module.prototype.require;
+	Module.prototype.require = function(id) {
+		if (id === 'async_hooks' || id === 'node:async_hooks') {
+			return fakeAsyncHooks;
+		}
+		return originalRequire.apply(this, arguments);
+	};
 }
