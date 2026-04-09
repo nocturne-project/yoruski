@@ -1,5 +1,5 @@
 /**
- * async_hooks無効化パッチ
+ * async_hooks無効化パッチ (CJS)
  *
  * NestJS 11.xのInterceptorsConsumerがasync_hooks.AsyncResourceを使用し、
  * 全Promise解決でpopAsyncContextが呼ばれてCPU 97%を消費する問題の対策。
@@ -10,8 +10,7 @@
  * entry.js（Misskeyメインプロセス）でのみ有効化。
  */
 
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
+'use strict';
 
 if (process.argv[1] && process.argv[1].includes('entry.js')) {
 	const async_hooks = require('async_hooks');
