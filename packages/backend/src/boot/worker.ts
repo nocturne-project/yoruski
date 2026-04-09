@@ -38,6 +38,11 @@ export async function workerMain() {
 	if (envOption.onlyServer) {
 		await server();
 	} else if (envOption.onlyQueue) {
+		// よるすきー: server()も起動してイベントループにHTTPソケットを追加
+		// HTTPサーバーのlistenソケットがpollフェーズでepoll_waitを呼び出し、
+		// BullMQのPromiseスピンを防止する（oru.skiのserver+queue一体と同じ効果）
+		// workerコンテナはポート非公開のためリクエストは来ない
+		await server();
 		await jobQueue();
 	} else {
 		await jobQueue();
