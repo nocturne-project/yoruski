@@ -11,7 +11,7 @@
 if (process.argv[1] && process.argv[1].includes('entry.js')) {
 	const originalThen = Promise.prototype.then;
 	let callCount = 0;
-	const THROTTLE_EVERY = 1000; // 1000回に1回yield
+	const THROTTLE_EVERY = 100; // 100回に1回yield
 
 	Promise.prototype.then = function(onFulfilled, onRejected) {
 		callCount++;
