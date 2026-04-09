@@ -98,7 +98,8 @@ export async function masterMain() {
 			// そのため、メインプロセスでも直接listenするとポートの競合が発生して起動に失敗してしまう。
 			// see: https://nodejs.org/api/cluster.html#cluster
 		} else if (envOption.onlyQueue) {
-			await jobQueue();
+			// masterプロセスではキュー処理を起動しない（workerプロセスのみで実行）
+			// masterでjobQueue()を呼ぶとBullMQのPromiseスピンでCPUを消費するため
 		} else {
 			await server();
 		}
