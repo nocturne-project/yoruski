@@ -19,8 +19,8 @@ if (process.argv[1] && process.argv[1].includes('entry.js')) {
 			// コマンドカウンタ（全Redis接続で共有）
 			let commandCount = 0;
 			// N回に1回だけ遅延を入れる（全コマンドに入れるとジョブ処理が遅くなりすぎる）
-			const THROTTLE_EVERY = 20;
-			const DELAY_MS = 1;
+			const THROTTLE_EVERY = 5;
+			const DELAY_MS = 2;
 
 			Redis.prototype.sendCommand = function(command, stream) {
 				const result = originalSendCommand.call(this, command, stream);
