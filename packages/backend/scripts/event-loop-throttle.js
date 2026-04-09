@@ -1,28 +1,30 @@
 /**
- * Promise.prototype.then スロットル
+ * async_hooks無効化パッチ
  *
- * BullMQ/ioredisのPromiseスピンを防止するため、
- * Promise.prototype.thenをパッチし、N回に1回setTimeoutでyieldを挿入する。
- * これによりprocessTicksAndRejectionsの高速ループが中断される。
+ * NestJS 11.xのInterceptorsConsumerがasync_hooks.AsyncResourceを使用し、
+ * 全Promise解決でpopAsyncContextが呼ばれてCPU 97%を消費する問題の対策。
+ *
+ * AsyncResourceをno-opクラスに置換することで、async_hooksの有効化を防止する。
+ * キュー処理にNestJSのインターセプターコンテキスト伝搬は不要なため安全。
  *
  * entry.js（Misskeyメインプロセス）でのみ有効化。
  */
 
 if (process.argv[1] && process.argv[1].includes('entry.js')) {
-	const originalThen = Promise.prototype.then;
-	let callCount = 0;
-	const THROTTLE_EVERY = 100; // 100回に1回yield
+	const async_hooks = require('async_hooks');
+	const OriginalAsyncResource = async_hooks.AsyncResource;
 
-	Promise.prototype.then = function(onFulfilled, onRejected) {
-		callCount++;
-		if (callCount % THROTTLE_EVERY === 0) {
-			// N回に1回、解決前にsetTimeoutでイベントループにyield
-			return originalThen.call(this, (val) => {
-				return new Promise(resolve => {
-					setTimeout(() => resolve(onFulfilled ? onFulfilled(val) : val), 0);
-				});
-			}, onRejected);
-		}
-		return originalThen.call(this, onFulfilled, onRejected);
-	};
+	// AsyncResourceをno-opに置換
+	class NoopAsyncResource {
+		constructor() {}
+		runInAsyncScope(fn, thisArg, ...args) { return fn.apply(thisArg, args); }
+		emitBefore() {}
+		emitAfter() {}
+		emitDestroy() {}
+		asyncId() { return -1; }
+		triggerAsyncId() { return -1; }
+		static bind(fn) { return fn; }
+	}
+
+	async_hooks.AsyncResource = NoopAsyncResource;
 }
