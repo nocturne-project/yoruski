@@ -1,7 +1,8 @@
 /**
- * BullMQ Worker 包括的CPUスピン対策パッチ
- * キュー専用コンテナでBullMQのポーリングがCPUを占有する問題の対策。
- * 全ループ・ポーリング箇所にyieldを追加。CJS版とESM版の両方にパッチ適用。
+ * BullMQ Worker パッチ: drained強制 + 古いyieldパッチ除去
+ *
+ * _getNextJob()のelse分岐（drained=false時）で、moveToActive()がnullを返したら
+ * 強制的にdrained=trueに設定し、次のイテレーションでwaitForJob(XREAD BLOCK)に入るようにする。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -33,63 +34,37 @@ if (workerFiles.length === 0) {
 	process.exit(0);
 }
 
-const YIELD = 'await new Promise(r => setTimeout(r, 100)); /* YORUSKI_YIELD */';
-
-const patches = [
-	// 1. mainLoopの外側whileループ冒頭
-	[
-		'while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {',
-		`while ((!this.closing && !this.paused) || asyncFifoQueue.numTotal() > 0) {\n            ${YIELD}`,
-	],
-	// 2. mainLoopの内側whileループ冒頭（ジョブフェッチループ）
-	[
-		'while (!this.closing &&\n                !this.paused &&\n                !this.waiting &&\n                asyncFifoQueue.numTotal() < this._concurrency &&\n                !this.isRateLimited()) {',
-		`while (!this.closing &&\n                !this.paused &&\n                !this.waiting &&\n                asyncFifoQueue.numTotal() < this._concurrency &&\n                !this.isRateLimited()) {\n                ${YIELD}`,
-	],
-	// 3. fetchキューのdoループ
-	[
-		'} while (!job && asyncFifoQueue.numQueued() > 0);',
-		`${YIELD}\n            } while (!job && asyncFifoQueue.numQueued() > 0);`,
-	],
-	// 4. _getNextJobのmoveToActive呼び出し前（2箇所、replaceAllで対応）
-	[
-		'return this.moveToActive(client, token, this.opts.name);',
-		`${YIELD}\n                return this.moveToActive(client, token, this.opts.name);`,
-	],
-	// 5. retryIfFailedのdoループ
-	[
-		'} while (++retry < maxRetries);',
-		`${YIELD}\n        } while (++retry < maxRetries);`,
-	],
-	// 6. stalledCheckerのwhileループ冒頭
-	[
-		'while (!(this.closing || this.paused)) {\n            await this.checkConnectionError',
-		`while (!(this.closing || this.paused)) {\n            ${YIELD}\n            await this.checkConnectionError`,
-	],
-];
-
 let patched = 0;
 for (const file of workerFiles) {
 	let content = fs.readFileSync(file, 'utf-8');
+
+	// 古いYORUSKI_YIELDパッチを除去
 	if (content.includes('YORUSKI_YIELD')) {
+		content = content.replaceAll('await new Promise(r => setTimeout(r, 100)); /* YORUSKI_YIELD */\n', '');
+		content = content.replaceAll('await new Promise(r => setTimeout(r, 100)); /* YORUSKI_YIELD */', '');
+	}
+
+	if (content.includes('YORUSKI_DRAIN_PATCH')) {
 		console.log(`[patch-bullmq] Already patched: ${file}`);
 		continue;
 	}
 
-	let filePatches = 0;
-	for (const [target, replacement] of patches) {
-		if (content.includes(target)) {
-			content = content.replaceAll(target, replacement);
-			filePatches++;
-		}
-	}
+	// _getNextJob()のelse分岐でmoveToActiveの結果をチェックし、nullならdrained=trueを強制
+	const target = 'return this.moveToActive(client, token, this.opts.name);';
+	const replacement = `{
+                // YORUSKI_DRAIN_PATCH: moveToActiveがnullならdrained=trueを強制
+                const job = await this.moveToActive(client, token, this.opts.name);
+                if (!job) { this.drained = true; }
+                return job;
+            }`;
 
-	if (filePatches > 0) {
+	if (content.includes(target)) {
+		content = content.replaceAll(target, replacement);
 		fs.writeFileSync(file, content);
-		console.log(`[patch-bullmq] Patched ${file} (${filePatches} patches applied)`);
+		console.log(`[patch-bullmq] Patched: ${file}`);
 		patched++;
 	} else {
-		console.log(`[patch-bullmq] No targets found: ${file}`);
+		console.log(`[patch-bullmq] Target not found: ${file}`);
 	}
 }
 
