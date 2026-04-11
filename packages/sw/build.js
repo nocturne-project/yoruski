@@ -16,10 +16,15 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 console.log('Starting SW building...');
 
+// よるすきー: Service Worker のビルドターゲットを明示する。
+// target 未指定だと esbuild は esnext で出力するため、Safari 15.6 (iOS 15.7.x) で
+// パースできない構文（class static blocks 等）が混入する恐れがある。
+// フロントエンド本体 (vite.config.ts) と同じ safari15 / chrome116 / firefox116 に揃える。
 /** @type {esbuild.BuildOptions} */
 const buildOptions = {
 	absWorkingDir: __dirname,
 	bundle: true,
+	target: ['safari15', 'chrome116', 'firefox116'],
 	define: {
 		_DEV_: JSON.stringify(process.env.NODE_ENV !== 'production'),
 		_ENV_: JSON.stringify(process.env.NODE_ENV ?? ''), // `NODE_ENV`が`undefined`なとき`JSON.stringify`が`undefined`を返してエラーになってしまうので`??`を使っている
