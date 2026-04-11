@@ -489,22 +489,40 @@ export class ApPersonService implements OnModuleInit {
 	 */
 	@bindThis
 	public async updatePerson(uri: string, resolver?: Resolver | null, hint?: IObject, movePreventUris: string[] = []): Promise<string | void> {
+		// よるすきー: 詳細トレース + メモリ計測（CPU 100%・メモリ320MB増問題のデバッグ用）
+		const t0 = Date.now();
+		const mem0 = process.memoryUsage();
+		const trace = (step: string) => {
+			const elapsed = Date.now() - t0;
+			const m = process.memoryUsage();
+			const heap = ((m.heapUsed - mem0.heapUsed) / 1024 / 1024).toFixed(1);
+			const ext = ((m.external - mem0.external) / 1024 / 1024).toFixed(1);
+			const ab = ((m.arrayBuffers - mem0.arrayBuffers) / 1024 / 1024).toFixed(1);
+			const rss = ((m.rss - mem0.rss) / 1024 / 1024).toFixed(1);
+			process.stderr.write(`[updatePerson] uri=${uri} step=${step} elapsed=${elapsed}ms heap=+${heap}MB ext=+${ext}MB ab=+${ab}MB rss=+${rss}MB\n`);
+		};
+
 		if (typeof uri !== 'string') throw new Error('uri is not string');
 
 		// URIがこのサーバーを指しているならスキップ
 		if (this.utilityService.isUriLocal(uri)) return;
 
+		trace('start');
 		//#region このサーバーに既に登録されているか
 		const exist = await this.fetchPerson(uri) as MiRemoteUser | null;
+		trace('fetchPerson');
 		if (exist === null) return;
 		//#endregion
 
 		// eslint-disable-next-line no-param-reassign
 		if (resolver == null) resolver = await this.apResolverService.createResolver();
+		trace('createResolver');
 
 		const object = hint ?? await resolver.resolve(uri);
+		trace(`resolve hint=${hint != null}`);
 
 		const person = this.validateActor(object, uri);
+		trace(`validateActor tagsCount=${(person.tag as unknown[] | undefined)?.length ?? 0} attachCount=${(person.attachment as unknown[] | undefined)?.length ?? 0}`);
 
 		this.logger.info(`Updating the Person: ${person.id}`);
 
@@ -513,12 +531,15 @@ export class ApPersonService implements OnModuleInit {
 			this.logger.info(`extractEmojis: ${e}`);
 			return [];
 		});
+		trace(`extractEmojis count=${emojis.length}`);
 
 		const emojiNames = emojis.map(emoji => emoji.name);
 
 		const fields = this.analyzeAttachments(person.attachment ?? []);
+		trace(`analyzeAttachments fieldsCount=${fields.length}`);
 
 		const tags = extractApHashtags(person.tag).map(normalizeForSearch).splice(0, 32);
+		trace(`extractApHashtags tagsCount=${tags.length}`);
 
 		const [followingVisibility, followersVisibility] = await Promise.all(
 			[
@@ -536,6 +557,7 @@ export class ApPersonService implements OnModuleInit {
 				}),
 			),
 		);
+		trace('isPublicCollection (following+followers)');
 
 		const bday = person['vcard:bday']?.match(/^\d{4}-\d{2}-\d{2}/);
 
@@ -555,6 +577,9 @@ export class ApPersonService implements OnModuleInit {
 			}
 		}
 
+		trace('resolveAvatarAndBanner-start');
+		const avatarBannerResult = await this.resolveAvatarAndBanner(exist, person.icon, person.image).catch(() => ({}));
+		trace('resolveAvatarAndBanner-done');
 		const updates = {
 			lastFetchedAt: new Date(),
 			inbox: person.inbox,
@@ -570,7 +595,7 @@ export class ApPersonService implements OnModuleInit {
 			movedToUri: person.movedTo ?? null,
 			alsoKnownAs: person.alsoKnownAs ?? null,
 			isExplorable: person.discoverable,
-			...(await this.resolveAvatarAndBanner(exist, person.icon, person.image).catch(() => ({}))),
+			...avatarBannerResult,
 		} as Partial<MiRemoteUser> & Pick<MiRemoteUser, 'isBot' | 'isCat' | 'isLocked' | 'movedToUri' | 'alsoKnownAs' | 'isExplorable'>;
 
 		const moving = ((): boolean => {
@@ -597,12 +622,14 @@ export class ApPersonService implements OnModuleInit {
 		if (!(await this.usersRepository.update({ id: exist.id, isDeleted: false }, updates)).affected) {
 			return 'skip';
 		}
+		trace('usersRepository.update');
 
 		if (person.publicKey) {
 			await this.userPublickeysRepository.update({ userId: exist.id }, {
 				keyId: person.publicKey.id,
 				keyPem: person.publicKey.publicKeyPem,
 			});
+			trace('userPublickeysRepository.update');
 		}
 
 		let _description: string | null = null;
@@ -623,19 +650,25 @@ export class ApPersonService implements OnModuleInit {
 			birthday: bday?.[0] ?? null,
 			location: person['vcard:Address'] ?? null,
 		});
+		trace('userProfilesRepository.update');
 
 		this.globalEventService.publishInternalEvent('remoteUserUpdated', { id: exist.id });
+		trace('publishInternalEvent');
 
 		// ハッシュタグ更新
-		this.hashtagService.updateUsertags(exist, tags);
+		// よるすきー: awaitしてfire-and-forget排除
+		await this.hashtagService.updateUsertags(exist, tags);
+		trace('hashtagService.updateUsertags');
 
 		// 該当ユーザーが既にフォロワーになっていた場合はFollowingもアップデートする
 		await this.followingsRepository.update(
 			{ followerId: exist.id },
 			{ followerSharedInbox: person.sharedInbox ?? person.endpoints?.sharedInbox ?? null },
 		);
+		trace('followingsRepository.update');
 
 		await this.updateFeatured(exist.id, resolver).catch(err => this.logger.error(err));
+		trace('updateFeatured');
 
 		const updated = { ...exist, ...updates };
 
@@ -701,24 +734,36 @@ export class ApPersonService implements OnModuleInit {
 
 	@bindThis
 	public async updateFeatured(userId: MiUser['id'], resolver?: Resolver): Promise<void> {
+		// よるすきー: 詳細トレース（CPU 100%デバッグ用）
+		const t0 = Date.now();
+		const trace = (step: string) => process.stderr.write(`[updateFeatured] userId=${userId} step=${step} elapsed=${Date.now() - t0}ms\n`);
+
+		trace('start');
 		const user = await this.usersRepository.findOneByOrFail({ id: userId, isDeleted: false });
+		trace('findUser');
 		if (!this.userEntityService.isRemoteUser(user)) return;
 		if (!user.featured) return;
 
 		this.logger.info(`Updating the featured: ${user.uri}`);
 
 		const _resolver = resolver ?? await this.apResolverService.createResolver();
+		trace('createResolver');
 
 		// Resolve to (Ordered)Collection Object
+		trace('resolveCollection-start');
 		const collection = await _resolver.resolveCollection(user.featured);
+		trace('resolveCollection-done');
 		if (!isCollectionOrOrderedCollection(collection)) throw new Error('Object is not Collection or OrderedCollection');
 
 		// Resolve to Object(may be Note) arrays
 		const unresolvedItems = isCollection(collection) ? collection.items : collection.orderedItems;
+		trace(`resolve-items-start count=${toArray(unresolvedItems).length}`);
 		const items = await Promise.all(toArray(unresolvedItems).map(x => _resolver.resolve(x)));
+		trace('resolve-items-done');
 
 		// Resolve and regist Notes
 		const limit = promiseLimit<MiNote | null>(2);
+		trace('resolveNotes-start');
 		const featuredNotes = await Promise.all(items
 			.filter(item => getApType(item) === 'Note')	// TODO: Noteでなくてもいいかも
 			.slice(0, 5)
@@ -726,7 +771,9 @@ export class ApPersonService implements OnModuleInit {
 				resolver: _resolver,
 				sentFrom: new URL(user.uri),
 			}))));
+		trace('resolveNotes-done');
 
+		trace('db-transaction-start');
 		await this.db.transaction(async transactionalEntityManager => {
 			await transactionalEntityManager.delete(MiUserNotePining, { userId: user.id });
 
@@ -741,6 +788,7 @@ export class ApPersonService implements OnModuleInit {
 				});
 			}
 		});
+		trace('db-transaction-done');
 	}
 
 	/**

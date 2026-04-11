@@ -44,21 +44,27 @@ export class HashtagService {
 
 	@bindThis
 	public async updateUsertags(user: MiUser, tags: string[]) {
+		// よるすきー: 詳細トレース
+		const t0 = Date.now();
+		process.stderr.write(`[updateUsertags] start userId=${user.id} addCount=${tags.length} removeCount=${user.tags.filter(x => !tags.includes(x)).length}\n`);
 		for (const tag of tags) {
 			await this.updateHashtag(user, tag, true, true);
+			process.stderr.write(`[updateUsertags] addTag=${tag} done elapsed=${Date.now() - t0}ms\n`);
 		}
 
 		for (const tag of user.tags.filter(x => !tags.includes(x))) {
 			await this.updateHashtag(user, tag, true, false);
+			process.stderr.write(`[updateUsertags] removeTag=${tag} done elapsed=${Date.now() - t0}ms\n`);
 		}
+		process.stderr.write(`[updateUsertags] end userId=${user.id} totalElapsed=${Date.now() - t0}ms\n`);
 	}
 
 	@bindThis
 	public async updateHashtag(user: { id: MiUser['id']; host: MiUser['host']; }, tag: string, isUserAttached = false, inc = true) {
 		tag = normalizeForSearch(tag);
 
-		// TODO: サンプリング
-		this.updateHashtagsRanking(tag, user.id);
+		// よるすきー: awaitしてfire-and-forget排除
+		await this.updateHashtagsRanking(tag, user.id);
 
 		const index = await this.hashtagsRepository.findOneBy({ name: tag });
 
@@ -118,11 +124,13 @@ export class HashtagService {
 
 			if (Object.keys(set).length > 0) {
 				q.set(set);
-				q.execute();
+				// よるすきー: awaitしてfire-and-forget排除
+				await q.execute();
 			}
 		} else {
 			if (isUserAttached) {
-				this.hashtagsRepository.insert({
+				// よるすきー: awaitしてfire-and-forget排除
+				await this.hashtagsRepository.insert({
 					id: this.idService.gen(),
 					name: tag,
 					mentionedUserIds: [],
@@ -139,7 +147,8 @@ export class HashtagService {
 					attachedRemoteUsersCount: this.userEntityService.isRemoteUser(user) ? 1 : 0,
 				} as MiHashtag);
 			} else {
-				this.hashtagsRepository.insert({
+				// よるすきー: awaitしてfire-and-forget排除
+				await this.hashtagsRepository.insert({
 					id: this.idService.gen(),
 					name: tag,
 					mentionedUserIds: [user.id],
@@ -173,7 +182,8 @@ export class HashtagService {
 		const exist = await this.redisClient.sismember(`hashtagUsers:${hashtag}`, userId);
 		if (exist === 1) return;
 
-		this.featuredService.updateHashtagsRanking(hashtag, 1);
+		// よるすきー: awaitしてfire-and-forget排除
+		await this.featuredService.updateHashtagsRanking(hashtag, 1);
 
 		const redisPipeline = this.redisClient.pipeline();
 
@@ -192,7 +202,8 @@ export class HashtagService {
 			'NX', // "NX -- Set expiry only when the key has no expiry" = 有効期限がないときだけ設定
 		);
 
-		redisPipeline.exec();
+		// よるすきー: awaitしてfire-and-forget排除
+		await redisPipeline.exec();
 	}
 
 	@bindThis

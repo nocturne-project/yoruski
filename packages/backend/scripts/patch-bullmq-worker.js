@@ -1,11 +1,15 @@
 /**
- * BullMQ Worker パッチ: _getNextJobを書き換えて常にwaitForJobを経由させる
+ * BullMQ Worker パッチ: _getNextJobの先頭にsleepを挿入してCPUスピンを防止
  *
- * オリジナルの_getNextJob()はdrained=trueの時だけwaitForJob(XREAD BLOCK)を呼ぶ。
- * drained=falseの時はmoveToActive()を直接呼び、ブロッキングなしの高速ループになる。
+ * 問題: BullMQのWorkerはdrained=false（ジョブあり）の時、moveToActive()を
+ * sleepなしで高速ループする。各ループでPromiseが大量生成され、
+ * NestJS 11.xのasync_hooks(popAsyncContext)がCPU 97%を消費する。
  *
- * パッチ後: drained状態に関係なく、常にwaitForJob()を呼んでからmoveToActive()する。
- * これによりキューにジョブがあってもXREAD BLOCKで最小限のスリープが入る。
+ * 対策: _getNextJob()の先頭で50msのsetTimeoutを入れ、ループごとに
+ * イベントループに制御を返す。これによりGCが動作でき、CPU使用率が下がる。
+ *
+ * 50ms = 1キューあたり最大20ジョブ/秒。10キュー合計で200ジョブ/秒。
+ * yoru.noc.skiの規模では十分な処理能力。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -37,61 +41,52 @@ if (workerFiles.length === 0) {
 	process.exit(0);
 }
 
+// パッチ対象: _getNextJob()の先頭（paused/closingチェックの後）
+// 元コード: if (this.drained && block && ...
+// 新コード: await sleep(50); if (this.drained && block && ...
+const SLEEP_MS = 50;
+
 let patched = 0;
 for (const file of workerFiles) {
 	let content = fs.readFileSync(file, 'utf-8');
 
-	// 古いパッチを除去
-	content = content.replace(/\/\/ YORUSKI_[A-Z_]+:.*\n/g, '');
-	content = content.replace(/await new Promise\(r => setTimeout\(r, \d+\)\);[^\n]*\n/g, '');
-
-	if (content.includes('YORUSKI_FORCE_WAIT')) {
+	// 既にパッチ済みならスキップ
+	if (content.includes('YORUSKI_LOOP_THROTTLE')) {
 		console.log(`[patch-bullmq] Already patched: ${file}`);
 		continue;
 	}
 
-	// _getNextJob()のif-else構造を書き換え
-	// 元: if (this.drained && ...) { waitForJob } else { moveToActive }
-	// 新: 常にwaitForJob→moveToActive
-	const oldCode = `if (this.drained && block && !this.limitUntil && !this.waiting) {
-            this.waiting = this.waitForJob(bclient, this.blockUntil);
-            try {
-                this.blockUntil = await this.waiting;
-                if (this.blockUntil <= 0 || this.blockUntil - Date.now() < 1) {
-                    return await this.moveToActive(client, token, this.opts.name);
-                }
-            }
-            finally {
-                this.waiting = null;
-            }
-        }
-        else {
-            if (!this.isRateLimited()) {
-                return this.moveToActive(client, token, this.opts.name);
-            }
-        }`;
+	// 古いパッチを除去
+	content = content.replace(/\/\/ YORUSKI_[A-Z_]+:.*\n/g, '');
+	content = content.replace(/await new Promise\(r => setTimeout\(r, \d+\)\);[^\n]*\n/g, '');
+	// 古いFORCE_WAITパッチのブロックも除去
+	content = content.replace(/\s*\/\/ YORUSKI_FORCE_WAIT[\s\S]*?if \(!this\.isRateLimited\(\)\) \{\s*return this\.moveToActive\(client, token, this\.opts\.name\);\s*\}/g, (match) => {
+		// マッチした場合は元のif-else構造に戻す必要があるが、
+		// 古いパッチが既に適用されているかもしれないので、元のコードに戻す
+		return '';
+	});
 
-	const newCode = `// YORUSKI_FORCE_WAIT: 常にwaitForJobを経由してCPUスピンを防止
-        if (!this.waiting && block) {
-            this.waiting = this.waitForJob(bclient, this.blockUntil);
-            try {
-                this.blockUntil = await this.waiting;
-            }
-            finally {
-                this.waiting = null;
-            }
-        }
-        if (!this.isRateLimited()) {
-            return this.moveToActive(client, token, this.opts.name);
-        }`;
+	// _getNextJob内の drained チェック直前にsleepを挿入
+	// ターゲット: "if (this.drained && block && !this.limitUntil && !this.waiting)"
+	const target = 'if (this.drained && block && !this.limitUntil && !this.waiting)';
 
-	if (content.includes(oldCode)) {
-		content = content.replace(oldCode, newCode);
+	if (content.includes(target)) {
+		content = content.replace(
+			target,
+			`// YORUSKI_LOOP_THROTTLE: 毎ループ${SLEEP_MS}msスリープでCPUスピン防止\n            await new Promise(r => setTimeout(r, ${SLEEP_MS}));\n            ${target}`,
+		);
 		fs.writeFileSync(file, content);
-		console.log(`[patch-bullmq] Patched: ${file}`);
+		console.log(`[patch-bullmq] Patched (${SLEEP_MS}ms throttle): ${file}`);
 		patched++;
 	} else {
-		console.log(`[patch-bullmq] Target not found (may have old patches): ${file}`);
+		console.log(`[patch-bullmq] Target code not found: ${file}`);
+		// ファイルの内容をデバッグ出力
+		const lines = content.split('\n');
+		const getNextJobLine = lines.findIndex(l => l.includes('_getNextJob'));
+		if (getNextJobLine >= 0) {
+			console.log(`[patch-bullmq] _getNextJob found at line ${getNextJobLine + 1}`);
+			console.log(lines.slice(getNextJobLine, getNextJobLine + 30).join('\n'));
+		}
 	}
 }
 

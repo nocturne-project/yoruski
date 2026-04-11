@@ -277,6 +277,15 @@ export function createPostgresDataSource(config: Config) {
 		database: config.db.db,
 		extra: {
 			statement_timeout: 1000 * 10,
+			// よるすきー: 全Promiseを必ず終わらせるためのタイムアウト設定
+			// fire-and-forgetされたDB操作Promiseが永遠にresolve/rejectされないと
+			// メモリに溜まってpopAsyncContextのCPU 100%スピンを引き起こす
+			query_timeout: 1000 * 30,           // クエリ全体30秒タイムアウト
+			connectionTimeoutMillis: 1000 * 10, // 接続確立10秒タイムアウト
+			idleTimeoutMillis: 1000 * 60 * 10,  // アイドル接続10分でクローズ
+			keepAlive: true,                    // TCP keep-alive有効
+			keepAliveInitialDelayMillis: 1000 * 60, // 60秒後にkeep-alive開始
+			max: 10,                             // プールサイズ明示
 			...config.db.extra,
 		},
 		...(config.dbReplications ? {

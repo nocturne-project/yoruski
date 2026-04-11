@@ -224,25 +224,27 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		this.apRequestChart.inbox();
 		this.federationChart.inbox(authUser.user.host);
 
+		// よるすきー: process.nextTickを排除してawaitに変更
+		// 原則: workerプロセスでは全てのPromiseをawaitする（fire-and-forget禁止）
 		// Update instance stats
-		process.nextTick(async () => {
+		{
 			const i = await (this.meta.enableStatsForFederatedInstances
 				? this.federatedInstanceService.fetchOrRegister(authUser.user.host)
 				: this.federatedInstanceService.fetch(authUser.user.host));
 
-			if (i == null) return;
+			if (i != null) {
+				this.updateInstanceQueue.enqueue(i.id, {
+					latestRequestReceivedAt: new Date(),
+					shouldUnsuspend: i.suspensionState === 'autoSuspendedForNotResponding',
+				});
 
-			this.updateInstanceQueue.enqueue(i.id, {
-				latestRequestReceivedAt: new Date(),
-				shouldUnsuspend: i.suspensionState === 'autoSuspendedForNotResponding',
-			});
+				if (this.meta.enableChartsForFederatedInstances) {
+					this.instanceChart.requestReceived(i.host);
+				}
 
-			if (this.meta.enableChartsForFederatedInstances) {
-				this.instanceChart.requestReceived(i.host);
+				await this.fetchInstanceMetadataService.fetchInstanceMetadata(i);
 			}
-
-			this.fetchInstanceMetadataService.fetchInstanceMetadata(i);
-		});
+		}
 
 		// アクティビティを処理
 		logStep('performActivity');

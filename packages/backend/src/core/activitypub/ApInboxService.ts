@@ -127,13 +127,13 @@ export class ApInboxService {
 			result = await this.performOneActivity(actor, activity, resolver);
 		}
 
+		// よるすきー: setImmediateを排除してawaitに変更
+		// 原則: workerプロセスでは全てのPromiseをawaitする（fire-and-forget禁止）
 		// ついでにリモートユーザーの情報が古かったら更新しておく
 		if (actor.uri) {
 			if (actor.lastFetchedAt == null || Date.now() - actor.lastFetchedAt.getTime() > 1000 * 60 * 60 * 24) {
-				setImmediate(() => {
-					// 同一ユーザーの情報を再度処理するので、使用済みのresolverを再利用してはいけない
-					this.apPersonService.updatePerson(actor.uri);
-				});
+				// 同一ユーザーの情報を再度処理するので、使用済みのresolverを再利用してはいけない
+				await this.apPersonService.updatePerson(actor.uri).catch(() => {});
 			}
 		}
 		return result;
@@ -431,6 +431,9 @@ export class ApInboxService {
 	@bindThis
 	private async createNote(resolver: Resolver, actor: MiRemoteUser, note: IObject, silent = false, activity?: ICreate): Promise<string> {
 		const uri = getApId(note);
+		const t0 = Date.now();
+		// よるすきー: 詳細トレース（CPU 100%問題のデバッグ用）
+		const trace = (step: string) => this.logger.info(`[create-trace] uri=${uri} step=${step} elapsed=${Date.now() - t0}ms`);
 
 		if (typeof note === 'object') {
 			if (actor.uri !== note.attributedTo) {
@@ -446,22 +449,31 @@ export class ApInboxService {
 			}
 		}
 
+		trace('acquireLock-start');
 		const unlock = await acquireApObjectLock(this.redisClient, uri);
+		trace('acquireLock-done');
 
 		try {
+			trace('fetchNote-start');
 			const exist = await this.apNoteService.fetchNote(note);
+			trace('fetchNote-done');
 			if (exist) return 'skip: note exists';
 
+			trace('createNote-start');
 			await this.apNoteService.createNote(note, actor, resolver, silent);
+			trace('createNote-done');
 			return 'ok';
 		} catch (err) {
+			trace(`error: ${(err as Error).message?.substring(0, 50)}`);
 			if (err instanceof StatusError && !err.isRetryable) {
 				return `skip ${err.statusCode}`;
 			} else {
 				throw err;
 			}
 		} finally {
+			trace('unlock-start');
 			unlock();
+			trace('unlock-done');
 		}
 	}
 

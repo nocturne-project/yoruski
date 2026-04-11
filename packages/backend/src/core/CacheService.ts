@@ -136,17 +136,29 @@ export class CacheService implements OnApplicationShutdown {
 					if (user == null) {
 						this.userByIdCache.delete(body.id);
 						this.localUserByIdCache.delete(body.id);
+						// よるすきー: Map iteration中の delete/set 禁止（無限ループ防止）
+						// MemoryKVCache.set/delete は LRU 実装で内部的に entry を末尾に移動するため、
+						// iteration中に呼ぶと iterator が同じ entry を再訪問して無限ループする
+						const keysToDelete: string[] = [];
 						for (const [k, v] of this.uriPersonCache.entries) {
 							if (v.value?.id === body.id) {
-								this.uriPersonCache.delete(k);
+								keysToDelete.push(k);
 							}
+						}
+						for (const k of keysToDelete) {
+							this.uriPersonCache.delete(k);
 						}
 					} else {
 						this.userByIdCache.set(user.id, user);
+						// よるすきー: Map iteration中の delete/set 禁止（無限ループ防止）
+						const keysToUpdate: string[] = [];
 						for (const [k, v] of this.uriPersonCache.entries) {
 							if (v.value?.id === user.id) {
-								this.uriPersonCache.set(k, user);
+								keysToUpdate.push(k);
 							}
+						}
+						for (const k of keysToUpdate) {
+							this.uriPersonCache.set(k, user);
 						}
 						if (this.userEntityService.isLocalUser(user)) {
 							this.localUserByNativeTokenCache.set(user.token!, user);

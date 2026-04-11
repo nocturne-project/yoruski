@@ -306,16 +306,24 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		//#region inbox
 		{
 			this.inboxQueueWorker = new Bull.Worker(QUEUE.INBOX, async (job) => {
-				await yieldToEventLoop();
+				await yieldToEventLoop(500);
+				let result;
 				if (Sentry != null) {
-					return Sentry.startSpan({ name: 'Queue: Inbox' }, () => this.inboxProcessorService.process(job));
+					result = await Sentry.startSpan({ name: 'Queue: Inbox' }, () => this.inboxProcessorService.process(job));
 				} else {
-					return this.inboxProcessorService.process(job);
+					result = await this.inboxProcessorService.process(job);
 				}
+				await yieldToEventLoop(2500);
+				return result;
 			}, {
 				...baseWorkerOptions(this.config, QUEUE.INBOX),
 				autorun: false,
-				concurrency: this.config.inboxJobConcurrency ?? 16,
+				// よるすきー: concurrency=1でPromise生成レートを抑制（CPU 100%対策）
+				concurrency: 1,
+				limiter: {
+					max: 5,
+					duration: 1000,
+				},
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
