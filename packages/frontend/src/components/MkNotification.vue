@@ -205,7 +205,6 @@ const props = withDefaults(defineProps<{
 type ExportCompletedNotification = Misskey.entities.Notification & { type: 'exportCompleted' };
 
 const exportEntityName = {
-	antenna: i18n.ts.antennas,
 	blocking: i18n.ts.blockedUsers,
 	clip: i18n.ts.clips,
 	customEmoji: i18n.ts.customEmojis,

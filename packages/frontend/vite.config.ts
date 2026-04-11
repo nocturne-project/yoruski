@@ -172,10 +172,11 @@ export function getConfig(): UserConfig {
 		},
 
 		build: {
+			// よるすきー: iOS 15.x Safari対応のためターゲットを引き下げ
 			target: [
 				'chrome116',
 				'firefox116',
-				'safari16',
+				'safari15',
 			],
 			manifest: 'manifest.json',
 			rollupOptions: {
@@ -215,7 +216,7 @@ export function getConfig(): UserConfig {
 
 			// https://vitejs.dev/guide/dep-pre-bundling.html#monorepos-and-linked-dependencies
 			commonjsOptions: {
-				include: [/misskey-js/, /misskey-reversi/, /misskey-bubble-game/, /node_modules/],
+				include: [/misskey-js/, /node_modules/],
 			},
 		},
 

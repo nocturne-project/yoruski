@@ -5,6 +5,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <template>
 <PageWithHeader v-model:tab="src" :actions="headerActions" :tabs="$i ? headerTabs : headerTabsWhenNotLogin" :swipable="true" :displayMyAvatar="true" :canOmitTitle="true">
+	<!-- 夜間限定ローカル・ソーシャルTL: カウントダウン（タブ直下に密着表示） -->
+	<div v-if="(src === 'local' || src === 'social') && nightStatus.loaded.value" :class="[nightStatus.isNight.value ? $style.nightBarNight : $style.nightBarDay]">
+		<i :class="nightStatus.isNight.value ? 'ti ti-moon-stars' : 'ti ti-sun'"></i>
+		<span v-if="nightStatus.isNight.value">{{ i18n.ts._yoruski?.sunriseCountdown ?? '日の出まで' }} {{ nightStatus.countdown.value }}</span>
+		<span v-else>{{ i18n.ts._yoruski?.sunsetCountdown ?? '日没まで' }} {{ nightStatus.countdown.value }}</span>
+	</div>
 	<div class="_spacer" style="--MI_SPACER-w: 800px;">
 		<MkTip v-if="isBasicTimeline(src)" :k="`tl.${src}`" style="margin-bottom: var(--MI-margin);">
 			{{ i18n.ts._timelineDescription[src] }}
@@ -14,7 +20,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			ref="tlComponent"
 			:key="src + withRenotes + withReplies + onlyFiles + withSensitive"
 			:class="$style.tl"
-			:src="(src.split(':')[0] as (BasicTimelineType | 'list' | 'role' | 'antenna'))"
+			:src="(src.split(':')[0] as (BasicTimelineType | 'list' | 'role'))"
 			:list="src.split(':')[1]"
 			:role="src.split(':')[0] === 'role' ? src.split(':')[1] : undefined"
 			:withRenotes="withRenotes"
@@ -22,7 +28,19 @@ SPDX-License-Identifier: AGPL-3.0-only
 			:withSensitive="withSensitive"
 			:onlyFiles="onlyFiles"
 			:sound="true"
-		/>
+		>
+			<!-- 昼間のローカル・ソーシャルTL: 夜間限定であることを説明 -->
+			<template v-if="(src === 'local' || src === 'social') && nightStatus.loaded.value && !nightStatus.isNight.value" #empty>
+				<div :class="$style.localDaytimeEmpty">
+					<i class="ti ti-moon-stars" :class="$style.localDaytimeIcon"></i>
+					<p :class="$style.localDaytimeTitle">{{ src === 'social' ? 'ソーシャルタイムラインは夜間限定です' : 'ローカルタイムラインは夜間限定です' }}</p>
+					<p :class="$style.localDaytimeDesc">日没後にタイムラインが開放されます。<br>それまではホームタイムラインをお楽しみください。</p>
+					<p :class="$style.localDaytimeCountdown">
+						<i class="ti ti-sun"></i> 日没まで {{ nightStatus.countdown.value }}
+					</p>
+				</div>
+			</template>
+		</MkStreamingNotesTimeline>
 	</div>
 </PageWithHeader>
 </template>
@@ -36,12 +54,13 @@ import type { BasicTimelineType } from '@/timelines.js';
 import type { PageHeaderItem } from '@/types/page-header.js';
 import MkStreamingNotesTimeline from '@/components/MkStreamingNotesTimeline.vue';
 import MkPostForm from '@/components/MkPostForm.vue';
+import { useNightStatus } from '@/scripts/use-night-status.js';
 import * as os from '@/os.js';
 import { store } from '@/store.js';
 import { i18n } from '@/i18n.js';
 import { $i } from '@/i.js';
 import { definePage } from '@/page.js';
-import { antennasCache, userListsCache, favoritedChannelsCache } from '@/cache.js';
+import { userListsCache, favoritedChannelsCache } from '@/cache.js';
 import { deviceKind } from '@/utility/device-kind.js';
 import { deepMerge } from '@/utility/merge.js';
 import { miLocalStorage } from '@/local-storage.js';
@@ -51,14 +70,14 @@ import { misskeyApi } from '@/utility/misskey-api.js';
 
 const tlComponent = useTemplateRef('tlComponent');
 const router = useRouter();
+const nightStatus = useNightStatus();
 
 const props = defineProps<{
 	roleId?: string;
 	listId?: string;
-	antennaId?: string;
 }>();
 
-type TimelinePageSrc = BasicTimelineType | `list:${string}` | `role:${string}` | `antenna:${string}`;
+type TimelinePageSrc = BasicTimelineType | `list:${string}` | `role:${string}`;
 
 const srcWhenNotSignin = ref<'local' | 'global'>(isAvailableBasicTimeline('local') ? 'local' : 'global');
 const src = computed<TimelinePageSrc>({
@@ -66,7 +85,6 @@ const src = computed<TimelinePageSrc>({
 		// URLパラメータから優先的に取得
 		if (props.roleId) return `role:${props.roleId}` as TimelinePageSrc;
 		if (props.listId) return `list:${props.listId}` as TimelinePageSrc;
-		if (props.antennaId) return `antenna:${props.antennaId}` as TimelinePageSrc;
 
 		// ストアから取得
 		return $i ? (store.r.tl.value.src as TimelinePageSrc) : srcWhenNotSignin.value;
@@ -143,26 +161,6 @@ async function chooseList(ev: PointerEvent): Promise<void> {
 	os.popupMenu(items.filter(i => i != null), ev.currentTarget ?? ev.target);
 }
 
-async function chooseAntenna(ev: PointerEvent): Promise<void> {
-	const antennas = await antennasCache.fetch();
-	const items: (MenuItem | undefined)[] = [
-		...antennas.map(antenna => ({
-			type: 'link' as const,
-			text: antenna.name,
-			indicate: antenna.hasUnreadNote,
-			to: `/timeline/antenna/${antenna.id}`,
-		})),
-		(antennas.length === 0 ? undefined : { type: 'divider' }),
-		{
-			type: 'link' as const,
-			icon: 'ti ti-plus',
-			text: i18n.ts.createNew,
-			to: '/my/antennas',
-		},
-	];
-	os.popupMenu(items.filter(i => i != null), ev.currentTarget ?? ev.target);
-}
-
 async function chooseChannel(ev: PointerEvent): Promise<void> {
 	const channels = await favoritedChannelsCache.fetch();
 	const items: (MenuItem | undefined)[] = [
@@ -214,7 +212,6 @@ function saveSrc(newSrc: TimelinePageSrc): void {
 	// URLパラメータ経由でも、ロールから別のタイムラインへ切り替える場合は許可
 	if (props.roleId && newSrc === `role:${props.roleId}`) return;
 	if (props.listId && newSrc === `list:${props.listId}`) return;
-	if (props.antennaId && newSrc === `antenna:${props.antennaId}`) return;
 	
 	// ナビゲーションでURLを更新
 	if (newSrc.startsWith('role:')) {
@@ -257,6 +254,13 @@ onMounted(() => {
 });
 onActivated(() => {
 	switchTlIfNeeded();
+});
+
+// 夜間状態が切り替わったらローカル・ソーシャルTLを自動リロード
+watch(() => nightStatus.isNight.value, () => {
+	if (src.value === 'local' || src.value === 'social') {
+		tlComponent.value?.reloadTimeline();
+	}
 });
 
 const headerActions = computed<PageHeaderItem[]>(() => {
@@ -335,11 +339,6 @@ const headerTabs = computed(() => [...(prefer.r.pinnedUserLists.value.map(l => (
 	iconOnly: true,
 	onClick: chooseList,
 }, {
-	icon: 'ti ti-antenna',
-	title: i18n.ts.antennas,
-	iconOnly: true,
-	onClick: chooseAntenna,
-}, {
 	icon: 'ti ti-device-tv',
 	title: i18n.ts.channel,
 	iconOnly: true,
@@ -392,5 +391,73 @@ definePage(() => ({
 	background: var(--MI_THEME-bg);
 	border-radius: var(--MI-radius);
 	overflow: clip;
+}
+
+/* 夜間カウントダウン: ステータスバー風コンパクト表示 */
+.nightBarNight,
+.nightBarDay {
+	text-align: center;
+	padding: 4px 12px;
+	font-size: 0.8em;
+	opacity: 0.85;
+
+	i {
+		margin-right: 6px;
+		font-size: 0.9em;
+	}
+}
+
+.nightBarNight {
+	background: var(--MI_THEME-infoWarnBg, var(--MI_THEME-bg));
+	color: var(--MI_THEME-infoWarnFg, var(--MI_THEME-fg));
+}
+
+.nightBarDay {
+	background: var(--MI_THEME-infoWarnBg, var(--MI_THEME-bg));
+	color: var(--MI_THEME-infoWarnFg, var(--MI_THEME-fg));
+}
+
+/* 昼間ローカルTL空状態の説明表示 */
+.localDaytimeEmpty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 48px 24px;
+	text-align: center;
+	color: var(--MI_THEME-fg);
+	opacity: 0.85;
+}
+
+.localDaytimeIcon {
+	font-size: 48px;
+	margin-bottom: 16px;
+	opacity: 0.5;
+}
+
+.localDaytimeTitle {
+	font-size: 1.1em;
+	font-weight: bold;
+	margin: 0 0 12px 0;
+}
+
+.localDaytimeDesc {
+	font-size: 0.9em;
+	margin: 0 0 20px 0;
+	opacity: 0.7;
+	line-height: 1.6;
+}
+
+.localDaytimeCountdown {
+	font-size: 1.2em;
+	margin: 0;
+	padding: 8px 20px;
+	border-radius: 999px;
+	background: var(--MI_THEME-infoWarnBg, var(--MI_THEME-bg));
+	color: var(--MI_THEME-infoWarnFg, var(--MI_THEME-fg));
+
+	i {
+		margin-right: 6px;
+	}
 }
 </style>

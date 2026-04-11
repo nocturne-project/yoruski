@@ -56,10 +56,11 @@ export class CacheService implements OnApplicationShutdown {
 	) {
 		//this.onMessage = this.onMessage.bind(this);
 
-		this.userByIdCache = new MemoryKVCache<MiUser>(1000 * 60 * 5); // 5m
-		this.localUserByNativeTokenCache = new MemoryKVCache<MiLocalUser | null>(1000 * 60 * 5); // 5m
-		this.localUserByIdCache = new MemoryKVCache<MiLocalUser>(1000 * 60 * 5); // 5m
-		this.uriPersonCache = new MemoryKVCache<MiUser | null>(1000 * 60 * 5); // 5m
+		// maxSize: 小規模サーバー向けにキャッシュエントリ数を制限（メモリ削減）
+		this.userByIdCache = new MemoryKVCache<MiUser>(1000 * 60 * 5, 1000); // 5m, max 1000
+		this.localUserByNativeTokenCache = new MemoryKVCache<MiLocalUser | null>(1000 * 60 * 5, 500); // 5m, max 500
+		this.localUserByIdCache = new MemoryKVCache<MiLocalUser>(1000 * 60 * 5, 500); // 5m, max 500
+		this.uriPersonCache = new MemoryKVCache<MiUser | null>(1000 * 60 * 5, 2000); // 5m, max 2000
 
 		this.userProfileCache = new RedisKVCache<MiUserProfile>(this.redisClient, 'userProfile', {
 			lifetime: 1000 * 60 * 30, // 30m
@@ -135,17 +136,29 @@ export class CacheService implements OnApplicationShutdown {
 					if (user == null) {
 						this.userByIdCache.delete(body.id);
 						this.localUserByIdCache.delete(body.id);
+						// よるすきー: Map iteration中の delete/set 禁止（無限ループ防止）
+						// MemoryKVCache.set/delete は LRU 実装で内部的に entry を末尾に移動するため、
+						// iteration中に呼ぶと iterator が同じ entry を再訪問して無限ループする
+						const keysToDelete: string[] = [];
 						for (const [k, v] of this.uriPersonCache.entries) {
 							if (v.value?.id === body.id) {
-								this.uriPersonCache.delete(k);
+								keysToDelete.push(k);
 							}
+						}
+						for (const k of keysToDelete) {
+							this.uriPersonCache.delete(k);
 						}
 					} else {
 						this.userByIdCache.set(user.id, user);
+						// よるすきー: Map iteration中の delete/set 禁止（無限ループ防止）
+						const keysToUpdate: string[] = [];
 						for (const [k, v] of this.uriPersonCache.entries) {
 							if (v.value?.id === user.id) {
-								this.uriPersonCache.set(k, user);
+								keysToUpdate.push(k);
 							}
+						}
+						for (const k of keysToUpdate) {
+							this.uriPersonCache.set(k, user);
 						}
 						if (this.userEntityService.isLocalUser(user)) {
 							this.localUserByNativeTokenCache.set(user.token!, user);

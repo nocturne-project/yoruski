@@ -20,6 +20,7 @@ import { MiLocalUser } from '@/models/User.js';
 import { FanoutTimelineEndpointService } from '@/core/FanoutTimelineEndpointService.js';
 import { ChannelMutingService } from '@/core/ChannelMutingService.js';
 import { ChannelFollowingService } from '@/core/ChannelFollowingService.js';
+import { NightTimeService } from '@/core/NightTimeService.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -90,9 +91,15 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private userFollowingService: UserFollowingService,
 		private channelMutingService: ChannelMutingService,
 		private channelFollowingService: ChannelFollowingService,
+		private nightTimeService: NightTimeService,
 		private fanoutTimelineEndpointService: FanoutTimelineEndpointService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			// 夜間限定ソーシャルTL: 昼間は空配列を返す
+			if (!this.nightTimeService.isNightTime()) {
+				return [];
+			}
+
 			const untilId = ps.untilId ?? (ps.untilDate ? this.idService.gen(ps.untilDate!) : null);
 			const sinceId = ps.sinceId ?? (ps.sinceDate ? this.idService.gen(ps.sinceDate!) : null);
 

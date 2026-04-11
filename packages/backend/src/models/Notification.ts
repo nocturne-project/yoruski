@@ -143,7 +143,7 @@ export type MiNotification = {
 	id: string;
 	createdAt: string;
 } | {
-	type: 'noqQuestion';
+	type: 'yoruqQuestion';
 	id: string;
 	createdAt: string;
 	notifierId: MiUser['id'];

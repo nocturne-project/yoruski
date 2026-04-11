@@ -52,7 +52,6 @@ export type RolePolicies = {
 	alwaysMarkNsfw: boolean;
 	canUpdateBioMedia: boolean;
 	pinLimit: number;
-	antennaLimit: number;
 	wordMuteLimit: number;
 	webhookLimit: number;
 	clipLimit: number;
@@ -61,7 +60,6 @@ export type RolePolicies = {
 	userEachUserListsLimit: number;
 	rateLimitFactor: number;
 	avatarDecorationLimit: number;
-	canImportAntennas: boolean;
 	canImportBlocking: boolean;
 	canImportFollowing: boolean;
 	canImportMuting: boolean;
@@ -93,7 +91,6 @@ export const DEFAULT_POLICIES: RolePolicies = {
 	alwaysMarkNsfw: false,
 	canUpdateBioMedia: true,
 	pinLimit: 5,
-	antennaLimit: 5,
 	wordMuteLimit: 200,
 	webhookLimit: 3,
 	clipLimit: 10,
@@ -102,7 +99,6 @@ export const DEFAULT_POLICIES: RolePolicies = {
 	userEachUserListsLimit: 50,
 	rateLimitFactor: 1,
 	avatarDecorationLimit: 1,
-	canImportAntennas: false,
 	canImportBlocking: false,
 	canImportFollowing: false,
 	canImportMuting: false,
@@ -416,7 +412,6 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 			alwaysMarkNsfw: calc('alwaysMarkNsfw', vs => vs.some(v => v === true)),
 			canUpdateBioMedia: calc('canUpdateBioMedia', vs => vs.some(v => v === true)),
 			pinLimit: calc('pinLimit', vs => Math.max(...vs)),
-			antennaLimit: calc('antennaLimit', vs => Math.max(...vs)),
 			wordMuteLimit: calc('wordMuteLimit', vs => Math.max(...vs)),
 			webhookLimit: calc('webhookLimit', vs => Math.max(...vs)),
 			clipLimit: calc('clipLimit', vs => Math.max(...vs)),
@@ -425,7 +420,6 @@ export class RoleService implements OnApplicationShutdown, OnModuleInit {
 			userEachUserListsLimit: calc('userEachUserListsLimit', vs => Math.max(...vs)),
 			rateLimitFactor: calc('rateLimitFactor', vs => Math.max(...vs)),
 			avatarDecorationLimit: calc('avatarDecorationLimit', vs => Math.max(...vs)),
-			canImportAntennas: calc('canImportAntennas', vs => vs.some(v => v === true)),
 			canImportBlocking: calc('canImportBlocking', vs => vs.some(v => v === true)),
 			canImportFollowing: calc('canImportFollowing', vs => vs.some(v => v === true)),
 			canImportMuting: calc('canImportMuting', vs => vs.some(v => v === true)),

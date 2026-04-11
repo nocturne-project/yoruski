@@ -10,7 +10,6 @@ import { type FastifyServerOptions } from 'fastify';
 import type * as Sentry from '@sentry/node';
 import type * as SentryVue from '@sentry/vue';
 import type { RedisOptions } from 'ioredis';
-import type { ManifestChunk } from 'vite';
 
 type RedisOptionsSource = Partial<RedisOptions> & {
 	host: string;
@@ -106,7 +105,6 @@ type Source = {
 
 	perChannelMaxNoteCacheCount?: number;
 	perUserNotificationsMaxCount?: number;
-	deactivateAntennaThreshold?: number;
 	pidFile: string;
 
 	logging?: {
@@ -120,6 +118,12 @@ type Source = {
 		enableSignupErrorNotification?: boolean;
 		botToken?: string;
 		channelId?: string;
+	};
+
+	// 夜間限定ローカルTL設定（yoru.noc.ski独自）
+	nightTime?: {
+		latitude: number;
+		longitude: number;
 	};
 };
 
@@ -195,9 +199,7 @@ export type Config = {
 	authUrl: string;
 	driveUrl: string;
 	userAgent: string;
-	frontendEntry: ManifestChunk;
 	frontendManifestExists: boolean;
-	frontendEmbedEntry: ManifestChunk;
 	frontendEmbedManifestExists: boolean;
 	mediaProxy: string;
 	externalMediaProxyEnabled: boolean;
@@ -216,12 +218,15 @@ export type Config = {
 	} | undefined;
 	perChannelMaxNoteCacheCount: number;
 	perUserNotificationsMaxCount: number;
-	deactivateAntennaThreshold: number;
 	pidFile: string;
 	slack: {
 		enableSignupErrorNotification?: boolean;
 		botToken?: string;
 		channelId?: string;
+	} | undefined;
+	nightTime: {
+		latitude: number;
+		longitude: number;
 	} | undefined;
 };
 
@@ -261,12 +266,6 @@ export function loadConfig(): Config {
 
 	const frontendManifestExists = fs.existsSync(resolve(projectBuiltDir, '_frontend_vite_/manifest.json'));
 	const frontendEmbedManifestExists = fs.existsSync(resolve(projectBuiltDir, '_frontend_embed_vite_/manifest.json'));
-	const frontendManifest = frontendManifestExists ?
-		JSON.parse(fs.readFileSync(resolve(projectBuiltDir, '_frontend_vite_/manifest.json'), 'utf-8'))
-		: { 'src/_boot_.ts': { file: null } };
-	const frontendEmbedManifest = frontendEmbedManifestExists ?
-		JSON.parse(fs.readFileSync(resolve(projectBuiltDir, '_frontend_embed_vite_/manifest.json'), 'utf-8'))
-		: { 'src/boot.ts': { file: null } };
 
 	const config = JSON.parse(fs.readFileSync(compiledConfigFilePath, 'utf-8')) as Source;
 
@@ -348,13 +347,10 @@ export function loadConfig(): Config {
 			config.videoThumbnailGenerator.endsWith('/') ? config.videoThumbnailGenerator.substring(0, config.videoThumbnailGenerator.length - 1) : config.videoThumbnailGenerator
 			: null,
 		userAgent: `Misskey/${version} (${config.url})`,
-		frontendEntry: frontendManifest['src/_boot_.ts'],
 		frontendManifestExists: frontendManifestExists,
-		frontendEmbedEntry: frontendEmbedManifest['src/boot.ts'],
 		frontendEmbedManifestExists: frontendEmbedManifestExists,
 		perChannelMaxNoteCacheCount: config.perChannelMaxNoteCacheCount ?? 1000,
 		perUserNotificationsMaxCount: config.perUserNotificationsMaxCount ?? 500,
-		deactivateAntennaThreshold: config.deactivateAntennaThreshold ?? (1000 * 60 * 60 * 24 * 7),
 		pidFile: config.pidFile,
 		logging: {
 			sql: {
@@ -363,6 +359,7 @@ export function loadConfig(): Config {
 			},
 		},
 		slack: config.slack,
+		nightTime: config.nightTime,
 	};
 };
 

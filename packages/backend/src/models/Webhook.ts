@@ -30,7 +30,7 @@ export class MiWebhook {
 
 	@Column('varchar', {
 		length: 128,
-		comment: 'The name of the Antenna.',
+		comment: 'The name of the Webhook.',
 	})
 	public name: string;
 

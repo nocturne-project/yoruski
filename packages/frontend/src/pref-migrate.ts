@@ -3,12 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import type { DeckProfile } from '@/deck.js';
-import { genId } from '@/utility/id.js';
 import { store } from '@/store.js';
 import { prefer } from '@/preferences.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
-import { deckStore } from '@/ui/deck/deck-store.js';
 import { unisonReload } from '@/utility/unison-reload.js';
 import * as os from '@/os.js';
 import { i18n } from '@/i18n.js';
@@ -23,26 +20,6 @@ export function migrateOldSettings() {
 			if (themes.length > 0) {
 				prefer.commit('themes', themes);
 			}
-		});
-
-		prefer.commit('deck.profile', deckStore.s.profile);
-		misskeyApi('i/registry/keys', {
-			scope: ['client', 'deck', 'profiles'],
-		}).then(async keys => {
-			const profiles: DeckProfile[] = [];
-			for (const key of keys) {
-				const deck = await misskeyApi('i/registry/get', {
-					scope: ['client', 'deck', 'profiles'],
-					key: key,
-				});
-				profiles.push({
-					id: genId(),
-					name: key,
-					columns: deck.columns,
-					layout: deck.layout,
-				});
-			}
-			prefer.commit('deck.profiles', profiles);
 		});
 
 		prefer.commit('emojiPalettes', [{

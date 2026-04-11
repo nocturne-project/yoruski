@@ -156,10 +156,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<div>{{ defaultPolicies.userListLimit }}</div>
 			</div>
 			<div>
-				<div><b>{{ i18n.ts._role.baseRole }}/{{ i18n.ts._role._options.antennaMax }}:</b></div>
-				<div>{{ defaultPolicies.antennaLimit }}</div>
-			</div>
-			<div>
 				<div><b>{{ i18n.ts._role.baseRole }}/{{ i18n.ts._role._options.webhookMax }}:</b></div>
 				<div>{{ defaultPolicies.webhookLimit }}</div>
 			</div>
@@ -178,10 +174,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<div>
 				<div><b>{{ i18n.ts._role.baseRole }}/{{ i18n.ts._role._options.canImportUserLists }}:</b></div>
 				<div>{{ defaultPolicies.canImportUserLists ? i18n.ts.yes : i18n.ts.no }}</div>
-			</div>
-			<div>
-				<div><b>{{ i18n.ts._role.baseRole }}/{{ i18n.ts._role._options.canImportAntennas }}:</b></div>
-				<div>{{ defaultPolicies.canImportAntennas ? i18n.ts.yes : i18n.ts.no }}</div>
 			</div>
 		</div>
 
@@ -283,15 +275,6 @@ const defaultPolicies = computed<Partial<Misskey.entities.RolePolicies>>(() => {
 		userListLimit = 3;
 	}
 
-	let antennaLimit: Misskey.entities.RolePolicies['antennaLimit'] | undefined;
-	if (q_use.value === 'single') {
-		antennaLimit = 100;
-	} else if (q_use.value === 'group') {
-		antennaLimit = 5;
-	} else if (q_use.value === 'open') {
-		antennaLimit = 0;
-	}
-
 	let webhookLimit: Misskey.entities.RolePolicies['webhookLimit'] | undefined;
 	if (q_use.value === 'single') {
 		webhookLimit = 100;
@@ -329,24 +312,15 @@ const defaultPolicies = computed<Partial<Misskey.entities.RolePolicies>>(() => {
 		canImportUserLists = false;
 	}
 
-	let canImportAntennas: Misskey.entities.RolePolicies['canImportAntennas'];
-	if (q_use.value === 'single') {
-		canImportAntennas = true;
-	} else {
-		canImportAntennas = false;
-	}
-
 	return {
 		rateLimitFactor,
 		driveCapacityMb,
 		userListLimit,
-		antennaLimit,
 		webhookLimit,
 		canImportFollowing,
 		canImportMuting,
 		canImportBlocking,
 		canImportUserLists,
-		canImportAntennas,
 	};
 });
 

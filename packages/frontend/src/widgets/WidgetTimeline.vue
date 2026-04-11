@@ -8,7 +8,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 	<template #icon>
 		<i v-if="isBasicTimeline(widgetProps.src)" :class="basicTimelineIconClass(widgetProps.src)"></i>
 		<i v-else-if="widgetProps.src === 'list'" class="ti ti-list"></i>
-		<i v-else-if="widgetProps.src === 'antenna'" class="ti ti-antenna"></i>
 	</template>
 	<template #header>
 		<button class="_button" @click="choose">
@@ -26,10 +25,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 	</div>
 	<div v-else>
 		<MkStreamingNotesTimeline
-			:key="widgetProps.src === 'list' ? `list:${widgetProps.list?.id}` : widgetProps.src === 'antenna' ? `antenna:${widgetProps.antenna?.id}` : widgetProps.src"
+			:key="widgetProps.src === 'list' ? `list:${widgetProps.list?.id}` : widgetProps.src"
 			:src="widgetProps.src"
 			:list="widgetProps.list ? widgetProps.list.id : undefined"
-			:antenna="widgetProps.antenna ? widgetProps.antenna.id : undefined"
 		/>
 	</div>
 </MkContainer>
@@ -51,7 +49,7 @@ import { availableBasicTimelines, isAvailableBasicTimeline, isBasicTimeline, bas
 
 const name = 'timeline';
 
-type TlSrc = typeof basicTimelineTypes[number] | 'list' | 'antenna';
+type TlSrc = typeof basicTimelineTypes[number] | 'list';
 
 const widgetPropsDef = {
 	showHeader: {
@@ -65,11 +63,6 @@ const widgetPropsDef = {
 	src: {
 		type: 'string',
 		default: 'home' as TlSrc,
-		hidden: true,
-	},
-	antenna: {
-		type: 'object',
-		default: null as Misskey.entities.Antenna | null,
 		hidden: true,
 	},
 	list: {
@@ -95,8 +88,6 @@ const menuOpened = ref(false);
 const headerTitle = computed<string>(() => {
 	if (widgetProps.src === 'list') {
 		return widgetProps.list != null ? widgetProps.list.name : '?';
-	} else if (widgetProps.src === 'antenna') {
-		return widgetProps.antenna != null ? widgetProps.antenna.name : '?';
 	} else {
 		return i18n.ts._timelines[widgetProps.src] ?? '?';
 	}
@@ -109,18 +100,7 @@ const setSrc = (src: TlSrc) => {
 
 const choose = async (ev: PointerEvent) => {
 	menuOpened.value = true;
-	const [antennas, lists] = await Promise.all([
-		misskeyApi('antennas/list'),
-		misskeyApi('users/lists/list'),
-	]);
-	const antennaItems = antennas.map(antenna => ({
-		text: antenna.name,
-		icon: 'ti ti-antenna',
-		action: () => {
-			widgetProps.antenna = antenna;
-			setSrc('antenna');
-		},
-	}));
+	const lists = await misskeyApi('users/lists/list');
 	const listItems = lists.map(list => ({
 		text: list.name,
 		icon: 'ti ti-list',
@@ -137,11 +117,6 @@ const choose = async (ev: PointerEvent) => {
 		icon: basicTimelineIconClass(tl),
 		action: () => { setSrc(tl); },
 	})));
-
-	if (antennaItems.length > 0) {
-		menuItems.push({ type: 'divider' });
-		menuItems.push(...antennaItems);
-	}
 
 	if (listItems.length > 0) {
 		menuItems.push({ type: 'divider' });

@@ -19,6 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			<div :class="$style.newBg2"></div>
 			<button class="_button" :class="$style.newButton" @click="releaseQueue()"><i class="ti ti-circle-arrow-up"></i> {{ i18n.ts.newNote }}</button>
 		</div>
+		<!-- 仮想スクロール: ビューポートから遠いノートをプレースホルダーに置換 -->
 		<component
 			:is="prefer.s.animation ? TransitionGroup : 'div'"
 			:class="$style.notes"
@@ -30,7 +31,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 			tag="div"
 		>
 			<template v-for="(note, i) in paginator.items.value" :key="note.id">
-				<div v-if="i > 0 && isSeparatorNeeded(paginator.items.value[i -1].createdAt, note.createdAt)" :data-scroll-anchor="note.id">
+				<div v-if="i > 0 && isSeparatorNeeded(paginator.items.value[i -1].createdAt, note.createdAt)" :data-scroll-anchor="note.id" :data-note-wrapper="note.id">
 					<div :class="$style.date">
 						<span><i class="ti ti-chevron-up"></i> {{ getSeparatorInfo(paginator.items.value[i -1].createdAt, note.createdAt)?.prevText }}</span>
 						<span style="height: 1em; width: 1px; background: var(--MI_THEME-divider);"></span>
@@ -38,13 +39,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 					</div>
 					<MkNote :class="$style.note" :note="note" :withHardMute="true"/>
 				</div>
-				<div v-else-if="note._shouldInsertAd_" :data-scroll-anchor="note.id">
+				<div v-else-if="note._shouldInsertAd_" :data-scroll-anchor="note.id" :data-note-wrapper="note.id">
 					<MkNote :class="$style.note" :note="note" :withHardMute="true"/>
 					<div :class="$style.ad">
 						<MkAd :preferForms="['horizontal', 'horizontal-big']"/>
 					</div>
 				</div>
-				<MkNote v-else :class="$style.note" :note="note" :withHardMute="true" :data-scroll-anchor="note.id"/>
+				<MkNote v-else :class="$style.note" :note="note" :withHardMute="true" :data-scroll-anchor="note.id" :data-note-wrapper="note.id"/>
 			</template>
 		</component>
 		<button v-show="paginator.canFetchOlder.value" key="_more_" v-appear="prefer.s.enableInfiniteScroll ? paginator.fetchOlder : null" :disabled="paginator.fetchingOlder.value" class="_button" :class="$style.more" @click="paginator.fetchOlder">
@@ -79,9 +80,8 @@ import { isSeparatorNeeded, getSeparatorInfo } from '@/utility/timeline-date-sep
 import { Paginator } from '@/utility/paginator.js';
 
 const props = withDefaults(defineProps<{
-	src: BasicTimelineType | 'mentions' | 'directs' | 'list' | 'antenna' | 'channel' | 'role';
+	src: BasicTimelineType | 'mentions' | 'directs' | 'list' | 'channel' | 'role';
 	list?: string;
-	antenna?: string;
 	channel?: string;
 	role?: string;
 	sound?: boolean;
@@ -103,16 +103,10 @@ provide('inTimeline', true);
 provide('tl_withSensitive', computed(() => props.withSensitive));
 provide('inChannel', computed(() => props.src === 'channel'));
 
+
 let paginator: IPaginator<Misskey.entities.Note>;
 
-if (props.src === 'antenna') {
-	paginator = markRaw(new Paginator('antennas/notes', {
-		computedParams: computed(() => ({
-			antennaId: props.antenna!,
-		})),
-		useShallowRef: true,
-	}));
-} else if (props.src === 'home') {
+if (props.src === 'home') {
 	paginator = markRaw(new Paginator('notes/timeline', {
 		computedParams: computed(() => ({
 			withRenotes: props.withRenotes,
@@ -300,7 +294,6 @@ function prepend(note: Misskey.entities.Note & MisskeyEntity) {
 const stream = store.s.realtimeMode ? useStream() : null;
 
 const connections = {
-	antenna: null as Misskey.IChannelConnection<Misskey.Channels['antenna']> | null,
 	homeTimeline: null as Misskey.IChannelConnection<Misskey.Channels['homeTimeline']> | null,
 	localTimeline: null as Misskey.IChannelConnection<Misskey.Channels['localTimeline']> | null,
 	hybridTimeline: null as Misskey.IChannelConnection<Misskey.Channels['hybridTimeline']> | null,
@@ -313,13 +306,7 @@ const connections = {
 
 function connectChannel() {
 	if (stream == null) return;
-	if (props.src === 'antenna') {
-		if (props.antenna == null) return;
-		connections.antenna = stream.useChannel('antenna', {
-			antennaId: props.antenna,
-		});
-		connections.antenna.on('note', prepend);
-	} else if (props.src === 'home') {
+	if (props.src === 'home') {
 		connections.homeTimeline = stream.useChannel('homeTimeline', {
 			withRenotes: props.withRenotes,
 			withFiles: props.onlyFiles ? true : undefined,
@@ -393,7 +380,7 @@ if (store.s.realtimeMode) {
 	connectChannel();
 }
 
-watch(() => [props.list, props.antenna, props.channel, props.role, props.withRenotes], () => {
+watch(() => [props.list, props.channel, props.role, props.withRenotes], () => {
 	if (store.s.realtimeMode) {
 		disconnectChannel();
 		connectChannel();
@@ -567,4 +554,5 @@ defineExpose({
 	padding: 16px;
 	background: var(--MI_THEME-panel);
 }
+
 </style>

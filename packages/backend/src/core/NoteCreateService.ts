@@ -36,7 +36,6 @@ import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { UserWebhookService } from '@/core/UserWebhookService.js';
 import { HashtagService } from '@/core/HashtagService.js';
-import { AntennaService } from '@/core/AntennaService.js';
 import { QueueService } from '@/core/QueueService.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
@@ -45,6 +44,8 @@ import { ApDeliverManagerService } from '@/core/activitypub/ApDeliverManagerServ
 import { RemoteUserResolveService } from '@/core/RemoteUserResolveService.js';
 import { bindThis } from '@/decorators.js';
 import { DB_MAX_NOTE_TEXT_LENGTH } from '@/const.js';
+import { NightPointService } from '@/core/NightPointService.js';
+import { NightTimeService } from '@/core/NightTimeService.js';
 import { RoleService } from '@/core/RoleService.js';
 import { SearchService } from '@/core/SearchService.js';
 import { FeaturedService } from '@/core/FeaturedService.js';
@@ -212,12 +213,13 @@ export class NoteCreateService implements OnApplicationShutdown {
 		private relayService: RelayService,
 		private federatedInstanceService: FederatedInstanceService,
 		private hashtagService: HashtagService,
-		private antennaService: AntennaService,
 		private webhookService: UserWebhookService,
 		private featuredService: FeaturedService,
 		private remoteUserResolveService: RemoteUserResolveService,
 		private apDeliverManagerService: ApDeliverManagerService,
 		private apRendererService: ApRendererService,
+		private nightPointService: NightPointService,
+		private nightTimeService: NightTimeService,
 		private roleService: RoleService,
 		private searchService: SearchService,
 		private notesChart: NotesChart,
@@ -453,6 +455,11 @@ export class NoteCreateService implements OnApplicationShutdown {
 			data.visibility = 'home';
 		}
 
+		// 夜間限定ローカルTL: 昼間はpublic投稿をhomeに強制変換（チャンネル投稿を除く）
+		if (data.visibility === 'public' && data.channel == null && !this.nightTimeService.isNightTime()) {
+			data.visibility = 'home';
+		}
+
 		if (data.renote) {
 			switch (data.renote.visibility) {
 				case 'public':
@@ -568,10 +575,16 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 		const note = await this.insertNote(user, data, tags, emojis, mentionedUsers);
 
-		setImmediate('post created', { signal: this.#shutdownController.signal }).then(
-			() => this.postNoteCreated(note, user, data, silent, tags!, mentionedUsers!),
-			() => { /* aborted, ignore this */ },
-		);
+		// 夜間ポイント付与: 夜間のpublic投稿（チャンネル除く）にポイントを付与
+		if (data.visibility === 'public' && data.channel == null) {
+			await this.nightPointService.awardPoints(user as MiUser, note).catch(() => {});
+		}
+
+		// よるすきー: postNoteCreatedをawaitしてfire-and-forgetを排除
+		// 元はsetImmediate→fire-and-forgetだが、workerプロセスでバックグラウンド
+		// Promiseが蓄積するとpopAsyncContextでCPU 100%になる
+		// 原則: workerプロセスでは全てのPromiseをawaitする
+		await this.postNoteCreated(note, user, data, silent, tags!, mentionedUsers!);
 
 		return note;
 	}
@@ -687,69 +700,87 @@ export class NoteCreateService implements OnApplicationShutdown {
 		host: MiUser['host'];
 		isBot: MiUser['isBot'];
 	}, data: Option, silent: boolean, tags: string[], mentionedUsers: MinimumUser[]) {
+		// よるすきー: 詳細トレース（CPU 100%問題のデバッグ用）
+		const t0 = Date.now();
+		let lastTrace = 0;
+		const trace = (step: string) => {
+			const elapsed = Date.now() - t0;
+			const stepDuration = elapsed - lastTrace;
+			lastTrace = elapsed;
+			// stderrに直接書き込み（Misskeyのloggerを経由しない）
+			process.stderr.write(`[postNoteCreated] noteId=${note.id} step=${step} totalMs=${elapsed} stepMs=${stepDuration}\n`);
+		};
+
+		trace('start');
 		this.notesChart.update(note, true);
+		trace('notesChart.update');
 		if (note.visibility !== 'specified' && (this.meta.enableChartsForRemoteUser || (user.host == null))) {
 			this.perUserNotesChart.update(user, note, true);
 		}
+		trace('perUserNotesChart.update');
 
 		// Register host
 		if (this.meta.enableStatsForFederatedInstances) {
 			if (this.userEntityService.isRemoteUser(user)) {
-				this.federatedInstanceService.fetchOrRegister(user.host).then(async i => {
+				// よるすきー: awaitしてfire-and-forget排除
+				const i = await this.federatedInstanceService.fetchOrRegister(user.host);
+				trace('federatedInstanceService.fetchOrRegister');
+				if (i) {
 					this.updateNotesCountQueue.enqueue(i.id, 1);
 					if (this.meta.enableChartsForFederatedInstances) {
 						this.instanceChart.updateNote(i.host, note, true);
 					}
-				});
+				}
 			}
 		}
 
 		// ハッシュタグ更新
 		if (data.visibility === 'public' || data.visibility === 'home') {
-			this.hashtagService.updateHashtags(user, tags);
+			await this.hashtagService.updateHashtags(user, tags);
+			trace('hashtagService.updateHashtags');
 		}
 
 		// Increment notes count (user)
 		this.incNotesCountOfUser(user);
+		trace('incNotesCountOfUser');
 
-		this.pushToTl(note, user);
-
-		this.antennaService.addNoteToAntennas({
-			...note,
-			channel: data.channel ?? null,
-		}, user);
+		await this.pushToTl(note, user);
+		trace('pushToTl');
 
 		if (data.reply) {
-			this.saveReply(data.reply, note);
+			await this.saveReply(data.reply, note);
+			trace('saveReply');
 		}
 
 		if (data.reply == null) {
-			// TODO: キャッシュ
-			this.followingsRepository.findBy({
+			trace('followingsRepository.findBy-start');
+			// よるすきー: awaitしてfire-and-forget排除
+			const followings = await this.followingsRepository.findBy({
 				followeeId: user.id,
 				notify: 'normal',
-			}).then(async followings => {
-				if (note.visibility !== 'specified') {
-					const isPureRenote = this.isRenote(data) && !this.isQuote(data) ? true : false;
-					for (const following of followings) {
-						// TODO: ワードミュート考慮
-						let isRenoteMuted = false;
-						if (isPureRenote) {
-							const userIdsWhoMeMutingRenotes = await this.cacheService.renoteMutingsCache.fetch(following.followerId);
-							isRenoteMuted = userIdsWhoMeMutingRenotes.has(user.id);
-						}
-						if (!isRenoteMuted) {
-							this.notificationService.createNotification(following.followerId, 'note', {
-								noteId: note.id,
-							}, user.id);
-						}
+			});
+			trace(`followingsRepository.findBy-done count=${followings.length}`);
+			if (note.visibility !== 'specified') {
+				const isPureRenote = this.isRenote(data) && !this.isQuote(data) ? true : false;
+				for (const following of followings) {
+					let isRenoteMuted = false;
+					if (isPureRenote) {
+						const userIdsWhoMeMutingRenotes = await this.cacheService.renoteMutingsCache.fetch(following.followerId);
+						isRenoteMuted = userIdsWhoMeMutingRenotes.has(user.id);
+					}
+					if (!isRenoteMuted) {
+						this.notificationService.createNotification(following.followerId, 'note', {
+							noteId: note.id,
+						}, user.id);
 					}
 				}
-			});
+				trace('followings-loop-done');
+			}
 		}
 
 		if (data.renote && data.renote.userId !== user.id && !user.isBot) {
 			this.incRenoteCount(data.renote, user);
+			trace('incRenoteCount');
 		}
 
 		if (data.poll && data.poll.expiresAt) {
@@ -770,20 +801,26 @@ export class NoteCreateService implements OnApplicationShutdown {
 		}
 
 		if (!silent) {
+			trace('silent-block-start');
 			if (this.userEntityService.isLocalUser(user)) this.activeUsersChart.write(user);
 
 			// Pack the note
 			const noteObj = await this.noteEntityService.pack(note, null, { skipHide: true, withReactionAndUserPairCache: true });
+			trace('noteEntityService.pack');
 
 			this.globalEventService.publishNotesStream(noteObj);
+			trace('publishNotesStream');
 
 			this.roleService.addNoteToRoleTimeline(noteObj);
+			trace('addNoteToRoleTimeline');
 
 			this.webhookService.enqueueUserWebhook(user.id, 'note', { note: noteObj });
+			trace('enqueueUserWebhook');
 
 			const nm = new NotificationManager(this.mutingsRepository, this.notificationService, user as NotifierUser, note);
 
 			await this.createMentionedEvents(mentionedUsers, note, nm);
+			trace('createMentionedEvents');
 
 			// If has in reply to note
 			if (data.reply) {
@@ -858,6 +895,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 				})();
 			}
 			//#endregion
+			trace('silent-block-end');
 		}
 
 		if (data.channel) {
@@ -880,6 +918,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 		// Register to search database
 		this.index(note);
+		trace('function-end');
 	}
 
 	@bindThis

@@ -1,6 +1,6 @@
-# syntax = docker/dockerfile:1.20
+# syntax = docker/dockerfile:1.21
 
-ARG NODE_VERSION=22.21.1-bookworm
+ARG NODE_VERSION=22.22.0-bookworm
 
 # build assets & compile TypeScript
 
@@ -28,8 +28,6 @@ COPY --link ["packages/i18n/package.json", "./packages/i18n/"]
 COPY --link ["packages/icons-subsetter/package.json", "./packages/icons-subsetter/"]
 COPY --link ["packages/sw/package.json", "./packages/sw/"]
 COPY --link ["packages/misskey-js/package.json", "./packages/misskey-js/"]
-COPY --link ["packages/misskey-reversi/package.json", "./packages/misskey-reversi/"]
-COPY --link ["packages/misskey-bubble-game/package.json", "./packages/misskey-bubble-game/"]
 
 ARG NODE_ENV=production
 
@@ -43,6 +41,10 @@ COPY --link . ./
 RUN git submodule update --init
 
 RUN pnpm build
+
+# よるすきー: BullMQ workerのポーリングループにyield追加（CPUスピン対策）
+# pnpm buildの後にパッチ（buildでnode_modulesが再構成される可能性があるため）
+RUN node packages/backend/scripts/patch-bullmq-worker.js
 
 # Verify LANGS replacement in native-builder stage
 # 2026.3.1: boot.js moved to built/_frontend_vite_/loader/boot.js
@@ -87,8 +89,6 @@ COPY --link ["scripts", "./scripts"]
 COPY --link ["patches", "./patches"]
 COPY --link ["packages/backend/package.json", "./packages/backend/"]
 COPY --link ["packages/misskey-js/package.json", "./packages/misskey-js/"]
-COPY --link ["packages/misskey-reversi/package.json", "./packages/misskey-reversi/"]
-COPY --link ["packages/misskey-bubble-game/package.json", "./packages/misskey-bubble-game/"]
 
 ARG NODE_ENV=production
 
@@ -121,14 +121,13 @@ USER misskey
 WORKDIR /misskey
 
 COPY --chown=misskey:misskey --from=target-builder /misskey/node_modules ./node_modules
+# よるすきー: BullMQパッチ済みworker.jsをnative-builderから上書きコピー（CJS+ESM両方）
+COPY --chown=misskey:misskey --from=native-builder /misskey/node_modules/.pnpm/bullmq@5.73.1/node_modules/bullmq/dist/cjs/classes/worker.js ./node_modules/.pnpm/bullmq@5.73.1/node_modules/bullmq/dist/cjs/classes/worker.js
+COPY --chown=misskey:misskey --from=native-builder /misskey/node_modules/.pnpm/bullmq@5.73.1/node_modules/bullmq/dist/esm/classes/worker.js ./node_modules/.pnpm/bullmq@5.73.1/node_modules/bullmq/dist/esm/classes/worker.js
 COPY --chown=misskey:misskey --from=target-builder /misskey/packages/backend/node_modules ./packages/backend/node_modules
 COPY --chown=misskey:misskey --from=target-builder /misskey/packages/misskey-js/node_modules ./packages/misskey-js/node_modules
-COPY --chown=misskey:misskey --from=target-builder /misskey/packages/misskey-reversi/node_modules ./packages/misskey-reversi/node_modules
-COPY --chown=misskey:misskey --from=target-builder /misskey/packages/misskey-bubble-game/node_modules ./packages/misskey-bubble-game/node_modules
 COPY --chown=misskey:misskey --from=native-builder /misskey/built ./built
 COPY --chown=misskey:misskey --from=native-builder /misskey/packages/misskey-js/built ./packages/misskey-js/built
-COPY --chown=misskey:misskey --from=native-builder /misskey/packages/misskey-reversi/built ./packages/misskey-reversi/built
-COPY --chown=misskey:misskey --from=native-builder /misskey/packages/misskey-bubble-game/built ./packages/misskey-bubble-game/built
 COPY --chown=misskey:misskey --from=native-builder /misskey/packages/backend/built ./packages/backend/built
 COPY --chown=misskey:misskey --from=native-builder /misskey/packages/backend/src-js ./packages/backend/src-js
 COPY --chown=misskey:misskey --from=native-builder /misskey/packages/i18n/built ./packages/i18n/built

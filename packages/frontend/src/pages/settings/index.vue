@@ -149,9 +149,9 @@ const menuDef = computed<SuperMenuDef[]>(() => [{
 		active: currentPage.value?.route.name === 'mute-block',
 	}, {
 		icon: 'ti ti-message-question',
-		text: i18n.ts._noq.questionBox,
-		to: '/settings/noq',
-		active: currentPage.value?.route.name === 'noq',
+		text: i18n.ts._yoruq.questionBox,
+		to: '/settings/yoruq',
+		active: currentPage.value?.route.name === 'yoruq',
 	}, {
 		icon: 'ti ti-link',
 		text: i18n.ts._settings.serviceConnection,

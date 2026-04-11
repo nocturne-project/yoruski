@@ -31,22 +31,17 @@ import { ExportMutingProcessorService } from './processors/ExportMutingProcessor
 import { ExportNotesProcessorService } from './processors/ExportNotesProcessorService.js';
 import { ExportClipsProcessorService } from './processors/ExportClipsProcessorService.js';
 import { ExportUserListsProcessorService } from './processors/ExportUserListsProcessorService.js';
-import { ExportAntennasProcessorService } from './processors/ExportAntennasProcessorService.js';
 import { ImportBlockingProcessorService } from './processors/ImportBlockingProcessorService.js';
 import { ImportCustomEmojisProcessorService } from './processors/ImportCustomEmojisProcessorService.js';
 import { ImportFollowingProcessorService } from './processors/ImportFollowingProcessorService.js';
 import { ImportMutingProcessorService } from './processors/ImportMutingProcessorService.js';
 import { ImportUserListsProcessorService } from './processors/ImportUserListsProcessorService.js';
-import { ImportAntennasProcessorService } from './processors/ImportAntennasProcessorService.js';
 import { ResyncChartsProcessorService } from './processors/ResyncChartsProcessorService.js';
 import { TickChartsProcessorService } from './processors/TickChartsProcessorService.js';
 import { AggregateRetentionProcessorService } from './processors/AggregateRetentionProcessorService.js';
 import { ExportFavoritesProcessorService } from './processors/ExportFavoritesProcessorService.js';
 import { RelationshipProcessorService } from './processors/RelationshipProcessorService.js';
 import { CleanExpiredChatMessagesProcessorService } from './processors/CleanExpiredChatMessagesProcessorService.js';
-import { CleanNoctownChatLogsProcessorService } from './processors/CleanNoctownChatLogsProcessorService.js';
-import { CleanExpiredNoctownTradesProcessorService } from './processors/CleanExpiredNoctownTradesProcessorService.js';
-import { CleanIdlePaintChatRoomsProcessorService } from './processors/CleanIdlePaintChatRoomsProcessorService.js';
 
 @Module({
 	imports: [
@@ -70,13 +65,11 @@ import { CleanIdlePaintChatRoomsProcessorService } from './processors/CleanIdleP
 		ExportMutingProcessorService,
 		ExportBlockingProcessorService,
 		ExportUserListsProcessorService,
-		ExportAntennasProcessorService,
 		ImportFollowingProcessorService,
 		ImportMutingProcessorService,
 		ImportBlockingProcessorService,
 		ImportUserListsProcessorService,
 		ImportCustomEmojisProcessorService,
-		ImportAntennasProcessorService,
 		DeleteAccountProcessorService,
 		DeleteFileProcessorService,
 		CleanRemoteFilesProcessorService,
@@ -91,9 +84,6 @@ import { CleanIdlePaintChatRoomsProcessorService } from './processors/CleanIdleP
 		CheckModeratorsActivityProcessorService,
 		CleanRemoteNotesProcessorService,
 		CleanExpiredChatMessagesProcessorService,
-		CleanNoctownChatLogsProcessorService,
-		CleanExpiredNoctownTradesProcessorService,
-		CleanIdlePaintChatRoomsProcessorService,
 		QueueProcessorService,
 	],
 	exports: [

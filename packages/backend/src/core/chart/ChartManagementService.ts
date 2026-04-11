@@ -39,19 +39,21 @@ export class ChartManagementService implements OnApplicationShutdown {
 		private perUserDriveChart: PerUserDriveChart,
 		private apRequestChart: ApRequestChart,
 	) {
+		// 小規模サーバー向け: per-userチャートを無効化しメモリ・DB I/O削減
 		this.charts = [
 			this.federationChart,
 			this.notesChart,
 			this.usersChart,
 			this.activeUsersChart,
 			this.instanceChart,
-			this.perUserNotesChart,
-			this.perUserPvChart,
 			this.driveChart,
-			this.perUserReactionsChart,
-			this.perUserFollowingChart,
-			this.perUserDriveChart,
 			this.apRequestChart,
+			// 無効化: per-userチャート（メモリバッファ + DB書き込み削減）
+			// this.perUserNotesChart,
+			// this.perUserPvChart,
+			// this.perUserReactionsChart,
+			// this.perUserFollowingChart,
+			// this.perUserDriveChart,
 		];
 	}
 

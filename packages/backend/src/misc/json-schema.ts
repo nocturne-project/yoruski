@@ -28,7 +28,6 @@ import { packedInviteCodeSchema } from '@/models/json-schema/invite-code.js';
 import { packedPageBlockSchema, packedPageSchema } from '@/models/json-schema/page.js';
 import { packedNoteFavoriteSchema } from '@/models/json-schema/note-favorite.js';
 import { packedChannelSchema } from '@/models/json-schema/channel.js';
-import { packedAntennaSchema } from '@/models/json-schema/antenna.js';
 import { packedClipSchema } from '@/models/json-schema/clip.js';
 import { packedFederationInstanceSchema } from '@/models/json-schema/federation-instance.js';
 import {
@@ -59,7 +58,6 @@ import {
 	packedRoleSchema,
 } from '@/models/json-schema/role.js';
 import { packedAdSchema } from '@/models/json-schema/ad.js';
-import { packedReversiGameDetailedSchema, packedReversiGameLiteSchema } from '@/models/json-schema/reversi-game.js';
 import {
 	packedMetaDetailedOnlySchema,
 	packedMetaDetailedSchema,
@@ -111,7 +109,6 @@ export const refs = {
 	QueueCount: packedQueueCountSchema,
 	QueueMetrics: packedQueueMetricsSchema,
 	QueueJob: packedQueueJobSchema,
-	Antenna: packedAntennaSchema,
 	Clip: packedClipSchema,
 	FederationInstance: packedFederationInstanceSchema,
 	GalleryPost: packedGalleryPostSchema,
@@ -131,8 +128,6 @@ export const refs = {
 	RoleLite: packedRoleLiteSchema,
 	Role: packedRoleSchema,
 	RolePolicies: packedRolePoliciesSchema,
-	ReversiGameLite: packedReversiGameLiteSchema,
-	ReversiGameDetailed: packedReversiGameDetailedSchema,
 	MetaLite: packedMetaLiteSchema,
 	MetaDetailedOnly: packedMetaDetailedOnlySchema,
 	MetaDetailed: packedMetaDetailedSchema,

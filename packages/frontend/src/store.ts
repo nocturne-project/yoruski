@@ -460,10 +460,6 @@ export const store = markRaw(new Pizzax('base', {
 		where: 'device',
 		default: { type: 'syuilo/waon', volume: 1 },
 	},
-	sound_antenna: {
-		where: 'device',
-		default: { type: 'syuilo/triple', volume: 1 },
-	},
 	sound_channel: {
 		where: 'device',
 		default: { type: 'syuilo/square-pico', volume: 1 },
@@ -471,13 +467,6 @@ export const store = markRaw(new Pizzax('base', {
 	sound_reaction: {
 		where: 'device',
 		default: { type: 'syuilo/bubble2', volume: 1 },
-	},
-	dropAndFusion: {
-		where: 'device',
-		default: {
-			bgmVolume: 0.25,
-			sfxVolume: 1,
-		},
 	},
 	//#endregion
 }));

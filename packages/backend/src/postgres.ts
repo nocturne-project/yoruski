@@ -17,7 +17,6 @@ import { MiAccessToken } from '@/models/AccessToken.js';
 import { MiAd } from '@/models/Ad.js';
 import { MiAnnouncement } from '@/models/Announcement.js';
 import { MiAnnouncementRead } from '@/models/AnnouncementRead.js';
-import { MiAntenna } from '@/models/Antenna.js';
 import { MiApp } from '@/models/App.js';
 import { MiAvatarDecoration } from '@/models/AvatarDecoration.js';
 import { MiAuthSession } from '@/models/AuthSession.js';
@@ -41,6 +40,7 @@ import { MiMeta } from '@/models/Meta.js';
 import { MiModerationLog } from '@/models/ModerationLog.js';
 import { MiMuting } from '@/models/Muting.js';
 import { MiRenoteMuting } from '@/models/RenoteMuting.js';
+import { MiNightPoint } from '@/models/NightPoint.js';
 import { MiNote } from '@/models/Note.js';
 import { MiNoteFavorite } from '@/models/NoteFavorite.js';
 import { MiNoteReaction } from '@/models/NoteReaction.js';
@@ -83,69 +83,14 @@ import { MiChatMessage } from '@/models/ChatMessage.js';
 import { MiChatRoom } from '@/models/ChatRoom.js';
 import { MiChatRoomMembership } from '@/models/ChatRoomMembership.js';
 import { MiChatRoomInvitation } from '@/models/ChatRoomInvitation.js';
-import { MiBubbleGameRecord } from '@/models/BubbleGameRecord.js';
-import { MiReversiGame } from '@/models/ReversiGame.js';
 import { MiChatApproval } from '@/models/ChatApproval.js';
 import { MiChatSecretSettings } from '@/models/ChatSecretSettings.js';
 import { MiSystemAccount } from '@/models/SystemAccount.js';
-import { MiDrawingRoomSettings } from '@/models/DrawingRoomSettings.js';
-import { MiDrawingUserSettings } from '@/models/DrawingUserSettings.js';
-
-// Noctown entities
-import { NoctownPlayer } from '@/models/noctown/NoctownPlayer.js';
-import { NoctownItem } from '@/models/noctown/NoctownItem.js';
-import { NoctownPlayerItem } from '@/models/noctown/NoctownPlayerItem.js';
-import { NoctownWallet } from '@/models/noctown/NoctownWallet.js';
-import { NoctownQuest } from '@/models/noctown/NoctownQuest.js';
-import { NoctownNpc } from '@/models/noctown/NoctownNpc.js';
-import { NoctownPlacedItem } from '@/models/noctown/NoctownPlacedItem.js';
-import { NoctownDroppedItem } from '@/models/noctown/NoctownDroppedItem.js';
-import { NoctownWorld } from '@/models/noctown/NoctownWorld.js';
-import { NoctownWorldChunk } from '@/models/noctown/NoctownWorldChunk.js';
-import { NoctownPlayerScore } from '@/models/noctown/NoctownPlayerScore.js';
-import { NoctownPlayerStatistics } from '@/models/noctown/NoctownPlayerStatistics.js';
-import { NoctownFarmPlot } from '@/models/noctown/NoctownFarmPlot.js';
-import { NoctownCrop } from '@/models/noctown/NoctownCrop.js';
-import { NoctownChicken } from '@/models/noctown/NoctownChicken.js';
-import { NoctownCow } from '@/models/noctown/NoctownCow.js';
-import { NoctownRecipe } from '@/models/noctown/NoctownRecipe.js';
-import { NoctownRecipeIngredient } from '@/models/noctown/NoctownRecipeIngredient.js';
-import { NoctownTrade } from '@/models/noctown/NoctownTrade.js';
-import { NoctownTradeItem } from '@/models/noctown/NoctownTradeItem.js';
-import { NoctownInteriorMap } from '@/models/noctown/NoctownInteriorMap.js';
-import { NoctownShopInventory } from '@/models/noctown/NoctownShopInventory.js';
-import { NoctownTreasureChest } from '@/models/noctown/NoctownTreasureChest.js';
-import { NoctownHouse } from '@/models/noctown/NoctownHouse.js';
-import { NoctownHouseWallItem } from '@/models/noctown/NoctownHouseWallItem.js';
-import { NoctownHouseFurniture } from '@/models/noctown/NoctownHouseFurniture.js';
-import { NoctownBulletinBoard } from '@/models/noctown/NoctownBulletinBoard.js';
-import { NoctownBulletinPost } from '@/models/noctown/NoctownBulletinPost.js';
-import { NoctownBulletinLike } from '@/models/noctown/NoctownBulletinLike.js';
-import { NoctownAgent } from '@/models/noctown/NoctownAgent.js';
-import { NoctownGacha } from '@/models/noctown/NoctownGacha.js';
-import { NoctownGachaItem } from '@/models/noctown/NoctownGachaItem.js';
-import { NoctownGachaPull } from '@/models/noctown/NoctownGachaPull.js';
-import { NoctownEvent } from '@/models/noctown/NoctownEvent.js';
-import { NoctownEventReward } from '@/models/noctown/NoctownEventReward.js';
-import { NoctownEventParticipation } from '@/models/noctown/NoctownEventParticipation.js';
-import { NoctownUniqueItem } from '@/models/noctown/NoctownUniqueItem.js';
-import { NoctownRankingBoard } from '@/models/noctown/NoctownRankingBoard.js';
-import { NoctownChatLog } from '@/models/noctown/NoctownChatLog.js';
-import { NoctownChatLogRecipient } from '@/models/noctown/NoctownChatLogRecipient.js';
-import { NoctownTransactionLog } from '@/models/noctown/NoctownTransactionLog.js';
-
-// Noqestion entities
-import { NoqUserSetting } from '@/models/NoqUserSetting.js';
-import { NoqQuestion } from '@/models/NoqQuestion.js';
-import { NoqMutedUser } from '@/models/NoqMutedUser.js';
-import { NoqReportedQuestion } from '@/models/NoqReportedQuestion.js';
-import { PaintChatRoom } from '@/models/PaintChatRoom.js';
-import { PaintChatParticipant } from '@/models/PaintChatParticipant.js';
-import { PaintChatMessage } from '@/models/PaintChatMessage.js';
-import { PaintChatReport } from '@/models/PaintChatReport.js';
-import { PaintChatBlock } from '@/models/PaintChatBlock.js';
-import { PaintChatPublish } from '@/models/PaintChatPublish.js';
-import { PaintChatSetting } from '@/models/PaintChatSetting.js';
+// YoruQuestion entities
+import { YoruqUserSetting } from '@/models/YoruqUserSetting.js';
+import { YoruqQuestion } from '@/models/YoruqQuestion.js';
+import { YoruqMutedUser } from '@/models/YoruqMutedUser.js';
+import { YoruqReportedQuestion } from '@/models/YoruqReportedQuestion.js';
 
 pg.types.setTypeParser(20, Number);
 
@@ -260,6 +205,7 @@ export const entities = [
 	MiMuting,
 	MiRenoteMuting,
 	MiBlocking,
+	MiNightPoint,
 	MiNote,
 	MiNoteFavorite,
 	MiNoteReaction,
@@ -285,7 +231,6 @@ export const entities = [
 	MiClip,
 	MiClipNote,
 	MiClipFavorite,
-	MiAntenna,
 	MiPromoNote,
 	MiPromoRead,
 	MiRelay,
@@ -312,65 +257,11 @@ export const entities = [
 	MiChatRoomInvitation,
 	MiChatApproval,
 	MiChatSecretSettings,
-	MiBubbleGameRecord,
-	MiReversiGame,
-	MiDrawingRoomSettings,
-	MiDrawingUserSettings,
-	// Noctown entities
-	NoctownPlayer,
-	NoctownItem,
-	NoctownPlayerItem,
-	NoctownWallet,
-	NoctownQuest,
-	NoctownNpc,
-	NoctownPlacedItem,
-	NoctownDroppedItem,
-	NoctownWorld,
-	NoctownWorldChunk,
-	NoctownPlayerScore,
-	NoctownPlayerStatistics,
-	NoctownFarmPlot,
-	NoctownCrop,
-	NoctownChicken,
-	NoctownCow,
-	NoctownRecipe,
-	NoctownRecipeIngredient,
-	NoctownTrade,
-	NoctownTradeItem,
-	NoctownInteriorMap,
-	NoctownShopInventory,
-	NoctownTreasureChest,
-	NoctownHouse,
-	NoctownHouseWallItem,
-	NoctownHouseFurniture,
-	NoctownBulletinBoard,
-	NoctownBulletinPost,
-	NoctownBulletinLike,
-	NoctownAgent,
-	NoctownGacha,
-	NoctownGachaItem,
-	NoctownGachaPull,
-	NoctownEvent,
-	NoctownEventReward,
-	NoctownEventParticipation,
-	NoctownUniqueItem,
-	NoctownRankingBoard,
-	NoctownChatLog,
-	NoctownChatLogRecipient,
-	NoctownTransactionLog,
-	// Noqestion entities
-	NoqUserSetting,
-	NoqQuestion,
-	NoqMutedUser,
-	NoqReportedQuestion,
-	// PaintChat entities
-	PaintChatRoom,
-	PaintChatParticipant,
-	PaintChatMessage,
-	PaintChatReport,
-	PaintChatBlock,
-	PaintChatPublish,
-	PaintChatSetting,
+	// YoruQuestion entities
+	YoruqUserSetting,
+	YoruqQuestion,
+	YoruqMutedUser,
+	YoruqReportedQuestion,
 	...charts,
 ];
 
@@ -386,6 +277,15 @@ export function createPostgresDataSource(config: Config) {
 		database: config.db.db,
 		extra: {
 			statement_timeout: 1000 * 10,
+			// よるすきー: 全Promiseを必ず終わらせるためのタイムアウト設定
+			// fire-and-forgetされたDB操作Promiseが永遠にresolve/rejectされないと
+			// メモリに溜まってpopAsyncContextのCPU 100%スピンを引き起こす
+			query_timeout: 1000 * 30,           // クエリ全体30秒タイムアウト
+			connectionTimeoutMillis: 1000 * 10, // 接続確立10秒タイムアウト
+			idleTimeoutMillis: 1000 * 60 * 10,  // アイドル接続10分でクローズ
+			keepAlive: true,                    // TCP keep-alive有効
+			keepAliveInitialDelayMillis: 1000 * 60, // 60秒後にkeep-alive開始
+			max: 10,                             // プールサイズ明示
 			...config.db.extra,
 		},
 		...(config.dbReplications ? {

@@ -49,8 +49,19 @@ export class DeliverProcessorService {
 		this.suspendedHostsCache = new MemorySingleCache<MiInstance[]>(1000 * 60 * 60); // 1h
 	}
 
+	// サンプリングカウンタ（100回に1回詳細ログ出力）
+	private deliverJobCount = 0;
+
 	@bindThis
 	public async process(job: Bull.Job<DeliverJobData>): Promise<string> {
+		const jobStartTime = Date.now();
+		this.deliverJobCount++;
+		const shouldSample = this.deliverJobCount % 10 === 1;
+		const logStep = (step: string) => {
+			if (!shouldSample) return;
+			this.logger.info(`[deliver-trace] job=${job.id} step=${step} elapsed=${Date.now() - jobStartTime}ms to=${job.data.to?.slice(0, 60)}`);
+		};
+		logStep('start');
 		const { host } = new URL(job.data.to);
 
 		if (!this.utilityService.isFederationAllowedUri(job.data.to)) {
@@ -81,7 +92,9 @@ export class DeliverProcessorService {
 		}
 
 		try {
+			logStep('signedPost');
 			await this.apRequestService.signedPost(job.data.user, job.data.to, job.data.content, job.data.digest);
+			logStep('signedPost done');
 
 			this.apRequestChart.deliverSucc();
 			this.federationChart.deliverd(host, true);
@@ -106,6 +119,11 @@ export class DeliverProcessorService {
 				}
 			});
 
+			// サマリーログ: サンプリング or 遅いジョブ（1000ms以上）は必ず出力
+			const totalMs = Date.now() - jobStartTime;
+			if (shouldSample || totalMs >= 1000) {
+				this.logger.info(`[deliver-summary] #${this.deliverJobCount} host=${host} elapsed=${totalMs}ms`);
+			}
 			return 'Success';
 		} catch (res) {
 			this.apRequestChart.deliverFail();
@@ -157,6 +175,9 @@ export class DeliverProcessorService {
 				throw new Error(`${res.statusCode} ${res.statusMessage}`);
 			} else {
 				// DNS error, socket error, timeout ...
+				// 失敗サマリーログ
+				const totalMs = Date.now() - jobStartTime;
+				this.logger.info(`[deliver-summary] #${this.deliverJobCount} host=${host} elapsed=${totalMs}ms FAILED err=${res?.message ?? res}`);
 				throw res;
 			}
 		}

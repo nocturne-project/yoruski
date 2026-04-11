@@ -62,10 +62,33 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		this.updateInstanceQueue = new CollapsedQueue(process.env.NODE_ENV !== 'test' ? 60 * 1000 * 5 : 0, this.collapseUpdateInstanceJobs, this.performUpdateInstance);
 	}
 
+	// サンプリングカウンタ（100回に1回詳細ログ出力）
+	private inboxJobCount = 0;
+
 	@bindThis
 	public async process(job: Bull.Job<InboxJobData>): Promise<string> {
+		const jobStartTime = Date.now();
+		const jobId = job.id;
+		this.inboxJobCount++;
+		const shouldSample = this.inboxJobCount % 10 === 1;
+		const logStep = (step: string) => {
+			if (!shouldSample) return;
+			const elapsed = Date.now() - jobStartTime;
+			this.logger.info(`[inbox-trace] job=${jobId} step=${step} elapsed=${elapsed}ms`);
+		};
+
 		const signature = job.data.signature;	// HTTP-signature
 		let activity = job.data.activity;
+
+		// 不正なactivityデータのバリデーション（リトライしない）
+		if (activity == null || typeof activity !== 'object' || Array.isArray(activity)) {
+			throw new Bull.UnrecoverableError(`skip: invalid activity data (type=${typeof activity}, isArray=${Array.isArray(activity)})`);
+		}
+		if (activity.actor == null) {
+			throw new Bull.UnrecoverableError(`skip: activity has no actor field (type=${activity.type ?? 'unknown'})`);
+		}
+
+		logStep(`start type=${activity.type} actor=${String(activity.actor).slice(0, 60)}`);
 
 		//#region Log
 		const info = Object.assign({}, activity);
@@ -85,10 +108,12 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		}
 
 		// HTTP-Signature keyIdを元にDBから取得
+		logStep('getAuthUserFromKeyId');
 		let authUser: {
 			user: MiRemoteUser;
 			key: MiUserPublickey | null;
 		} | null = await this.apDbResolverService.getAuthUserFromKeyId(signature.keyId);
+		logStep('getAuthUserFromKeyId done');
 
 		// keyIdでわからなければ、activity.actorを元にDBから取得 || activity.actorを元にリモートから取得
 		if (authUser == null) {
@@ -116,7 +141,9 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		}
 
 		// HTTP-Signatureの検証
+		logStep('verifySignature');
 		const httpSignatureValidated = httpSignature.verifySignature(signature, authUser.key.keyPem);
+		logStep('verifySignature done');
 
 		// また、signatureのsignerは、activity.actorと一致する必要がある
 		if (!httpSignatureValidated || authUser.user.uri !== activity.actor) {
@@ -197,29 +224,33 @@ export class InboxProcessorService implements OnApplicationShutdown {
 		this.apRequestChart.inbox();
 		this.federationChart.inbox(authUser.user.host);
 
+		// よるすきー: process.nextTickを排除してawaitに変更
+		// 原則: workerプロセスでは全てのPromiseをawaitする（fire-and-forget禁止）
 		// Update instance stats
-		process.nextTick(async () => {
+		{
 			const i = await (this.meta.enableStatsForFederatedInstances
 				? this.federatedInstanceService.fetchOrRegister(authUser.user.host)
 				: this.federatedInstanceService.fetch(authUser.user.host));
 
-			if (i == null) return;
+			if (i != null) {
+				this.updateInstanceQueue.enqueue(i.id, {
+					latestRequestReceivedAt: new Date(),
+					shouldUnsuspend: i.suspensionState === 'autoSuspendedForNotResponding',
+				});
 
-			this.updateInstanceQueue.enqueue(i.id, {
-				latestRequestReceivedAt: new Date(),
-				shouldUnsuspend: i.suspensionState === 'autoSuspendedForNotResponding',
-			});
+				if (this.meta.enableChartsForFederatedInstances) {
+					this.instanceChart.requestReceived(i.host);
+				}
 
-			if (this.meta.enableChartsForFederatedInstances) {
-				this.instanceChart.requestReceived(i.host);
+				await this.fetchInstanceMetadataService.fetchInstanceMetadata(i);
 			}
-
-			this.fetchInstanceMetadataService.fetchInstanceMetadata(i);
-		});
+		}
 
 		// アクティビティを処理
+		logStep('performActivity');
 		try {
 			const result = await this.apInboxService.performActivity(authUser.user, activity);
+			logStep(`performActivity done result=${result?.slice(0, 30)}`);
 			if (result && !result.startsWith('ok')) {
 				this.logger.warn(`inbox activity ignored (maybe): id=${activity.id} reason=${result}`);
 				return result;
@@ -238,6 +269,14 @@ export class InboxProcessorService implements OnApplicationShutdown {
 			}
 			throw e;
 		}
+
+		// サマリーログ: サンプリング or 遅いジョブ（500ms以上）は必ず出力
+		const totalMs = Date.now() - jobStartTime;
+		if (shouldSample || totalMs >= 500) {
+			const host = this.utilityService.toPuny(new URL(signature.keyId).hostname);
+			this.logger.info(`[inbox-summary] #${this.inboxJobCount} type=${activity.type} host=${host} elapsed=${totalMs}ms`);
+		}
+
 		return 'ok';
 	}
 

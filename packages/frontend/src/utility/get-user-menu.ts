@@ -15,7 +15,7 @@ import * as os from '@/os.js';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { $i, iAmModerator } from '@/i.js';
 import { notesSearchAvailable, canSearchNonLocalNotes } from '@/utility/check-permissions.js';
-import { antennasCache, rolesCache, userListsCache } from '@/cache.js';
+import { rolesCache, userListsCache } from '@/cache.js';
 import { mainRouter } from '@/router.js';
 import { genEmbedCode } from '@/utility/get-embed-code.js';
 import { prefer } from '@/preferences.js';
@@ -283,32 +283,6 @@ export function getUserMenu(user: Misskey.entities.UserDetailed, router: Router 
 						ref: isListed,
 					};
 				});
-			},
-		}, {
-			type: 'parent',
-			icon: 'ti ti-antenna',
-			text: toText(i18n.ts.addToAntenna),
-			children: async () => {
-				const antennas = await antennasCache.fetch();
-				const canonical = user.host === null ? `@${user.username}` : `@${user.username}@${toUnicode(user.host)}`;
-				return antennas.filter((a) => a.src === 'users').map(antenna => ({
-					text: antenna.name,
-					action: async () => {
-						await os.apiWithDialog('antennas/update', {
-							antennaId: antenna.id,
-							name: antenna.name,
-							keywords: antenna.keywords,
-							excludeKeywords: antenna.excludeKeywords,
-							src: antenna.src,
-							userListId: antenna.userListId,
-							users: [...antenna.users, canonical],
-							caseSensitive: antenna.caseSensitive,
-							withReplies: antenna.withReplies,
-							withFile: antenna.withFile,
-						});
-						antennasCache.delete();
-					},
-				}));
 			},
 		});
 	}

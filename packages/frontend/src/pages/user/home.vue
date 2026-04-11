@@ -127,6 +127,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 								<b>{{ number(user.followersCount) }}</b>
 								<span>{{ i18n.ts.followers }}</span>
 							</MkA>
+							<!-- 夜間ポイント: ランキング順位とポイント数（改行で分離表示） -->
+							<span v-if="nightPoints != null" style="cursor: default; display: inline-flex; flex-direction: column; align-items: center; line-height: 1.3;">
+								<b>{{ nightPoints.rank > 0 ? nightPoints.rank + '位' : '-' }}</b>
+								<span>{{ nightPoints.totalPoints }}p</span>
+							</span>
 						</div>
 					</div>
 				</div>
@@ -225,6 +230,15 @@ const router = useRouter();
 
 const user = ref(props.user);
 const narrow = ref<null | boolean>(null);
+
+// 夜間ポイント: ランキングから該当ユーザーのポイント情報を取得
+const nightPoints = ref<{ totalPoints: number; rank: number } | null>(null);
+misskeyApi('night-points/ranking', { limit: 100 }).then(ranking => {
+	const entry = ranking.find((r: any) => r.userId === props.user.id);
+	if (entry) {
+		nightPoints.value = { totalPoints: entry.totalPoints, rank: entry.rank };
+	}
+}).catch(() => {});
 const rootEl = useTemplateRef('rootEl');
 const bannerEl = useTemplateRef('bannerEl');
 const memoTextareaEl = useTemplateRef('memoTextareaEl');

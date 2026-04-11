@@ -9,11 +9,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 		<div :class="[$style.label, $style.item]">
 			{{ i18n.ts.visibility }}
 		</div>
-		<button key="public" :disabled="isSilenced || isReplyVisibilitySpecified" class="_button" :class="[$style.item, { [$style.active]: v === 'public' }]" data-index="1" @click="choose('public')">
+		<!-- 夜間限定ローカルTL: 昼間はpublic公開範囲を無効化 -->
+		<button key="public" :disabled="isSilenced || isReplyVisibilitySpecified || !nightStatus.isNight.value" class="_button" :class="[$style.item, { [$style.active]: v === 'public' }]" data-index="1" @click="choose('public')">
 			<div :class="$style.icon"><i class="ti ti-world"></i></div>
 			<div :class="$style.body">
 				<span :class="$style.itemTitle">{{ i18n.ts._visibility.public }}</span>
-				<span :class="$style.itemDescription">{{ i18n.ts._visibility.publicDescription }}</span>
+				<span v-if="!nightStatus.isNight.value" :class="$style.itemDescription">{{ i18n.ts._yoruski?.nightOnly ?? '夜間のみ利用可能' }}</span>
+				<span v-else :class="$style.itemDescription">{{ i18n.ts._visibility.publicDescription }}</span>
 			</div>
 		</button>
 		<button key="home" :disabled="isReplyVisibilitySpecified" class="_button" :class="[$style.item, { [$style.active]: v === 'home' }]" data-index="2" @click="choose('home')">
@@ -46,6 +48,7 @@ import { nextTick, useTemplateRef, ref } from 'vue';
 import * as Misskey from 'misskey-js';
 import MkModal from '@/components/MkModal.vue';
 import { i18n } from '@/i18n.js';
+import { useNightStatus } from '@/scripts/use-night-status.js';
 
 const modal = useTemplateRef('modal');
 
@@ -62,6 +65,7 @@ const emit = defineEmits<{
 	(ev: 'closed'): void;
 }>();
 
+const nightStatus = useNightStatus();
 const v = ref(props.currentVisibility);
 
 function choose(visibility: typeof Misskey.noteVisibilities[number]): void {

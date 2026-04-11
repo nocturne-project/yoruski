@@ -35,6 +35,17 @@ export async function jobQueue() {
 		logger: new NestLogger(),
 	});
 
+	// よるすきー: workerプロセスにinspectorを開く（port 9230, デバッグ用）
+	if (process.env.MK_ONLY_QUEUE === '1') {
+		try {
+			const inspector = await import('node:inspector');
+			inspector.open(9230, '0.0.0.0', false);
+			console.log('[jobQueue] Inspector opened on port 9230');
+		} catch (e) {
+			console.error('[jobQueue] Failed to open inspector:', e);
+		}
+	}
+
 	jobQueue.get(QueueProcessorService).start();
 	jobQueue.get(ChartManagementService).start();
 

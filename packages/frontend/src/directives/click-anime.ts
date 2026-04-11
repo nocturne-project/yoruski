@@ -8,7 +8,8 @@ import { prefer } from '@/preferences.js';
 
 export const clickAnimeDirective = {
 	mounted(el) {
-		if (!prefer.s.animation) return;
+		// dataSaver.disableAnimationsでもアニメーション無効化
+		if (!prefer.s.animation || prefer.s.dataSaver.disableAnimations) return;
 
 		const target = el.children[0];
 

@@ -59,11 +59,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 		</div>
 	</div>
 
-	<div v-else-if="tab === 'drawing'" class="_spacer" style="--MI_SPACER-w: 100%; max-width: 100vw;">
-		<XDrawing v-if="room != null" :roomId="roomId"/>
-		<XDrawing v-else-if="user != null && userId" :userId="userId"/>
-	</div>
-
 	<div v-else-if="tab === 'search'" class="_spacer" style="--MI_SPACER-w: 700px;">
 		<XSearch :userId="userId" :roomId="roomId"/>
 	</div>
@@ -118,7 +113,6 @@ import XForm from './room.form.vue';
 import XSearch from './room.search.vue';
 import XMembers from './room.members.vue';
 import XInfo from './room.info.vue';
-import XDrawing from './room.drawing.vue';
 import type { MenuItem } from '@/types/menu.js';
 import type { PageHeaderItem } from '@/types/page-header.js';
 import * as os from '@/os.js';
@@ -1061,7 +1055,7 @@ function showMenu(ev: PointerEvent) {
 // URLハッシュからタブを初期化
 function getInitialTab(): string {
 	const hash = window.location.hash.slice(1); // '#' を除去
-	const validTabs = ['chat', 'drawing', 'search', 'members', 'info'];
+	const validTabs = ['chat', 'search', 'members', 'info'];
 	return validTabs.includes(hash) ? hash : 'chat';
 }
 
@@ -1081,7 +1075,7 @@ watch(tab, (newTab) => {
 onMounted(() => {
 	const handleHashChange = () => {
 		const hash = window.location.hash.slice(1);
-		const validTabs = ['chat', 'drawing', 'search', 'members', 'info'];
+		const validTabs = ['chat', 'search', 'members', 'info'];
 		if (validTabs.includes(hash)) {
 			tab.value = hash;
 		} else if (hash === '') {
@@ -1101,10 +1095,6 @@ const headerTabs = computed(() => room.value ? [{
 	title: i18n.ts._chat.messages,
 	icon: 'ti ti-messages',
 }, {
-	key: 'drawing',
-	title: 'お絵かき',
-	icon: 'ti ti-brush',
-}, {
 	key: 'members',
 	title: i18n.ts._chat.members,
 	icon: 'ti ti-users',
@@ -1120,10 +1110,6 @@ const headerTabs = computed(() => room.value ? [{
 	key: 'chat',
 	title: i18n.ts._chat.messages,
 	icon: 'ti ti-messages',
-}, {
-	key: 'drawing',
-	title: 'お絵かき',
-	icon: 'ti ti-brush',
 }, {
 	key: 'search',
 	title: i18n.ts.search,

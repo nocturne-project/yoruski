@@ -24,13 +24,11 @@ import { ExportFollowingProcessorService } from './processors/ExportFollowingPro
 import { ExportMutingProcessorService } from './processors/ExportMutingProcessorService.js';
 import { ExportBlockingProcessorService } from './processors/ExportBlockingProcessorService.js';
 import { ExportUserListsProcessorService } from './processors/ExportUserListsProcessorService.js';
-import { ExportAntennasProcessorService } from './processors/ExportAntennasProcessorService.js';
 import { ImportFollowingProcessorService } from './processors/ImportFollowingProcessorService.js';
 import { ImportMutingProcessorService } from './processors/ImportMutingProcessorService.js';
 import { ImportBlockingProcessorService } from './processors/ImportBlockingProcessorService.js';
 import { ImportUserListsProcessorService } from './processors/ImportUserListsProcessorService.js';
 import { ImportCustomEmojisProcessorService } from './processors/ImportCustomEmojisProcessorService.js';
-import { ImportAntennasProcessorService } from './processors/ImportAntennasProcessorService.js';
 import { DeleteAccountProcessorService } from './processors/DeleteAccountProcessorService.js';
 import { ExportFavoritesProcessorService } from './processors/ExportFavoritesProcessorService.js';
 import { CleanRemoteFilesProcessorService } from './processors/CleanRemoteFilesProcessorService.js';
@@ -45,11 +43,8 @@ import { CleanProcessorService } from './processors/CleanProcessorService.js';
 import { AggregateRetentionProcessorService } from './processors/AggregateRetentionProcessorService.js';
 import { CleanRemoteNotesProcessorService } from './processors/CleanRemoteNotesProcessorService.js';
 import { CleanExpiredChatMessagesProcessorService } from './processors/CleanExpiredChatMessagesProcessorService.js';
-import { CleanNoctownChatLogsProcessorService } from './processors/CleanNoctownChatLogsProcessorService.js';
-import { CleanExpiredNoctownTradesProcessorService } from './processors/CleanExpiredNoctownTradesProcessorService.js';
-import { CleanIdlePaintChatRoomsProcessorService } from './processors/CleanIdlePaintChatRoomsProcessorService.js';
 import { QueueLoggerService } from './QueueLoggerService.js';
-import { QUEUE, baseWorkerOptions } from './const.js';
+import { QUEUE, baseWorkerOptions, yieldToEventLoop } from './const.js';
 
 // ref. https://github.com/misskey-dev/misskey/pull/7635#issue-971097019
 function httpRelatedBackoff(attemptsMade: number) {
@@ -111,13 +106,11 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		private exportMutingProcessorService: ExportMutingProcessorService,
 		private exportBlockingProcessorService: ExportBlockingProcessorService,
 		private exportUserListsProcessorService: ExportUserListsProcessorService,
-		private exportAntennasProcessorService: ExportAntennasProcessorService,
 		private importFollowingProcessorService: ImportFollowingProcessorService,
 		private importMutingProcessorService: ImportMutingProcessorService,
 		private importBlockingProcessorService: ImportBlockingProcessorService,
 		private importUserListsProcessorService: ImportUserListsProcessorService,
 		private importCustomEmojisProcessorService: ImportCustomEmojisProcessorService,
-		private importAntennasProcessorService: ImportAntennasProcessorService,
 		private deleteAccountProcessorService: DeleteAccountProcessorService,
 		private deleteFileProcessorService: DeleteFileProcessorService,
 		private cleanRemoteFilesProcessorService: CleanRemoteFilesProcessorService,
@@ -132,9 +125,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		private cleanProcessorService: CleanProcessorService,
 		private cleanRemoteNotesProcessorService: CleanRemoteNotesProcessorService,
 		private cleanExpiredChatMessagesProcessorService: CleanExpiredChatMessagesProcessorService,
-		private cleanNoctownChatLogsProcessorService: CleanNoctownChatLogsProcessorService,
-		private cleanExpiredNoctownTradesProcessorService: CleanExpiredNoctownTradesProcessorService,
-		private cleanIdlePaintChatRoomsProcessorService: CleanIdlePaintChatRoomsProcessorService,
 	) {
 		this.logger = this.queueLoggerService.logger;
 
@@ -185,14 +175,12 @@ export class QueueProcessorService implements OnApplicationShutdown {
 					case 'clean': return this.cleanProcessorService.process();
 					case 'cleanRemoteNotes': return this.cleanRemoteNotesProcessorService.process(job);
 					case 'cleanExpiredChatMessages': return this.cleanExpiredChatMessagesProcessorService.process(job);
-					case 'cleanNoctownChatLogs': return this.cleanNoctownChatLogsProcessorService.process(job);
-					case 'cleanExpiredNoctownTrades': return this.cleanExpiredNoctownTradesProcessorService.process(job);
-					case 'cleanIdlePaintChatRooms': return this.cleanIdlePaintChatRoomsProcessorService.process(job);
 					default: throw new Error(`unrecognized job type ${job.name} for system`);
 				}
 			};
 
-			this.systemQueueWorker = new Bull.Worker(QUEUE.SYSTEM, (job) => {
+			this.systemQueueWorker = new Bull.Worker(QUEUE.SYSTEM, async (job) => {
+				await yieldToEventLoop();
 				if (Sentry != null) {
 					return Sentry.startSpan({ name: 'Queue: System: ' + job.name }, () => processer(job));
 				} else {
@@ -235,21 +223,20 @@ export class QueueProcessorService implements OnApplicationShutdown {
 					case 'exportMuting': return this.exportMutingProcessorService.process(job);
 					case 'exportBlocking': return this.exportBlockingProcessorService.process(job);
 					case 'exportUserLists': return this.exportUserListsProcessorService.process(job);
-					case 'exportAntennas': return this.exportAntennasProcessorService.process(job);
-					case 'importFollowing': return this.importFollowingProcessorService.process(job);
+						case 'importFollowing': return this.importFollowingProcessorService.process(job);
 					case 'importFollowingToDb': return this.importFollowingProcessorService.processDb(job);
 					case 'importMuting': return this.importMutingProcessorService.process(job);
 					case 'importBlocking': return this.importBlockingProcessorService.process(job);
 					case 'importBlockingToDb': return this.importBlockingProcessorService.processDb(job);
 					case 'importUserLists': return this.importUserListsProcessorService.process(job);
 					case 'importCustomEmojis': return this.importCustomEmojisProcessorService.process(job);
-					case 'importAntennas': return this.importAntennasProcessorService.process(job);
-					case 'deleteAccount': return this.deleteAccountProcessorService.process(job);
+						case 'deleteAccount': return this.deleteAccountProcessorService.process(job);
 					default: throw new Error(`unrecognized job type ${job.name} for db`);
 				}
 			};
 
-			this.dbQueueWorker = new Bull.Worker(QUEUE.DB, (job) => {
+			this.dbQueueWorker = new Bull.Worker(QUEUE.DB, async (job) => {
+				await yieldToEventLoop();
 				if (Sentry != null) {
 					return Sentry.startSpan({ name: 'Queue: DB: ' + job.name }, () => processer(job));
 				} else {
@@ -281,7 +268,8 @@ export class QueueProcessorService implements OnApplicationShutdown {
 
 		//#region deliver
 		{
-			this.deliverQueueWorker = new Bull.Worker(QUEUE.DELIVER, (job) => {
+			this.deliverQueueWorker = new Bull.Worker(QUEUE.DELIVER, async (job) => {
+				await yieldToEventLoop();
 				if (Sentry != null) {
 					return Sentry.startSpan({ name: 'Queue: Deliver' }, () => this.deliverProcessorService.process(job));
 				} else {
@@ -291,10 +279,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.DELIVER),
 				autorun: false,
 				concurrency: this.config.deliverJobConcurrency ?? 128,
-				limiter: {
-					max: this.config.deliverJobPerSec ?? 128,
-					duration: 1000,
-				},
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
@@ -321,18 +305,23 @@ export class QueueProcessorService implements OnApplicationShutdown {
 
 		//#region inbox
 		{
-			this.inboxQueueWorker = new Bull.Worker(QUEUE.INBOX, (job) => {
+			this.inboxQueueWorker = new Bull.Worker(QUEUE.INBOX, async (job) => {
+				await yieldToEventLoop(500);
+				let result;
 				if (Sentry != null) {
-					return Sentry.startSpan({ name: 'Queue: Inbox' }, () => this.inboxProcessorService.process(job));
+					result = await Sentry.startSpan({ name: 'Queue: Inbox' }, () => this.inboxProcessorService.process(job));
 				} else {
-					return this.inboxProcessorService.process(job);
+					result = await this.inboxProcessorService.process(job);
 				}
+				await yieldToEventLoop(2500);
+				return result;
 			}, {
 				...baseWorkerOptions(this.config, QUEUE.INBOX),
 				autorun: false,
-				concurrency: this.config.inboxJobConcurrency ?? 16,
+				// よるすきー: concurrency=1でPromise生成レートを抑制（CPU 100%対策）
+				concurrency: 1,
 				limiter: {
-					max: this.config.inboxJobPerSec ?? 32,
+					max: 5,
 					duration: 1000,
 				},
 				settings: {
@@ -361,7 +350,8 @@ export class QueueProcessorService implements OnApplicationShutdown {
 
 		//#region user-webhook deliver
 		{
-			this.userWebhookDeliverQueueWorker = new Bull.Worker(QUEUE.USER_WEBHOOK_DELIVER, (job) => {
+			this.userWebhookDeliverQueueWorker = new Bull.Worker(QUEUE.USER_WEBHOOK_DELIVER, async (job) => {
+				await yieldToEventLoop();
 				if (Sentry != null) {
 					return Sentry.startSpan({ name: 'Queue: UserWebhookDeliver' }, () => this.userWebhookDeliverProcessorService.process(job));
 				} else {
@@ -371,10 +361,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.USER_WEBHOOK_DELIVER),
 				autorun: false,
 				concurrency: 64,
-				limiter: {
-					max: 64,
-					duration: 1000,
-				},
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
@@ -401,7 +387,8 @@ export class QueueProcessorService implements OnApplicationShutdown {
 
 		//#region system-webhook deliver
 		{
-			this.systemWebhookDeliverQueueWorker = new Bull.Worker(QUEUE.SYSTEM_WEBHOOK_DELIVER, (job) => {
+			this.systemWebhookDeliverQueueWorker = new Bull.Worker(QUEUE.SYSTEM_WEBHOOK_DELIVER, async (job) => {
+				await yieldToEventLoop();
 				if (Sentry != null) {
 					return Sentry.startSpan({ name: 'Queue: SystemWebhookDeliver' }, () => this.systemWebhookDeliverProcessorService.process(job));
 				} else {
@@ -411,10 +398,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.SYSTEM_WEBHOOK_DELIVER),
 				autorun: false,
 				concurrency: 16,
-				limiter: {
-					max: 16,
-					duration: 1000,
-				},
 				settings: {
 					backoffStrategy: httpRelatedBackoff,
 				},
@@ -451,7 +434,8 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				}
 			};
 
-			this.relationshipQueueWorker = new Bull.Worker(QUEUE.RELATIONSHIP, (job) => {
+			this.relationshipQueueWorker = new Bull.Worker(QUEUE.RELATIONSHIP, async (job) => {
+				await yieldToEventLoop();
 				if (Sentry != null) {
 					return Sentry.startSpan({ name: 'Queue: Relationship: ' + job.name }, () => processer(job));
 				} else {
@@ -461,10 +445,6 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				...baseWorkerOptions(this.config, QUEUE.RELATIONSHIP),
 				autorun: false,
 				concurrency: this.config.relationshipJobConcurrency ?? 16,
-				limiter: {
-					max: this.config.relationshipJobPerSec ?? 64,
-					duration: 1000,
-				},
 			});
 
 			const logger = this.logger.createSubLogger('relationship');
@@ -496,7 +476,8 @@ export class QueueProcessorService implements OnApplicationShutdown {
 				}
 			};
 
-			this.objectStorageQueueWorker = new Bull.Worker(QUEUE.OBJECT_STORAGE, (job) => {
+			this.objectStorageQueueWorker = new Bull.Worker(QUEUE.OBJECT_STORAGE, async (job) => {
+				await yieldToEventLoop();
 				if (Sentry != null) {
 					return Sentry.startSpan({ name: 'Queue: ObjectStorage: ' + job.name }, () => processer(job));
 				} else {
@@ -529,7 +510,8 @@ export class QueueProcessorService implements OnApplicationShutdown {
 
 		//#region ended poll notification
 		{
-			this.endedPollNotificationQueueWorker = new Bull.Worker(QUEUE.ENDED_POLL_NOTIFICATION, (job) => {
+			this.endedPollNotificationQueueWorker = new Bull.Worker(QUEUE.ENDED_POLL_NOTIFICATION, async (job) => {
+				await yieldToEventLoop();
 				if (Sentry != null) {
 					return Sentry.startSpan({ name: 'Queue: EndedPollNotification' }, () => this.endedPollNotificationProcessorService.process(job));
 				} else {
@@ -545,6 +527,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		//#region post scheduled note
 		{
 			this.postScheduledNoteQueueWorker = new Bull.Worker(QUEUE.POST_SCHEDULED_NOTE, async (job) => {
+				await yieldToEventLoop();
 				if (Sentry != null) {
 					return Sentry.startSpan({ name: 'Queue: PostScheduledNote' }, () => this.postScheduledNoteProcessorService.process(job));
 				} else {

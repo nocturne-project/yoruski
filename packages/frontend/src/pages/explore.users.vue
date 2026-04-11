@@ -21,6 +21,21 @@ SPDX-License-Identifier: AGPL-3.0-only
 				<template #header><i class="ti ti-bookmark ti-fw" style="margin-right: 0.5em;"></i>{{ i18n.ts.pinnedUsers }}</template>
 				<MkUserList :paginator="pinnedUsersPaginator"/>
 			</MkFoldableSection>
+			<!-- 夜間ポイントランキング（よるすきー独自） -->
+			<MkFoldableSection class="_margin" persistKey="explore-night-ranking">
+				<template #header><i class="ti ti-moon-stars ti-fw" style="margin-right: 0.5em;"></i>{{ i18n.ts._yoruski?.nightRanking ?? '夜間ポイントランキング' }}</template>
+				<div v-if="nightRanking.length > 0" :class="$style.nightRanking">
+					<div v-for="entry in nightRanking" :key="entry.userId" :class="$style.rankEntry">
+						<span :class="$style.rank">#{{ entry.rank }}</span>
+						<MkA :to="`/@${entry.user.username}`" :class="$style.rankUser">
+							<MkAvatar :user="entry.user" :class="$style.rankAvatar"/>
+							<MkUserName :user="entry.user"/>
+						</MkA>
+						<span :class="$style.rankPoints">{{ entry.totalPoints }}pt</span>
+					</div>
+				</div>
+				<div v-else style="text-align: center; padding: 16px; opacity: 0.6;">{{ i18n.ts._yoruski?.noRankingData ?? 'ランキングデータがありません' }}</div>
+			</MkFoldableSection>
 			<MkFoldableSection class="_margin" persistKey="explore-popular-users">
 				<template #header><i class="ti ti-chart-line ti-fw" style="margin-right: 0.5em;"></i>{{ i18n.ts.popularUsers }}</template>
 				<MkUserList :paginator="popularUsersPaginator"/>
@@ -69,11 +84,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 </template>
 
 <script lang="ts" setup>
-import { watch, ref, useTemplateRef, computed, markRaw } from 'vue';
+import { watch, ref, useTemplateRef, computed, markRaw, onMounted } from 'vue';
 import * as Misskey from 'misskey-js';
 import MkUserList from '@/components/MkUserList.vue';
 import MkFoldableSection from '@/components/MkFoldableSection.vue';
 import MkTab from '@/components/MkTab.vue';
+import MkAvatar from '@/components/global/MkAvatar.vue';
 import { misskeyApi } from '@/utility/misskey-api.js';
 import { instance } from '@/instance.js';
 import { i18n } from '@/i18n.js';
@@ -84,6 +100,16 @@ const props = defineProps<{
 }>();
 
 const origin = ref<'local' | 'remote'>('local');
+
+// 夜間ポイントランキング
+const nightRanking = ref<{ rank: number; userId: string; totalPoints: number; user: any }[]>([]);
+onMounted(async () => {
+	try {
+		nightRanking.value = await misskeyApi('night-points/ranking', { limit: 100 });
+	} catch {
+		nightRanking.value = [];
+	}
+});
 const tagsLocal = ref<Misskey.entities.Hashtag[]>([]);
 const tagsRemote = ref<Misskey.entities.Hashtag[]>([]);
 
@@ -172,3 +198,52 @@ misskeyApi('hashtags/list', {
 	tagsRemote.value = tags;
 });
 </script>
+
+<style lang="scss" module>
+.nightRanking {
+	padding: 8px 16px;
+}
+
+.rankEntry {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 0;
+	border-bottom: solid 0.5px var(--MI_THEME-divider);
+
+	&:last-child {
+		border-bottom: none;
+	}
+}
+
+.rank {
+	font-weight: bold;
+	font-size: 0.9em;
+	min-width: 36px;
+	color: var(--MI_THEME-accent);
+}
+
+.rankUser {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rankAvatar {
+	width: 32px;
+	height: 32px;
+	flex-shrink: 0;
+}
+
+.rankPoints {
+	font-weight: bold;
+	font-size: 0.85em;
+	color: var(--MI_THEME-accent);
+	white-space: nowrap;
+}
+</style>
